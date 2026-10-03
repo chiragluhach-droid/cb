@@ -36,3 +36,4 @@ See `.env.example`. Optional: `ANTHROPIC_API_KEY`, `RAZORPAY_KEY_ID` / `RAZORPAY
 - Add Razorpay keys (test mode is blocked in production unless `ALLOW_TEST_PAYMENTS=true`).
 - Rotate the MongoDB password (it was shared in chat) and allow your host's IPs in Atlas.
 # cs
+# cs
