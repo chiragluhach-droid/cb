@@ -1,0 +1,21 @@
+{
+  "name": "khao",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed:admin": "node --env-file=.env.local scripts/seed-admin.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.12",
+    "mongoose": "^9.10.4",
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  }
+}

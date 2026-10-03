@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KHAO reel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root { --paper:#f4efe4; --ink:#111010; --lime:#c8f43a; --pink:#ff5fa2; --orange:#ff7a1a; --lilac:#b8a5ff; --sky:#7fd1ff; --butter:#ffe066; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); font-family: "Bricolage Grotesque", system-ui, sans-serif; cursor: pointer; user-select: none; }
+  .d { font-weight: 800; letter-spacing: -0.05em; line-height: .9; }
+  .s { font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+  .m { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+  .bars { position: absolute; top: 34px; left: 14px; right: 14px; display: flex; gap: 4px; z-index: 10; }
+  .bars i { flex: 1; height: 4px; border-radius: 4px; background: rgba(17,16,16,.18); overflow: hidden; }
+  .bars i b { display: block; height: 100%; width: 0; background: var(--ink); }
+  .handle { position: absolute; top: 46px; left: 14px; right: 14px; display: flex; align-items: center; gap: 8px; z-index: 10; font-size: 12px; font-weight: 600; }
+  .handle .av { width: 26px; height: 26px; border-radius: 50%; background: var(--lime); border: 2px solid var(--ink); display: grid; place-items: center; font-size: 13px; }
+  .scene { position: absolute; inset: 0; padding: 92px 20px 26px; display: none; flex-direction: column; justify-content: center; gap: 14px; overflow: hidden; }
+  .scene.on { display: flex; }
+  .scene.on .in { animation: pop .55s cubic-bezier(.3,1.6,.6,1) both; }
+  .scene.on .up { animation: up .6s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes pop { from { transform: scale(.6) rotate(-6deg); opacity: 0; } }
+  @keyframes up { from { transform: translateY(30px); opacity: 0; } }
+  .card { background: #fffdf7; border: 2px solid var(--ink); border-radius: 16px; box-shadow: 3px 3px 0 var(--ink); padding: 12px 14px; }
+  .chip { display: inline-block; border: 2px solid var(--ink); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; background: #fffdf7; }
+  .grain { pointer-events: none; position: absolute; inset: 0; opacity: .08; z-index: 20; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .typed::after { content: "▍"; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .shake { display: inline-block; animation: shake .5s ease-in-out infinite; }
+  @keyframes shake { 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .tick { width: 26px; height: 26px; border: 2px solid var(--ink); border-radius: 8px; flex: none; display: grid; place-items: center; background: #fffdf7; font-size: 14px; transition: .25s cubic-bezier(.3,1.8,.5,1); }
+  .tick.on { background: var(--lime); transform: rotate(-8deg) scale(1.1); }
+  .meal { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .bar { height: 12px; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; background: #fffdf7; }
+  .bar b { display: block; height: 100%; width: 0; background: var(--pink); transition: width 2.6s cubic-bezier(.2,.8,.2,1); }
+  .swap { transition: transform .4s, opacity .4s; }
+  .paused::before { content: "❚❚"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 40px; z-index: 30; background: rgba(244,239,228,.5); }
+  svg .ln { stroke-dasharray: 400; stroke-dashoffset: 400; }
+  .scene.on svg .ln { animation: draw 1.6s ease forwards; }
+  .scene.on svg .ln2 { animation: draw 1.4s 2.2s ease forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  .confetti { position: absolute; font-size: 22px; animation: fall 2.2s linear forwards; }
+  @keyframes fall { from { transform: translateY(-40px) rotate(0); } to { transform: translateY(620px) rotate(540deg); } }
+</style>
+</head>
+<body>
+<div class="bars" id="bars"></div>
+<div class="handle"><span class="av">🍛</span> khao.coach <span style="opacity:.5">· sponsored by your future self</span></div>
+
+<!-- 1 -->
+<section class="scene" style="background:var(--butter)">
+  <span class="m in">POV:</span>
+  <h1 class="d in" style="font-size:54px;animation-delay:.1s">you're tired of <span class="s">sad</span> salads</h1>
+  <div style="font-size:90px;text-align:center;margin-top:10px"><span class="shake">🥗</span><span class="in" style="animation-delay:.6s;display:inline-block">😩</span></div>
+  <p class="up" style="animation-delay:1s;font-size:17px">and diet plans that think dal is a "carb bomb".</p>
+</section>
+
+<!-- 2 -->
+<section class="scene" style="background:var(--paper)">
+  <span class="m">step 1 · tell your coach everything</span>
+  <h2 class="d" style="font-size:40px">spill the <span class="s" style="color:var(--pink)">tea</span> ☕</h2>
+  <div class="card up" style="animation-delay:.2s"><span class="m" style="opacity:.6">goal</span><div class="typed" data-type="lose 8 kg before the wedding 💍"></div></div>
+  <div class="card up" style="animation-delay:.5s"><span class="m" style="opacity:.6">i eat</span><div class="row" style="margin-top:4px"><span class="chip" style="background:var(--lime)">veg 🌱</span><span class="chip">+ eggs</span></div></div>
+  <div class="card up" style="animation-delay:.8s"><span class="m" style="opacity:.6">health</span><div class="row" style="margin-top:4px"><span class="chip" style="background:var(--pink)">PCOS ✓</span><span class="chip">thyroid</span></div></div>
+  <div class="card up" style="animation-delay:1.1s"><span class="m" style="opacity:.6">love / hate</span><div>❤️ paneer, rajma, chai · 🚫 karela</div></div>
+</section>
+
+<!-- 3 -->
+<section class="scene" style="background:var(--lilac)">
+  <span class="m">step 2 · your coach gets to work</span>
+  <div class="row in"><span style="font-size:46px;width:70px;height:70px;border-radius:50%;background:var(--paper);border:2px solid var(--ink);display:grid;place-items:center">🧑‍🍳</span><div><b style="font-size:20px">Coach</b><div class="m">building your plan…</div></div></div>
+  <div class="card up" style="animation-delay:.3s;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8">
+    <div>maintenance <b style="float:right" class="count" data-to="1965">0</b></div>
+    <div>target <b style="float:right;background:var(--lime);padding:0 4px" class="count" data-to="1570">0</b></div>
+    <div>protein <b style="float:right" class="count" data-to="106" data-suf="g">0</b></div>
+    <div>PCOS → low-GI carbs <b style="float:right">✓</b></div>
+  </div>
+  <div class="up" style="animation-delay:.6s"><div class="m" style="margin-bottom:6px">checking every meal by hand</div><div class="bar"><b id="fill"></b></div></div>
+  <p class="s up" style="font-size:26px;animation-delay:1s">"no karela. promise."</p>
+</section>
+
+<!-- 4 -->
+<section class="scene" style="background:var(--paper)">
+  <span class="m">step 3 · your day, sorted</span>
+  <h2 class="d" style="font-size:38px">tick. swap. <span class="s">glow.</span></h2>
+  <div class="card meal up" style="animation-delay:.1s"><div><div class="m" style="opacity:.6">breakfast</div><b class="swap" id="sw">Veggie poha</b></div><span class="tick" data-t="900">✓</span></div>
+  <div class="card meal up" style="animation-delay:.3s"><div><div class="m" style="opacity:.6">lunch</div><b>Rajma + 2 roti + salad</b></div><span class="tick" data-t="1700">✓</span></div>
+  <div class="card meal up" style="animation-delay:.5s"><div><div class="m" style="opacity:.6">snack</div><b>Sprouts chaat</b></div><span class="tick" data-t="2500">✓</span></div>
+  <div class="card meal up" style="animation-delay:.7s"><div><div class="m" style="opacity:.6">dinner</div><b>Paneer bhurji + roti</b></div><span class="tick" data-t="3300">✓</span></div>
+  <div class="row up" style="animation-delay:.9s;justify-content:space-between" ><span class="chip">💧 2.5L</span><span class="chip">👟 9,120</span><span class="chip" style="background:var(--orange)">🔥 12 days</span></div>
+</section>
+
+<!-- 5 -->
+<section class="scene" style="background:var(--sky)">
+  <span class="m">week 3</span>
+  <h2 class="d" style="font-size:40px">scale stuck? <span class="s">we move.</span></h2>
+  <div class="card up" style="animation-delay:.2s">
+    <svg viewBox="0 0 260 120" style="width:100%">
+      <polyline class="ln" points="0,20 40,32 80,44 120,50 160,51 200,50" fill="none" stroke="#111" stroke-width="3" />
+      <polyline class="ln ln2" points="200,50 230,72 260,98" fill="none" stroke="#ff5fa2" stroke-width="4" />
+      <text x="128" y="40" style="font:700 10px 'JetBrains Mono'">plateau 😐</text>
+    </svg>
+  </div>
+  <div class="card up" style="animation-delay:2s;background:var(--lime)"><b>plan updated ✨</b><div class="m" style="margin-top:4px">−150 kcal · +1,500 steps · new dinners</div></div>
+</section>
+
+<!-- 6 -->
+<section class="scene" style="background:var(--ink);color:var(--paper);text-align:center;align-items:center" id="last">
+  <div class="d in" style="font-size:86px;color:var(--lime)">−9.4kg</div>
+  <p class="s up" style="font-size:30px;animation-delay:.4s">still eating roti.</p>
+  <div class="up" style="animation-delay:1s;margin-top:20px"><span class="d" style="font-size:52px">khao<span style="color:var(--pink)">.</span></span></div>
+  <div class="up" style="animation-delay:1.4s;background:var(--lime);color:var(--ink);border:2px solid var(--paper);border-radius:999px;padding:12px 22px;font-weight:800;box-shadow:3px 3px 0 var(--pink)">build my plan →</div>
+</section>
+
+<div class="grain"></div>
+<script>
+  const D = [4000, 5500, 5000, 5200, 5000, 5000];
+  const scenes = [...document.querySelectorAll(".scene")];
+  const bars = document.getElementById("bars");
+  bars.innerHTML = D.map(() => "<i><b></b></i>").join("");
+  const fills = [...bars.querySelectorAll("b")];
+  let idx = 0, t0 = 0, elapsedBefore = 0, paused = false, timers = [];
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+  function enter(i) {
+    timers.forEach(clearTimeout); timers = [];
+    scenes.forEach((s, k) => s.classList.toggle("on", k === i));
+    fills.forEach((f, k) => (f.style.width = k < i ? "100%" : "0%"));
+    const s = scenes[i];
+    // typing
+    s.querySelectorAll("[data-type]").forEach((el) => {
+      const txt = el.dataset.type; el.textContent = "";
+      [...txt].forEach((ch, k) => later(() => (el.textContent += ch), 300 + k * 45));
+    });
+    // counters
+    s.querySelectorAll(".count").forEach((el) => {
+      const to = +el.dataset.to, suf = el.dataset.suf || "";
+      for (let k = 0; k <= 20; k++) later(() => (el.textContent = Math.round((to * k) / 20).toLocaleString("en-IN") + suf), 500 + k * 40);
+    });
+    const fill = s.querySelector("#fill"); if (fill) { fill.style.width = "0"; later(() => (fill.style.width = "100%"), 700); }
+    s.querySelectorAll(".tick").forEach((el) => { el.classList.remove("on"); later(() => el.classList.add("on"), +el.dataset.t); });
+    const sw = s.querySelector("#sw");
+    if (sw) { sw.textContent = "Veggie poha"; later(() => { sw.style.opacity = 0; sw.style.transform = "translateX(20px)"; }, 3900); later(() => { sw.textContent = "Besan chilla ⇄ swapped"; sw.style.opacity = 1; sw.style.transform = "none"; }, 4300); }
+    if (s.id === "last") for (let k = 0; k < 18; k++) later(() => {
+      const c = document.createElement("span"); c.className = "confetti";
+      c.textContent = ["✨","🔥","💚","⭐","🍛"][k % 5]; c.style.left = Math.random() * 90 + "%"; c.style.top = "0";
+      s.appendChild(c); setTimeout(() => c.remove(), 2300);
+    }, k * 90);
+    t0 = performance.now(); elapsedBefore = 0;
+  }
+
+  function tick(now) {
+    if (!paused) {
+      const e = elapsedBefore + (now - t0);
+      fills[idx].style.width = Math.min(100, (e / D[idx]) * 100) + "%";
+      if (e >= D[idx]) { idx = (idx + 1) % scenes.length; enter(idx); }
+    }
+    requestAnimationFrame(tick);
+  }
+  document.body.addEventListener("click", (e) => {
+    // tap right side = next, left side = previous, middle = pause
+    const x = e.clientX / innerWidth;
+    if (x > 0.7) { idx = (idx + 1) % scenes.length; enter(idx); }
+    else if (x < 0.3) { idx = (idx - 1 + scenes.length) % scenes.length; enter(idx); }
+    else {
+      paused = !paused; document.body.classList.toggle("paused", paused);
+      if (paused) elapsedBefore += performance.now() - t0; else t0 = performance.now();
+      document.querySelectorAll("*").forEach((el) => (el.style.animationPlayState = paused ? "paused" : ""));
+    }
+  });
+  enter(0);
+  requestAnimationFrame(tick);
+</script>
+</body>
+</html>
