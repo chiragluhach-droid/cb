@@ -28,7 +28,7 @@ export default function ProfileForm({ name: initialName, email, profile }) {
   const router = useRouter();
   const [toast, toastNode] = useToast();
   const [name, setName] = useState(initialName);
-  const [p, setP] = useState({ ...profile, likes: (profile.likes || []).join(", "), dislikes: (profile.dislikes || []).join(", ") });
+  const [p, setP] = useState({ ...profile, likes: (profile.likes || []).join(", "), dislikes: (profile.dislikes || []).join(", "), allergies: (profile.allergies || []).join(", ") });
   const [pw, setPw] = useState({ currentPassword: "", newPassword: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -90,6 +90,8 @@ export default function ProfileForm({ name: initialName, email, profile }) {
             })}
           </div>
         </div>
+        <div className="prof__full"><Field label="Other health conditions" hint="Anything not listed above"><input className="input" value={p.otherConditions || ""} onChange={set("otherConditions")} maxLength={300} placeholder="e.g. acid reflux, IBS" /></Field></div>
+        <div className="prof__full"><Field label="Allergies & intolerances" hint="Separate with commas. These are never included in your plan."><input className="input" value={p.allergies} onChange={set("allergies")} placeholder="peanut, gluten, sesame" /></Field></div>
         <div className="prof__full"><Field label="Foods you love" hint="Separate with commas"><input className="input" value={p.likes} onChange={set("likes")} placeholder="paneer, dal, poha" /></Field></div>
         <div className="prof__full"><Field label="Foods to avoid" hint="Separate with commas"><input className="input" value={p.dislikes} onChange={set("dislikes")} placeholder="karela, mushroom" /></Field></div>
       </div>

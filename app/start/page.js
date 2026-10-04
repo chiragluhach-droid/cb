@@ -5,6 +5,7 @@ import Logo from "@/components/Logo";
 import { burst } from "@/components/fx";
 
 const LIKES = ["paneer", "rajma", "chole", "dal", "poha", "idli", "dosa", "chilla", "curd", "eggs", "chicken", "fish", "oats", "khichdi", "sprouts", "peanut butter", "banana", "makhana", "tofu", "quinoa"];
+const ALLERGIES = ["peanut", "tree nut", "gluten", "dairy", "egg", "soy", "fish", "shellfish"];
 const DISLIKES = ["karela", "lauki", "baingan", "mushroom", "oats", "curd", "eggs", "soya", "tofu", "fish", "quinoa", "sprouts", "upma", "poha"];
 
 const Opt = ({ on, onClick, emoji, title, sub, color = "var(--lime)" }) => (
@@ -27,10 +28,11 @@ export default function Start() {
   const [i, setI] = useState(0);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [custom, setCustom] = useState({ like: "", dislike: "" });
+  const [custom, setCustom] = useState({ like: "", dislike: "", allergy: "" });
+  const [otherOpen, setOtherOpen] = useState(false);
   const [d, setD] = useState({
     goal: "", sex: "", age: "", heightCm: "", weightKg: "", targetWeightKg: "", activity: "", diet: "",
-    conditions: [], likes: [], dislikes: [], mealsPerDay: 4, workoutPlace: "", experience: "beginner", daysPerWeek: 4, afterGoal: "maintain", notes: "", city: "", phone: "",
+    conditions: [], otherConditions: "", allergies: [], likes: [], dislikes: [], mealsPerDay: 4, workoutPlace: "", experience: "beginner", daysPerWeek: 4, afterGoal: "maintain", notes: "", city: "", phone: "",
   });
   const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
   const toggle = (k, v) => setD((x) => ({ ...x, [k]: x[k].includes(v) ? x[k].filter((y) => y !== v) : [...x[k].filter((y) => y !== "none"), v] }));
@@ -100,22 +102,45 @@ export default function Start() {
       q: <>what do you eat?</>,
       ok: !!d.diet,
       body: (
-        <div className="grid g3">
+        <div className="stack">
+        <div className="optgrid">
           {[["veg", "🌱", "vegetarian"], ["egg", "🥚", "veg + eggs"], ["nonveg", "🍗", "non-veg"], ["vegan", "🥥", "vegan"], ["jain", "🙏", "jain"]].map(([v, e, t]) => (
             <Opt key={v} on={d.diet === v} onClick={() => set("diet", v)} emoji={e} title={t} />
           ))}
+        </div>
+        <div className="card" style={{ padding: 16, marginTop: 20, boxShadow: "none" }}>
+          <div style={{ fontWeight: 600 }}>Any food allergies or intolerances?</div>
+          <p className="muted" style={{ fontSize: 13, marginTop: 2 }}>These are never included in your plan. Skip if none.</p>
+          <div className="row wrapflex" style={{ marginTop: 12, gap: 8 }}>
+            {ALLERGIES.map((x) => <Tag key={x} on={d.allergies.includes(x)} onClick={() => toggle("allergies", x)}>{x}</Tag>)}
+            {d.allergies.filter((x) => !ALLERGIES.includes(x)).map((x) => <Tag key={x} on onClick={() => toggle("allergies", x)}>{x}</Tag>)}
+          </div>
+          <form className="row" style={{ marginTop: 12 }} onSubmit={(e) => { e.preventDefault(); const a = custom.allergy.trim().toLowerCase(); if (a && !d.allergies.includes(a)) toggle("allergies", a); setCustom({ ...custom, allergy: "" }); }}>
+            <input className="input" placeholder="Other allergy, e.g. sesame, mustard" value={custom.allergy} onChange={(e) => setCustom({ ...custom, allergy: e.target.value })} aria-label="Add another allergy" />
+            <button className="btn sm ghost" style={{ flex: "none" }}>Add</button>
+          </form>
+        </div>
         </div>
       ),
     },
     {
       q: <>any health conditions?</>,
-      ok: d.conditions.length > 0,
+      ok: d.conditions.length > 0 || !!d.otherConditions.trim(),
       sub: "Pick all that apply. Your coach builds around these.",
       body: (
-        <div className="grid g3">
+        <div className="stack">
+        <div className="optgrid">
           {[["pcos", "🌸", "PCOS / PCOD"], ["thyroid", "🦋", "thyroid"], ["diabetes", "🩸", "diabetes / pre"], ["bp", "❤️", "high BP"], ["lactose", "🥛", "lactose intolerant"], ["none", "✌️", "nope, all good"]].map(([v, e, t]) => (
-            <Opt key={v} on={d.conditions.includes(v)} onClick={() => (v === "none" ? set("conditions", ["none"]) : toggle("conditions", v))} emoji={e} title={t} color="var(--pink)" />
+            <Opt key={v} on={d.conditions.includes(v)} onClick={() => { if (v === "none") { set("conditions", ["none"]); set("otherConditions", ""); setOtherOpen(false); } else toggle("conditions", v); }} emoji={e} title={t} />
           ))}
+          <Opt on={otherOpen || !!d.otherConditions} onClick={() => { const open = !(otherOpen || d.otherConditions); setOtherOpen(open); if (!open) set("otherConditions", ""); else set("conditions", d.conditions.filter((c) => c !== "none")); }} emoji="✍️" title="something else" sub="tell us in your words" />
+        </div>
+        {(otherOpen || d.otherConditions) && (
+          <div style={{ marginTop: 16 }}>
+            <label className="label" htmlFor="otherc">Tell us about it</label>
+            <textarea id="otherc" className="textarea" rows={3} maxLength={300} autoFocus value={d.otherConditions} onChange={(e) => set("otherConditions", e.target.value)} placeholder="e.g. IBS, acid reflux, gout, recovering from surgery, on blood thinners…" />
+          </div>
+        )}
         </div>
       ),
     },

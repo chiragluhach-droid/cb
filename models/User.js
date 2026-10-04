@@ -12,6 +12,8 @@ const ProfileSchema = new mongoose.Schema(
     activity: { type: String, enum: ["sedentary", "light", "moderate", "active"], default: "light" },
     diet: { type: String, enum: ["vegan", "veg", "jain", "egg", "nonveg"], default: "veg" },
     conditions: [String],
+    otherConditions: String, // free text for anything not in the list
+    allergies: [String],
     likes: [String],
     dislikes: [String],
     notes: String,

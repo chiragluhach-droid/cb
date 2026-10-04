@@ -296,3 +296,8 @@ html { -webkit-tap-highlight-color: transparent; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* onboarding option cards: 2 across on phones, 3 on wider screens */
+.optgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.optgrid > .card { padding: 14px !important; }
+@media (min-width: 700px) { .optgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } .optgrid > .card { padding: 18px !important; } }

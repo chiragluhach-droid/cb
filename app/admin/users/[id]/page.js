@@ -58,6 +58,7 @@ export default async function ClientPage({ params, searchParams }) {
             <span className="pill lilac">phase: {user.stage?.replace("_", " ")}</span>
             {p.diet && <span className="pill butter">{p.diet}</span>}
             {(p.conditions || []).filter((c) => c !== "none").map((c) => <span key={c} className="pill pink">{c}</span>)}
+            {(p.allergies || []).map((c) => <span key={c} className="pill orange">allergy: {c}</span>)}
           </div>
         </div>
       </div>
@@ -87,6 +88,7 @@ export default async function ClientPage({ params, searchParams }) {
             <Info k="meals / day" v={p.mealsPerDay} />
             <Info k="loves" v={(p.likes || []).join(", ")} />
             <Info k="hates" v={(p.dislikes || []).join(", ")} />
+            {p.otherConditions && <Info k="other health" v={p.otherConditions} />}
             {p.notes && <p style={{ fontSize: 14, marginTop: 10, background: "var(--paper-2)", padding: 10, borderRadius: 10 }}>&ldquo;{p.notes}&rdquo;</p>}
             {suggested && <div className="mono muted" style={{ fontSize: 11, marginTop: 10 }}>formula targets now: {suggested.calories} kcal · {suggested.protein}P · maint. {suggested.maintenance}</div>}
           </div>
