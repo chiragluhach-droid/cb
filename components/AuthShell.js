@@ -1,44 +1,73 @@
+"use client";
+import { useState } from "react";
+import Link from "next/link";
 import Logo from "./Logo";
 import Icon from "./Icon";
+import "./auth.css";
 
-const POINTS = [
-  "Meal plans built around Indian home food",
-  "Every plan reviewed by your coach",
-  "Adjusts automatically as you progress",
-];
+const IMG = (id, w = 1200) => `https://images.unsplash.com/photo-${id}?w=${w}&q=70&auto=format&fit=crop`;
+const PHOTOS = {
+  thali: "1546833999-b9f581a1996d",
+  paneer: "1567188040759-fb8a883dc6d8",
+  bowl: "1626777552726-4a6b54c97e46",
+  idli: "1589301760014-d929f3979dbc",
+  workout: "1571019613454-1cb2f99b2d8b",
+};
+const TILES = [["paneer", "Paneer tikka"], ["idli", "Idli sambar"], ["workout", "Home workouts"]];
 
-export default function AuthShell({ children, title, sub }) {
+// Password field with a show / hide toggle
+export function PasswordInput({ value, onChange, autoComplete = "current-password", ...rest }) {
+  const [show, setShow] = useState(false);
   return (
-    <div className="auth" style={{ minHeight: "100vh", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", background: "var(--surface)" }}>
-      <style>{`@media (min-width: 861px) { .auth-logo-mobile { display: none; } } @media (max-width: 860px) { .auth { grid-template-columns: 1fr !important; } .auth-art { display: none !important; } }`}</style>
-      <div style={{ display: "grid", placeItems: "center", padding: "48px 20px" }}>
-        <div style={{ width: "min(400px, 100%)" }}>
-          <div className="auth-logo-mobile" style={{ marginBottom: 32 }}><Logo /></div>
-          <h1 className="display" style={{ fontSize: 28 }}>{title}</h1>
-          {sub && <p className="muted" style={{ marginTop: 8, fontSize: 15 }}>{sub}</p>}
-          <div style={{ marginTop: 28 }}>{children}</div>
+    <div className="pw">
+      <input className="input" type={show ? "text" : "password"} value={value} onChange={onChange} autoComplete={autoComplete} {...rest} />
+      <button type="button" onClick={() => setShow((s) => !s)} aria-label={show ? "Hide password" : "Show password"}>{show ? "Hide" : "Show"}</button>
+    </div>
+  );
+}
+
+export default function AuthShell({ children, title, sub, photo = "thali", footer }) {
+  return (
+    <div className="auth">
+      {/* phones: photo banner on top; desktop: photo panel on the right */}
+      <aside className="auth__art" style={{ "--img": `url(${IMG(PHOTOS[photo] || PHOTOS.thali)})` }}>
+        <div className="auth__artTop">
+          <Logo light />
+          <Link href="/" className="auth__back"><Icon name="arrow" size={14} style={{ transform: "rotate(180deg)" }} /> Home</Link>
         </div>
-      </div>
-      <div className="auth-art" style={{ background: "linear-gradient(160deg, #14532d 0%, #166534 55%, #15803d 100%)", color: "#fff", padding: 48, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-        <Logo light />
-        <div style={{ maxWidth: 440 }}>
-          <p style={{ fontSize: 22, lineHeight: 1.45, fontWeight: 500, letterSpacing: "-0.01em" }}>
-            &ldquo;Finally a plan that works with the food I actually eat. My coach adjusted it twice when I plateaued, and I never felt like I was dieting.&rdquo;
-          </p>
-          <div className="row" style={{ marginTop: 20 }}>
-            <span style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,.15)", display: "grid", placeItems: "center", fontWeight: 600 }}>S</span>
-            <div style={{ fontSize: 14 }}>
-              <div style={{ fontWeight: 600 }}>Simran K.</div>
-              <div style={{ opacity: 0.7 }}>Client, 10 weeks</div>
-            </div>
+        <div className="auth__artMid">
+          <span className="auth__badge"><span /> Free during early access</span>
+          <p className="auth__tag">Real food. A real coach. Results that last.</p>
+        </div>
+        <div className="auth__artBottom">
+          <figure className="auth__quote">
+            <blockquote>&ldquo;Finally a plan that works with the food I actually eat. My coach adjusted it twice when I plateaued, and I never felt like I was dieting.&rdquo;</blockquote>
+            <figcaption>
+              <span>S</span>
+              <div><b>Simran K.</b><small>Lost 6.8 kg in 10 weeks</small></div>
+            </figcaption>
+          </figure>
+          <div className="auth__tiles">
+            {TILES.map(([k, l]) => (
+              <div key={k} className="auth__tile" style={{ backgroundImage: `url(${IMG(PHOTOS[k], 400)})` }}><span>{l}</span></div>
+            ))}
           </div>
         </div>
-        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10, fontSize: 14, opacity: 0.9 }}>
-          {POINTS.map((p) => (
-            <li key={p} className="row" style={{ gap: 10 }}><Icon name="check" size={16} /> {p}</li>
-          ))}
-        </ul>
-      </div>
+      </aside>
+
+      <main className="auth__main">
+        <div className="auth__form">
+          <h1 className="display">{title}</h1>
+          {sub && <p className="auth__sub">{sub}</p>}
+          <div style={{ marginTop: 24 }}>{children}</div>
+          {footer && <div className="auth__foot">{footer}</div>}
+          <ul className="auth__points">
+            <li><Icon name="shield" size={16} /> Plans reviewed by a real coach</li>
+            <li><Icon name="plate" size={16} /> Built around Indian home food</li>
+            <li><Icon name="refresh" size={16} /> Adjusts as you progress</li>
+          </ul>
+        </div>
+      </main>
     </div>
   );
 }

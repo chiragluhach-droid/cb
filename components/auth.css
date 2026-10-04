@@ -1,0 +1,68 @@
+/* ---------- sign in / sign up (mobile first) ---------- */
+.auth { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: var(--surface); }
+
+/* photo panel: banner on phones */
+.auth__art {
+  position: relative; color: #fff; padding: calc(env(safe-area-inset-top) + 16px) 20px 44px;
+  background: linear-gradient(180deg, rgba(20, 83, 45, 0.55) 0%, rgba(20, 83, 45, 0.82) 100%), var(--img) center 40% / cover no-repeat, #14532d;
+  display: flex; flex-direction: column; gap: 22px;
+}
+.auth__artTop { display: flex; align-items: center; justify-content: space-between; }
+.auth__back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(6px); }
+.auth__badge { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 999px; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.28); }
+.auth__badge span { width: 6px; height: 6px; border-radius: 50%; background: #86efac; }
+.auth__tag { font-size: 22px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.2; margin-top: 10px; max-width: 320px; text-wrap: balance; }
+.auth__artBottom { display: none; }
+
+/* form: a sheet that overlaps the banner */
+.auth__main { flex: 1; display: flex; justify-content: center; margin-top: -20px; position: relative; }
+.auth__form {
+  width: 100%; background: var(--surface); border-radius: 20px 20px 0 0;
+  padding: 26px 20px calc(32px + env(safe-area-inset-bottom));
+}
+.auth__form h1 { font-size: 26px; letter-spacing: -0.025em; }
+.auth__sub { color: var(--muted); margin-top: 6px; font-size: 15px; }
+.auth__form .input { height: 48px; font-size: 16px; }
+.auth__form .btn { min-height: 48px; font-size: 16px; }
+.auth__foot { text-align: center; margin-top: 20px; font-size: 14px; color: var(--muted); }
+.auth__foot a { color: var(--brand-600); font-weight: 600; }
+.auth__points { list-style: none; padding: 18px 0 0; margin: 26px 0 0; border-top: var(--line); display: grid; gap: 10px; font-size: 13.5px; color: var(--ink-2); }
+.auth__points li { display: flex; align-items: center; gap: 10px; }
+.auth__points svg { color: var(--brand); flex: none; }
+
+/* password show / hide */
+.pw { position: relative; }
+.pw .input { padding-right: 64px; }
+.pw button { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: none; font-size: 13px; font-weight: 600; color: var(--brand-600); padding: 8px 10px; cursor: pointer; border-radius: 6px; }
+.pw button:hover { background: var(--brand-50); }
+
+@media (min-width: 600px) {
+  .auth { background: var(--paper); }
+  .auth__art { padding: 24px 32px 64px; }
+  .auth__tag { font-size: 26px; max-width: 420px; }
+  .auth__main { margin-top: -40px; padding: 0 24px 40px; }
+  .auth__form { max-width: 460px; border-radius: 16px; padding: 32px; border: var(--line); box-shadow: var(--shadow-lg); }
+}
+
+/* desktop: form left, photo panel right */
+@media (min-width: 1000px) {
+  .auth { flex-direction: row-reverse; background: var(--surface); }
+  .auth__art {
+    flex: 0 0 52%; position: sticky; top: 0; height: 100vh; padding: 40px 48px; justify-content: space-between;
+    background: linear-gradient(180deg, rgba(20, 83, 45, 0.35) 0%, rgba(20, 83, 45, 0.65) 45%, rgba(20, 83, 45, 0.94) 100%), var(--img) center / cover no-repeat, #14532d;
+  }
+  .auth__tag { font-size: 34px; max-width: 460px; }
+  .auth__artBottom { display: grid; gap: 18px; }
+  .auth__quote { margin: 0; padding: 20px; border-radius: 14px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); max-width: 520px; }
+  .auth__quote blockquote { margin: 0; font-size: 16px; line-height: 1.55; }
+  .auth__quote figcaption { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+  .auth__quote figcaption > span { width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); display: grid; place-items: center; font-weight: 700; }
+  .auth__quote b { display: block; font-size: 14px; }
+  .auth__quote small { font-size: 12.5px; opacity: 0.8; }
+  .auth__tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 520px; }
+  .auth__tile { aspect-ratio: 4 / 3; border-radius: 12px; background-size: cover; background-position: center; position: relative; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.25); }
+  .auth__tile span { position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 10px 8px; font-size: 12px; font-weight: 600; background: linear-gradient(transparent, rgba(0, 0, 0, 0.65)); }
+  .auth__main { margin: 0; padding: 48px; align-items: center; }
+  .auth__form { max-width: 420px; padding: 0; border: 0; box-shadow: none; border-radius: 0; background: none; }
+  .auth__form h1 { font-size: 30px; }
+}

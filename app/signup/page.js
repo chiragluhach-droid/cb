@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import AuthShell from "@/components/AuthShell";
+import AuthShell, { PasswordInput } from "@/components/AuthShell";
 
 function SignupForm() {
   const router = useRouter();
@@ -26,18 +26,18 @@ function SignupForm() {
   return (
     <form onSubmit={submit} className="stack">
       {err && <div className="err">{err}</div>}
-      <div><label className="label">your name</label><input className="input" required placeholder="Riya Sharma" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
-      <div><label className="label">email</label><input className="input" type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-      <div><label className="label">password</label><input className="input" type="password" minLength={8} required placeholder="At least 8 characters" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-      <button className="btn lime" style={{ width: "100%", marginTop: 8 }} disabled={busy}>{busy ? "Creating account…" : "Create account"}</button>
-      <p className="muted" style={{ textAlign: "center", marginTop: 20, fontSize: 14 }}>Already have an account? <Link href="/login" style={{ color: "var(--brand-600)", fontWeight: 600 }}>Sign in</Link></p>
+      <div><label className="label" htmlFor="name">Your name</label><input id="name" className="input" autoComplete="name" required placeholder="Riya Sharma" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>
+      <div><label className="label" htmlFor="email">Email</label><input id="email" className="input" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
+      <div><label className="label" htmlFor="password">Password</label><PasswordInput id="password" autoComplete="new-password" minLength={8} required placeholder="At least 8 characters" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
+      <button className="btn primary" style={{ width: "100%", marginTop: 8 }} disabled={busy}>{busy ? "Creating account…" : "Create account"}</button>
+      <p className="muted" style={{ fontSize: 12.5, textAlign: "center", marginTop: 4 }}>Free during early access. No card needed.</p>
     </form>
   );
 }
 
 export default function Signup() {
   return (
-    <AuthShell title="Create your account" sub="Takes about 3 minutes. Your coach takes it from there.">
+    <AuthShell title="Create your free account" sub="Takes about 3 minutes. Your coach takes it from there." footer={<>Already have an account? <Link href="/login">Sign in</Link></>}>
       <Suspense><SignupForm /></Suspense>
     </AuthShell>
   );

@@ -2,7 +2,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import AuthShell from "@/components/AuthShell";
+import AuthShell, { PasswordInput } from "@/components/AuthShell";
 
 function LoginForm() {
   const router = useRouter();
@@ -24,17 +24,16 @@ function LoginForm() {
   return (
     <form onSubmit={submit} className="stack">
       {err && <div className="err">{err}</div>}
-      <div><label className="label">email</label><input className="input" type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
-      <div><label className="label">password</label><input className="input" type="password" required value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-      <button className="btn lime" style={{ width: "100%", marginTop: 8 }} disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
-      <p className="muted" style={{ textAlign: "center", marginTop: 20, fontSize: 14 }}>New to Khao? <Link href="/signup" style={{ color: "var(--brand-600)", fontWeight: 600 }}>Create an account</Link></p>
+      <div><label className="label" htmlFor="email">Email</label><input id="email" className="input" type="email" inputMode="email" autoComplete="email" placeholder="you@example.com" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
+      <div><label className="label" htmlFor="password">Password</label><PasswordInput id="password" required value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
+      <button className="btn primary" style={{ width: "100%", marginTop: 8 }} disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
     </form>
   );
 }
 
 export default function Login() {
   return (
-    <AuthShell title="Welcome back" sub="Sign in to see today's meals and your progress.">
+    <AuthShell title="Welcome back" sub="Sign in to see today's meals and your progress." photo="paneer" footer={<>New to Khao? <Link href="/signup">Create a free account</Link></>}>
       <Suspense><LoginForm /></Suspense>
     </AuthShell>
   );
