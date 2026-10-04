@@ -20,6 +20,7 @@ export default async function DashLayout({ children }) {
     <div className="shell">
       <SideNav
         home="/dashboard"
+        profileHref="/dashboard/profile"
         mobileExtra={daysLeft != null && (
           <a href="/checkout" className="chip" style={daysLeft <= 7 ? { color: "#9a3412", background: "var(--orange)", borderColor: "#fed7aa" } : undefined}>
             {daysLeft} days left

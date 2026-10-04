@@ -5,7 +5,7 @@ import Logo from "./Logo";
 import Icon from "./Icon";
 
 // Desktop: left sidebar. Mobile: sticky top bar + bottom tab bar.
-export default function SideNav({ items, footer, mobileExtra, home = "/" }) {
+export default function SideNav({ items, footer, mobileExtra, profileHref, home = "/" }) {
   const path = usePathname();
   const router = useRouter();
   const logout = async () => {
@@ -27,6 +27,11 @@ export default function SideNav({ items, footer, mobileExtra, home = "/" }) {
         ))}
         <div className="side-foot">
           {footer}
+          {profileHref && (
+            <Link href={profileHref} className={`nav ${path === profileHref ? "on" : ""}`}>
+              <span className="em"><Icon name="user" /></span><span>Profile</span>
+            </Link>
+          )}
           <button onClick={logout} className="btn ghost sm" style={{ justifyContent: "flex-start", border: 0, boxShadow: "none", color: "var(--muted)" }}><Icon name="logout" size={16} /> Log out</button>
         </div>
       </aside>
@@ -35,6 +40,9 @@ export default function SideNav({ items, footer, mobileExtra, home = "/" }) {
         <Logo href={home} size={26} />
         <div className="row" style={{ gap: 8 }}>
           {mobileExtra}
+          {profileHref && (
+            <Link href={profileHref} className="icon-btn" aria-label="Profile" style={path === profileHref ? { borderColor: "var(--brand)", color: "var(--brand-700)", background: "var(--brand-50)" } : undefined}><Icon name="user" size={18} /></Link>
+          )}
           <button onClick={logout} className="icon-btn" aria-label="Log out"><Icon name="logout" size={18} /></button>
         </div>
       </header>
