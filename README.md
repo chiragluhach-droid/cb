@@ -37,3 +37,4 @@ See `.env.example`. Optional: `ANTHROPIC_API_KEY`, `RAZORPAY_KEY_ID` / `RAZORPAY
 - Rotate the MongoDB password (it was shared in chat) and allow your host's IPs in Atlas.
 # cs
 # cs
+# cb
