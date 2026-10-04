@@ -18,7 +18,7 @@ export default function Coupons({ list }) {
   };
   return (
     <div style={{ maxWidth: 1100 }}>
-      <h1 className="display" style={{ fontSize: "clamp(42px, 6vw, 72px)" }}>discount <span className="serif">codes</span></h1>
+      <h1 className="display" style={{ fontSize: 28 }}>discount codes</h1>
       <form onSubmit={create} className="card" style={{ padding: 20, marginTop: 20, background: "var(--butter)" }}>
         <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
           <div><label className="label">code</label><input className="input" value={f.code} onChange={(e) => setF({ ...f, code: e.target.value.toUpperCase() })} placeholder="DIWALI20" required /></div>

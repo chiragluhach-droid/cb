@@ -52,7 +52,7 @@ export default async function ClientPage({ params, searchParams }) {
       <div className="row between wrapflex" style={{ alignItems: "end" }}>
         <div>
           <div className="eyebrow muted">{user.email}{p.phone ? ` · ${p.phone}` : ""}{p.city ? ` · ${p.city}` : ""}</div>
-          <h1 className="display" style={{ fontSize: "clamp(40px, 5vw, 64px)" }}>{user.name}</h1>
+          <h1 className="display" style={{ fontSize: 28 }}>{user.name}</h1>
           <div className="row wrapflex" style={{ gap: 6, marginTop: 8 }}>
             <span className={`pill ${user.subscription?.status === "active" ? "lime" : "gray"}`}>{user.subscription?.status === "active" ? `${user.subscription.plan}-day · ${left}d left` : user.subscription?.status || "none"}</span>
             <span className="pill lilac">phase: {user.stage?.replace("_", " ")}</span>
@@ -87,7 +87,7 @@ export default async function ClientPage({ params, searchParams }) {
             <Info k="meals / day" v={p.mealsPerDay} />
             <Info k="loves" v={(p.likes || []).join(", ")} />
             <Info k="hates" v={(p.dislikes || []).join(", ")} />
-            {p.notes && <p className="serif" style={{ fontSize: 18, marginTop: 10, background: "var(--paper-2)", padding: 10, borderRadius: 10 }}>&ldquo;{p.notes}&rdquo;</p>}
+            {p.notes && <p style={{ fontSize: 14, marginTop: 10, background: "var(--paper-2)", padding: 10, borderRadius: 10 }}>&ldquo;{p.notes}&rdquo;</p>}
             {suggested && <div className="mono muted" style={{ fontSize: 11, marginTop: 10 }}>formula targets now: {suggested.calories} kcal · {suggested.protein}P · maint. {suggested.maintenance}</div>}
           </div>
 
@@ -98,7 +98,7 @@ export default async function ClientPage({ params, searchParams }) {
                 const l = byDate[d];
                 const done = l ? Object.values(l.meals || {}).filter(Boolean).length : 0;
                 const pct = done / mealsPerDay;
-                return <div key={d} title={`${d}: ${done}/${mealsPerDay} meals${l?.workoutDone ? ", workout ✓" : ""}${l?.weightKg ? `, ${l.weightKg}kg` : ""}`} style={{ flex: 1, height: 34, borderRadius: 6, border: "1.5px solid var(--ink)", background: !l ? "#fffdf7" : pct >= 0.75 ? "var(--lime)" : pct > 0 ? "var(--butter)" : "#e3ddcf", position: "relative" }}>{l?.workoutDone && <span style={{ position: "absolute", bottom: -2, right: 1, fontSize: 10 }}>💪</span>}</div>;
+                return <div key={d} title={`${d}: ${done}/${mealsPerDay} meals${l?.workoutDone ? ", workout ✓" : ""}${l?.weightKg ? `, ${l.weightKg}kg` : ""}`} style={{ flex: 1, height: 34, borderRadius: 6, border: "1.5px solid var(--ink)", background: !l ? "#fff" : pct >= 0.75 ? "var(--lime)" : pct > 0 ? "var(--butter)" : "var(--paper-2)", position: "relative" }}>{l?.workoutDone && <span style={{ position: "absolute", bottom: -2, right: 1, fontSize: 10 }}>💪</span>}</div>;
               })}
             </div>
             <div className="mono muted" style={{ fontSize: 10, marginTop: 6 }}>green = 75%+ meals ticked · hover for details</div>

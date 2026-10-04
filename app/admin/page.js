@@ -44,23 +44,23 @@ export default async function Overview() {
   const stats = [
     ["active clients", active, "var(--lime)"],
     ["logged this week", loggers.length, "var(--sky)"],
-    ["plans to review", reviews, reviews ? "var(--pink)" : "#fffdf7", "/admin/reviews"],
+    ["plans to review", reviews, reviews ? "var(--pink)" : "#fff", "/admin/reviews"],
     ["ending in 7 days", expiring, "var(--orange)"],
     ["revenue this month", `₹${monthINR.toLocaleString("en-IN")}${monthUSD ? ` + $${monthUSD}` : ""}`, "var(--butter)"],
-    ["all-time revenue", `₹${(rev.INR || 0).toLocaleString("en-IN")}${rev.USD ? ` + $${rev.USD}` : ""}`, "#fffdf7"],
+    ["all-time revenue", `₹${(rev.INR || 0).toLocaleString("en-IN")}${rev.USD ? ` + $${rev.USD}` : ""}`, "#fff"],
     ["total signups", total, "var(--lilac)"],
   ];
 
   return (
     <div style={{ maxWidth: 1200 }}>
       <div className="row between wrapflex">
-        <h1 className="display" style={{ fontSize: "clamp(42px, 6vw, 72px)" }}>hey <span className="serif">coach</span> 👋</h1>
+        <h1 className="display" style={{ fontSize: 28 }}>Overview</h1>
         <ActionButton url="/api/cron/reminders" method="GET" className="btn sm ghost" style={{ border: "var(--line)" }}>⚡ run reminders now</ActionButton>
       </div>
       <div className="grid g4" style={{ marginTop: 24 }}>
         {stats.map(([k, v, c, href]) => {
           const inner = (<><div className="v" style={{ fontSize: typeof v === "string" && v.length > 9 ? 24 : 36 }}>{v}</div><div className="k" style={{ color: "var(--ink)" }}>{k}</div></>);
-          return href ? <Link key={k} href={href} className="card stat wobble" style={{ background: c }}>{inner}</Link> : <div key={k} className="card stat" style={{ background: c }}>{inner}</div>;
+          return href ? <Link key={k} href={href} className="card stat" style={{ background: c }}>{inner}</Link> : <div key={k} className="card stat" style={{ background: c }}>{inner}</div>;
         })}
       </div>
 
@@ -71,7 +71,7 @@ export default async function Overview() {
             {bars.map((b) => (
               <div key={b.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
                 <span className="mono" style={{ fontSize: 10 }}>{b.v ? `₹${Math.round(b.v / 1000)}k` : ""}</span>
-                <div style={{ width: "100%", height: `${(b.v / maxBar) * 100}%`, minHeight: 4, background: "var(--lime)", border: "var(--line)", borderRadius: "8px 8px 0 0" }} />
+                <div style={{ width: "100%", height: `${(b.v / maxBar) * 100}%`, minHeight: 4, background: "var(--brand)", borderRadius: "6px 6px 0 0" }} />
                 <span className="mono" style={{ fontSize: 11 }}>{b.label}</span>
               </div>
             ))}
@@ -94,11 +94,11 @@ export default async function Overview() {
         </div>
       </div>
 
-      <h2 className="display" style={{ fontSize: 34, marginTop: 36 }}>alerts <span className="serif">to handle</span></h2>
+      <h2 className="display" style={{ fontSize: 20, marginTop: 36 }}>alerts to handle</h2>
       <div className="stack" style={{ marginTop: 14 }}>
         {alerts.length === 0 && <div className="card" style={{ padding: 24 }}>all clear ✨</div>}
         {alerts.map((a) => {
-          const [e, c] = ALERT[a.type] || ["🔔", "#fffdf7"];
+          const [e, c] = ALERT[a.type] || ["🔔", "#fff"];
           return (
             <div key={String(a._id)} className="card row between wrapflex" style={{ padding: 14, gap: 12 }}>
               <div className="row" style={{ gap: 12 }}>

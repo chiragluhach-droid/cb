@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import WeightChart from "@/components/WeightChart";
 import { burst, useToast } from "@/components/fx";
+import Icon from "@/components/Icon";
 
 const FIELDS = [["weightKg", "weight", "kg"], ["waistCm", "waist", "cm"], ["hipsCm", "hips", "cm"], ["chestCm", "chest", "cm"], ["armCm", "arm", "cm"], ["thighCm", "thigh", "cm"]];
 
@@ -37,10 +38,10 @@ function Compare({ before, after }) {
       <div style={{ position: "absolute", inset: 0, clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img src={before.data} alt="before" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
-      <div style={{ position: "absolute", top: 0, bottom: 0, left: `${pos}%`, width: 3, background: "var(--ink)" }}>
-        <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 40, height: 40, borderRadius: "50%", background: "var(--lime)", border: "var(--line)", display: "grid", placeItems: "center" }}>⇔</span>
+      <div style={{ position: "absolute", top: 0, bottom: 0, left: `${pos}%`, width: 2, background: "#fff" }}>
+        <span style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 36, height: 36, borderRadius: "50%", background: "#fff", boxShadow: "var(--shadow-lg)", display: "grid", placeItems: "center" }}>⇔</span>
       </div>
-      <span className="pill" style={{ position: "absolute", top: 10, left: 10, background: "#fffdf7" }}>before · {before.date}</span>
+      <span className="pill" style={{ position: "absolute", top: 10, left: 10, background: "#fff" }}>before · {before.date}</span>
       <span className="pill lime" style={{ position: "absolute", top: 10, right: 10 }}>now · {after.date}</span>
     </div>
   );
@@ -70,7 +71,7 @@ export default function Progress({ start, goal, checkins, series, photos: initia
     setBusy(false);
     if (!r.ok) return toast(j.error);
     burst(e.nativeEvent.submitter?.getBoundingClientRect().x || 300, e.nativeEvent.submitter?.getBoundingClientRect().y || 300, ["📏", "✨", "💚"]);
-    toast("check-in sent to your coach ✓");
+    toast("Check-in sent to your coach");
     setF({ energy: 3, hunger: 3 });
     router.refresh();
   };
@@ -84,8 +85,8 @@ export default function Progress({ start, goal, checkins, series, photos: initia
       const j = await r.json();
       if (!r.ok) return toast(j.error);
       setPhotos((p) => [...p, { _id: j.id, date: j.date, angle: j.angle, data }]);
-      toast("photo saved 📸");
-    } catch { toast("couldn't read that image"); }
+      toast("Photo saved");
+    } catch { toast("Couldn't read that image"); }
     e.target.value = "";
   };
   const del = async (id) => {
@@ -94,34 +95,31 @@ export default function Progress({ start, goal, checkins, series, photos: initia
   };
 
   return (
-    <div style={{ maxWidth: 1100 }}>
+    <div className="dpage">
       {toastNode}
-      <h1 className="display" style={{ fontSize: "clamp(42px, 6vw, 76px)" }}>the <span className="serif">glow-up</span> log</h1>
+      <div className="ph"><div><h1 className="display">Progress</h1><p>Weight, measurements and photos over time.</p></div></div>
 
-      <div className="grid g4" style={{ marginTop: 24 }}>
-        <div className="card stat" style={{ background: diff != null && diff < 0 ? "var(--lime)" : "var(--butter)" }}>
-          <div className="v">{diff == null ? "–" : `${diff > 0 ? "+" : ""}${diff}`}<span className="mono" style={{ fontSize: 14 }}>kg</span></div>
-          <div className="k" style={{ color: "var(--ink)" }}>since day 1</div>
-        </div>
-        <div className="card stat"><div className="v">{startW ?? "–"}</div><div className="k">start weight</div></div>
-        <div className="card stat"><div className="v">{nowW ?? "–"}</div><div className="k">now</div></div>
-        <div className="card stat"><div className="v">{goal ?? "–"}</div><div className="k">goal{goal && nowW ? ` · ${Math.abs(Math.round((nowW - goal) * 10) / 10)}kg to go` : ""}</div></div>
+      <div className="card kv" style={{ marginTop: 16 }}>
+        <div><b style={{ color: diff != null && diff < 0 ? "var(--brand-600)" : undefined }}>{diff == null ? "–" : `${diff > 0 ? "+" : ""}${diff}`}<small style={{ fontSize: 12, fontWeight: 500, color: "var(--muted)" }}> kg</small></b><span>Since day 1</span></div>
+        <div><b>{startW ?? "–"}</b><span>Start weight</span></div>
+        <div><b>{nowW ?? "–"}</b><span>Current</span></div>
+        <div><b>{goal ?? "–"}</b><span>Goal{goal && nowW ? ` · ${Math.abs(Math.round((nowW - goal) * 10) / 10)} kg to go` : ""}</span></div>
       </div>
 
-      <div className="card reveal" style={{ marginTop: 22, padding: 20 }}>
-        <div className="eyebrow">weight trend</div>
+      <div className="card" style={{ marginTop: 16, padding: "16px 12px 8px" }}>
+        <div style={{ fontWeight: 600, fontSize: 15, padding: "0 4px" }}>Weight trend</div>
         <WeightChart series={series} goal={goal} />
       </div>
 
       {checkins.length > 1 && (
-        <div className="card reveal" style={{ marginTop: 22, padding: 20 }}>
-          <div className="eyebrow">start vs now</div>
+        <div className="card" style={{ marginTop: 16, padding: 16 }}>
+          <div style={{ fontWeight: 600, fontSize: 15 }}>Start vs now</div>
           <div className="grid g3" style={{ marginTop: 12 }}>
             {FIELDS.slice(1).map(([k, l, u]) =>
               first[k] && last[k] ? (
                 <div key={k} className="row between card" style={{ padding: 14, boxShadow: "none" }}>
-                  <b>{l}</b>
-                  <span className="mono">{first[k]} → {last[k]}{u} <b style={{ color: last[k] < first[k] ? "#1c7a2c" : "var(--ink)" }}>({(last[k] - first[k]).toFixed(1)})</b></span>
+                  <b style={{ textTransform: "capitalize" }}>{l}</b>
+                  <span className="mono">{first[k]} → {last[k]}{u} <b style={{ color: last[k] < first[k] ? "var(--brand-600)" : "var(--ink)" }}>({(last[k] - first[k]).toFixed(1)})</b></span>
                 </div>
               ) : null
             )}
@@ -129,47 +127,47 @@ export default function Progress({ start, goal, checkins, series, photos: initia
         </div>
       )}
 
-      <div className="grid g2" style={{ marginTop: 22, alignItems: "start" }}>
-        <form onSubmit={submit} className="card" style={{ padding: 22, background: "var(--sky)" }}>
-          <h2 className="display" style={{ fontSize: 30 }}>weekly check-in 📏</h2>
-          <p style={{ fontSize: 14, marginTop: 4 }}>Once a week, same day, morning. Your coach uses this to tune your plan.</p>
-          <div className="grid g3" style={{ marginTop: 16, gap: 10 }}>
+      <div className="grid g2" style={{ marginTop: 16, alignItems: "start" }}>
+        <form onSubmit={submit} className="card" style={{ padding: 16 }}>
+          <h2 className="display" style={{ fontSize: 18 }}>Weekly check-in</h2>
+          <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>Once a week, same day, morning. Your coach uses this to tune your plan.</p>
+          <div className="grid" style={{ marginTop: 14, gap: 10, gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))" }}>
             {FIELDS.map(([k, l, u]) => (
-              <div key={k}><label className="label">{l} ({u}){k === "weightKg" ? " *" : ""}</label><input className="input" type="number" step="0.1" value={f[k] ?? ""} onChange={(e) => setF({ ...f, [k]: e.target.value })} required={k === "weightKg"} /></div>
+              <div key={k}><label className="label">{l} ({u}){k === "weightKg" ? " *" : ""}</label><input className="input" type="number" inputMode="decimal" step="0.1" value={f[k] ?? ""} onChange={(e) => setF({ ...f, [k]: e.target.value })} required={k === "weightKg"} /></div>
             ))}
           </div>
           {[["energy", "energy", ["😴", "🥱", "🙂", "😃", "⚡"]], ["hunger", "hunger", ["😌", "🙂", "😐", "😋", "🤤"]]].map(([k, l, em]) => (
             <div key={k} style={{ marginTop: 14 }}>
               <label className="label">{l} this week</label>
-              <div className="row" style={{ gap: 6 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
                 {em.map((x, n) => (
-                  <button type="button" key={x} onClick={() => setF({ ...f, [k]: n + 1 })} style={{ fontSize: 24, width: 46, height: 46, borderRadius: 12, border: "var(--line)", background: f[k] === n + 1 ? "var(--lime)" : "#fffdf7", cursor: "pointer", transform: f[k] === n + 1 ? "scale(1.12) rotate(-6deg)" : "" , transition: "transform .2s"}}>{x}</button>
+                  <button type="button" key={x} onClick={() => setF({ ...f, [k]: n + 1 })} aria-pressed={f[k] === n + 1} style={{ fontSize: 22, height: 46, borderRadius: 10, border: `1px solid ${f[k] === n + 1 ? "var(--brand)" : "var(--border)"}`, background: f[k] === n + 1 ? "var(--brand-50)" : "#fff", cursor: "pointer" }}>{x}</button>
                 ))}
               </div>
             </div>
           ))}
-          <div style={{ marginTop: 14 }}><label className="label">anything to tell your coach?</label><textarea className="textarea" rows={3} value={f.note || ""} onChange={(e) => setF({ ...f, note: e.target.value })} placeholder="had a wedding this weekend 🙈" /></div>
-          <button className="btn" style={{ marginTop: 16, width: "100%" }} disabled={busy}>{busy ? "sending…" : "send check-in →"}</button>
+          <div style={{ marginTop: 14 }}><label className="label">anything to tell your coach?</label><textarea className="textarea" rows={3} value={f.note || ""} onChange={(e) => setF({ ...f, note: e.target.value })} placeholder="e.g. had a wedding this weekend" /></div>
+          <button className="btn primary" style={{ marginTop: 16, width: "100%" }} disabled={busy}>{busy ? "Sending…" : "Send check-in"}</button>
         </form>
 
-        <div className="card" style={{ padding: 22 }}>
+        <div className="card" style={{ padding: 16 }}>
           <div className="row between wrapflex">
-            <h2 className="display" style={{ fontSize: 30 }}>photos 📸</h2>
+            <h2 className="display" style={{ fontSize: 18 }}>Photos</h2>
             <div className="toggle">
               {["front", "side", "back"].map((a) => <button key={a} className={angle === a ? "on" : ""} onClick={() => setAngle(a)}>{a}</button>)}
             </div>
           </div>
-          <p style={{ fontSize: 14, marginTop: 4 }}>Same spot, same light, every 2 weeks. Private to you and your coach.</p>
-          <label className="btn lime sm" style={{ marginTop: 14 }} data-cursor="upload">
-            + add {angle} photo
+          <p className="muted" style={{ fontSize: 14, marginTop: 4 }}>Same spot, same light, every 2 weeks. Private to you and your coach.</p>
+          <label className="btn ghost" style={{ marginTop: 14, width: "100%" }}>
+            <Icon name="camera" size={16} /> Add {angle} photo
             <input type="file" accept="image/*" onChange={upload} hidden />
           </label>
           <div style={{ marginTop: 18 }}>
             {byAngle.length >= 2 ? (
               <Compare before={byAngle[0]} after={byAngle.at(-1)} />
             ) : (
-              <div className="card" style={{ padding: 30, textAlign: "center", background: "var(--paper-2)", boxShadow: "none" }}>
-                {byAngle.length === 1 ? "nice, add another later to unlock before / after ✨" : "no photos yet, add your first one"}
+              <div className="card" style={{ padding: 24, textAlign: "center", background: "var(--paper)", boxShadow: "none", fontSize: 14, color: "var(--muted)" }}>
+                {byAngle.length === 1 ? "Add another photo later to unlock the before / after view." : "No photos yet. Add your first one."}
               </div>
             )}
           </div>
@@ -178,7 +176,7 @@ export default function Progress({ start, goal, checkins, series, photos: initia
               {byAngle.map((p) => (
                 <div key={p._id} style={{ position: "relative" }}>
                   <img src={p.data} alt={p.date} style={{ width: 70, height: 90, objectFit: "cover", borderRadius: 10, border: "var(--line)" }} />
-                  <button onClick={() => del(p._id)} title="delete" style={{ position: "absolute", top: -8, right: -8, width: 22, height: 22, borderRadius: "50%", border: "var(--line)", background: "var(--pink)", cursor: "pointer", fontSize: 11, lineHeight: 1 }}>×</button>
+                  <button onClick={() => del(p._id)} title="delete" style={{ position: "absolute", top: -8, right: -8, width: 22, height: 22, borderRadius: "50%", border: "var(--line)", background: "#fff", cursor: "pointer", fontSize: 13, lineHeight: 1, boxShadow: "var(--shadow)" }} aria-label="Delete photo">×</button>
                 </div>
               ))}
             </div>
@@ -187,8 +185,8 @@ export default function Progress({ start, goal, checkins, series, photos: initia
       </div>
 
       {checkins.length > 0 && (
-        <div className="card" style={{ marginTop: 22, padding: 20 }}>
-          <div className="eyebrow">check-in history</div>
+        <div className="card" style={{ marginTop: 16, padding: 16 }}>
+          <div style={{ fontWeight: 600, fontSize: 15 }}>Check-in history</div>
           <div className="tablewrap">
             <table className="table" style={{ marginTop: 10 }}>
               <thead><tr><th>date</th>{FIELDS.map(([k, l]) => <th key={k}>{l}</th>)}<th>note</th></tr></thead>

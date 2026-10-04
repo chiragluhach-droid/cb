@@ -7,7 +7,7 @@ export default async function Payments() {
   const list = await Payment.find().sort({ createdAt: -1 }).limit(300).populate("user", "name email").lean();
   return (
     <div style={{ maxWidth: 1200 }}>
-      <h1 className="display" style={{ fontSize: "clamp(42px, 6vw, 72px)" }}>pay<span className="serif">ments</span></h1>
+      <h1 className="display" style={{ fontSize: 28 }}>payments</h1>
       <div className="card tablewrap" style={{ marginTop: 20 }}>
         <table className="table">
           <thead><tr><th>date</th><th>client</th><th>plan</th><th>amount</th><th>code</th><th>status</th><th>provider / id</th></tr></thead>

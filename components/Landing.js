@@ -1,32 +1,44 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Logo from "./Logo";
-import { Sticker, Magnetic, Tilt, CountUp, RevealOnScroll, burst } from "./fx";
-import { STORIES, FAQ, MARQUEE } from "@/lib/content";
+import Icon from "./Icon";
+import { RevealOnScroll } from "./fx";
+import { STORIES, FAQ } from "@/lib/content";
 import { PLANS } from "@/lib/pricing";
 import { buildPlan } from "@/lib/planEngine";
 
-const IMG = (id, w = 900) => `https://images.unsplash.com/photo-${id}?w=${w}&q=75&auto=format&fit=crop`;
+function SectionHead({ eyebrow, title, sub, center }) {
+  return (
+    <div className={`sec-head reveal ${center ? "center" : ""}`}>
+      <div className="eyebrow brand">{eyebrow}</div>
+      <h2 className="display">{title}</h2>
+      {sub && <p className="lead">{sub}</p>}
+    </div>
+  );
+}
 
 export function Nav({ authed }) {
   return (
-    <header className="nav wrap">
-      <div className="nav__in">
-        <Logo />
-        <nav className="nav__links">
-          <a href="#how">how it works</a>
-          <a href="#try">try it</a>
-          <a href="#results">results</a>
-          <a href="#pricing">pricing</a>
-        </nav>
-        <div className="row" style={{ gap: 6 }}>
+    <header className="lnav">
+      <div className="wrap lnav__in">
+        <div className="row" style={{ gap: 36 }}>
+          <Logo />
+          <nav className="lnav__links">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#results">Results</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+        </div>
+        <div className="row" style={{ gap: 8 }}>
           {authed ? (
-            <Link className="btn lime sm" href="/dashboard">my dashboard →</Link>
+            <Link className="btn primary sm" href="/dashboard">Go to dashboard</Link>
           ) : (
             <>
-              <Link className="btn ghost sm" href="/login">log in</Link>
-              <Link className="btn lime sm" href="/signup" data-cursor="let's go">get my plan</Link>
+              <Link className="btn ghost sm lnav__signin" href="/login">Sign in</Link>
+              <Link className="btn primary sm" href="/signup">Get started</Link>
             </>
           )}
         </div>
@@ -35,125 +47,129 @@ export function Nav({ authed }) {
   );
 }
 
-const WORDS = ["roti", "dal", "paneer", "dosa", "biryani*", "chai"];
+const MOCK_MEALS = [
+  ["Breakfast", "Besan chilla, mint chutney, curd", 340, true],
+  ["Lunch", "Dal, 2 roti, mixed veg sabzi, salad", 520, true],
+  ["Snack", "Roasted makhana, green tea", 160, false],
+  ["Dinner", "Paneer tikka, jeera rice, cucumber raita", 480, false],
+];
 
-export function Hero() {
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setI((x) => (x + 1) % WORDS.length), 1700);
-    return () => clearInterval(t);
-  }, []);
+function DashboardMock() {
   return (
-    <section className="hero wrap">
-      <RevealOnScroll />
-      <div className="row wrapflex" style={{ gap: 10 }}>
-        <span className="chip" style={{ background: "var(--lime)" }}>● now taking clients</span>
-        <span className="chip">diet + workout + a real human</span>
-      </div>
-      <h1 className="display" style={{ marginTop: 22 }}>
-        eat <span key={i} className="rot-word word-in">{WORDS[i]}</span>
-        <br />
-        <span className="hl">get fit.</span> <span className="serif">no sad</span>
-        <br />
-        salads<span style={{ color: "var(--orange)" }}>.</span>
-      </h1>
-
-      <div className="hero__grid">
-        <div>
-          <p style={{ fontSize: "clamp(18px, 2vw, 23px)", maxWidth: 560, lineHeight: 1.4 }}>
-            A diet + workout plan built around <span className="serif" style={{ fontSize: "1.2em" }}>ghar ka khana</span>. Made for your body,
-            your PCOS or thyroid, your cravings. Checked by your coach. Updated as you change.
-          </p>
-          <div className="row wrapflex" style={{ marginTop: 28, gap: 14 }}>
-            <Magnetic>
-              <Link href="/signup" className="btn lime" data-cursor="start" style={{ fontSize: 20, padding: "18px 30px" }}>
-                build my plan →
-              </Link>
-            </Magnetic>
-            <a href="#reel" className="btn ghost" data-cursor="play">▶ watch 30s</a>
+    <div className="mock">
+      <div className="mock__bar"><i /><i /><i /><span>app.khao.fit/dashboard</span></div>
+      <div className="mock__body">
+        <aside className="mock__side">
+          {[["home", "Today", true], ["clipboard", "My plan"], ["dumbbell", "Workout"], ["chart", "Progress"], ["message", "Coach"]].map(([i, l, on]) => (
+            <div key={l} className={on ? "on" : ""}><Icon name={i} size={14} /> {l}</div>
+          ))}
+        </aside>
+        <div className="mock__main">
+          <div className="row between">
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 15 }}>Good morning, Riya</div>
+              <div className="muted" style={{ fontSize: 12 }}>Week 6 · Fat loss phase</div>
+            </div>
+            <span className="pill lime">On track</span>
           </div>
-          <div className="row wrapflex" style={{ marginTop: 40, gap: 34 }}>
-            {[[3, " min", "to sign up"], [24, " hrs", "plan in your hands"], [100, "%", "plans checked by a human"]].map(([n, s, k]) => (
-              <div key={k}>
-                <div className="display" style={{ fontSize: 46 }}><CountUp to={n} suffix={s} /></div>
-                <div className="eyebrow muted">{k}</div>
+          <div className="mock__stats">
+            {[["Calories", "860", "1,650", 52], ["Protein", "48g", "95g", 51], ["Steps", "6,820", "8,000", 85]].map(([k, v, t, p]) => (
+              <div key={k} className="mock__stat">
+                <div className="muted" style={{ fontSize: 11 }}>{k}</div>
+                <div style={{ fontWeight: 700, fontSize: 16 }}>{v} <span className="muted" style={{ fontWeight: 500, fontSize: 11 }}>/ {t}</span></div>
+                <div className="progress" style={{ height: 5, marginTop: 6 }}><i style={{ width: `${p}%` }} /></div>
               </div>
             ))}
           </div>
-          <p className="mono muted" style={{ fontSize: 11, marginTop: 12 }}>*yes, biryani. portion-controlled, but yes.</p>
+          <div className="mock__meals">
+            {MOCK_MEALS.map(([slot, name, kcal, done]) => (
+              <div key={slot} className="mock__meal">
+                <span className={`tick ${done ? "on" : ""}`} style={{ width: 18, height: 18, borderRadius: 5 }}><Icon name="check" size={11} stroke={3} /></span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div className="muted" style={{ fontSize: 10.5 }}>{slot}</div>
+                  <div className="mock__mealname">{name}</div>
+                </div>
+                <span className="mono muted" style={{ fontSize: 11.5 }}>{kcal} kcal</span>
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
+      <div className="mock__float">
+        <div className="muted" style={{ fontSize: 11 }}>Weight · last 6 weeks</div>
+        <div style={{ fontWeight: 700, fontSize: 18 }}>−4.2 kg</div>
+        <svg viewBox="0 0 160 44" width="160" height="44" aria-hidden>
+          <polyline points="0,6 27,10 54,15 81,19 108,26 135,30 160,38" fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+    </div>
+  );
+}
 
-        <div className="hero__art" style={{ position: "relative", maxWidth: 460, justifySelf: "center", width: "100%" }}>
-          <Tilt className="arch" data-cursor="yum">
-            <img src={IMG("1546833999-b9f581a1996d")} alt="Indian thali with roti, dal and sabzi" />
-          </Tilt>
-          <div className="badge-spin" style={{ top: -40, left: -50 }}>
-            <svg viewBox="0 0 200 200" className="spin" style={{ width: "100%", height: "100%" }}>
-              <defs><path id="c" d="M100,100 m-75,0 a75,75 0 1,1 150,0 a75,75 0 1,1 -150,0" /></defs>
-              <circle cx="100" cy="100" r="98" fill="var(--butter)" stroke="var(--ink)" strokeWidth="3" />
-              <text style={{ fontFamily: "var(--mono)", fontSize: 17, fontWeight: 700, letterSpacing: 3 }}>
-                <textPath href="#c">REAL COACH ✦ REAL FOOD ✦ REAL RESULTS ✦</textPath>
-              </text>
-            </svg>
-            <div className="core">🧑‍🍳</div>
+export function Hero() {
+  return (
+    <section className="hero">
+      <RevealOnScroll />
+      <div className="wrap hero__grid">
+        <div>
+          <span className="chip hero__badge"><span className="dot" /> Now accepting new clients</span>
+          <h1 className="display hero__title">Nutrition coaching built around the food you already eat.</h1>
+          <p className="lead" style={{ maxWidth: 540 }}>
+            Khao gives you a personal diet and workout plan made from everyday Indian meals, reviewed by a real coach and adjusted as your body changes. Including PCOS, thyroid and diabetes-aware plans.
+          </p>
+          <div className="row wrapflex" style={{ marginTop: 32, gap: 12 }}>
+            <Link href="/signup" className="btn primary lg">Get your plan <Icon name="arrow" size={16} /></Link>
+            <a href="#demo" className="btn ghost lg">See a sample day</a>
           </div>
-          <div className="macro-card float" style={{ right: -18, top: "38%" }}>
-            <div className="eyebrow muted">today's lunch</div>
-            <b style={{ fontFamily: "var(--display)", fontSize: 17 }}>Dal, 2 roti, sabzi</b>
-            <div className="mono" style={{ marginTop: 4 }}>520 kcal · 24g protein</div>
-          </div>
-          <div className="macro-card" style={{ left: -24, bottom: 30, background: "var(--lime)", rotate: "-4deg" }}>
-            <div className="mono">✓ ticked off · streak 12 🔥</div>
-          </div>
-          <Sticker style={{ top: "4%", right: -10, background: "var(--pink)" }} rotate={8}>PCOS friendly</Sticker>
-          <Sticker style={{ bottom: -24, right: 40, background: "var(--sky)" }} rotate={-6}>veg / non-veg / jain</Sticker>
+          <ul className="hero__checks">
+            {["Coach-reviewed plans", "Veg, Jain, egg & non-veg", "UPI & international cards"].map((x) => (
+              <li key={x}><Icon name="check" size={16} /> {x}</li>
+            ))}
+          </ul>
         </div>
+        <DashboardMock />
       </div>
     </section>
   );
 }
 
-export function Marquee({ items = MARQUEE, rev, lime }) {
-  const row = (
-    <span>
-      {items.map((w) => (
-        <span key={w} style={{ display: "contents" }}>
-          {w} <span style={{ color: lime ? "var(--pink)" : "var(--lime)" }}>✦</span>
-        </span>
-      ))}
-    </span>
-  );
+export function Stats() {
   return (
-    <div className={`marquee ${rev ? "rev" : ""} ${lime ? "lime" : ""}`} style={{ rotate: rev ? "1deg" : "-1.5deg", margin: "10px -10px" }}>
-      <div className="marquee__track">{row}{row}</div>
-    </div>
+    <section className="stats">
+      <div className="wrap stats__grid">
+        {[["3 min", "to complete onboarding"], ["24 hrs", "to receive your first plan"], ["100%", "of plans reviewed by a coach"], ["2–3 wks", "before a plateau triggers a new plan"]].map(([v, k]) => (
+          <div key={k}>
+            <div className="stats__v">{v}</div>
+            <div className="muted" style={{ fontSize: 14 }}>{k}</div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
-export function Reel() {
+const FEATURES = [
+  ["plate", "Personalised meal plans", "Calories and protein worked out for your body, then turned into meals from dal, roti, paneer, idli and everything else you already cook."],
+  ["shield", "Reviewed by a coach", "Every plan is checked and approved by your coach before it reaches you. No auto-generated PDFs."],
+  ["refresh", "Plans that adapt", "Lose 2 kg and your numbers update. Stall for two weeks and your plan is reworked. Hit your goal and you move to maintain or build."],
+  ["dumbbell", "Home or gym training", "Progressive workouts that get harder each week, whether you have a full gym or a mat and a pair of dumbbells."],
+  ["chart", "Progress tracking", "Log meals, water, steps and weight daily. Weekly check-ins, progress photos and a before/after comparison."],
+  ["message", "Direct coach access", "Questions about a meal swap or a tough week? Message your coach from the dashboard and get a real reply."],
+];
+
+export function Features() {
   return (
-    <section id="reel" className="section wrap">
-      <div className="grid g2" style={{ alignItems: "center", gap: 50 }}>
-        <div className="reveal">
-          <div className="kicker"><span className="dot" /><span className="eyebrow">the 30-second version</span></div>
-          <h2 className="display">
-            this is how <span className="serif">your</span> plan gets made.
-          </h2>
-          <p style={{ fontSize: 20, marginTop: 22, maxWidth: 480, color: "var(--ink-2)" }}>
-            You tell us about your body, your food and your schedule. Your coach builds the plan, checks every meal and sends it over.
-            Then it keeps changing as you do.
-          </p>
-          <div className="row wrapflex" style={{ marginTop: 26 }}>
-            <span className="pill lime">no generic PDFs</span>
-            <span className="pill pink">no 1200-kcal crash diets</span>
-            <span className="pill sky">no boiled-chicken-only</span>
-          </div>
-        </div>
-        <div className="reveal" style={{ display: "flex", justifyContent: "center", position: "relative" }}>
-          <div className="phone" data-cursor="watch">
-            <iframe src="/reel.html" title="How KHAO works" loading="lazy" />
-          </div>
-          <Sticker style={{ top: 40, left: "4%", background: "var(--lime)" }} rotate={-10}>▶ live</Sticker>
+    <section id="features" className="section">
+      <div className="wrap">
+        <SectionHead center eyebrow="Features" title="Everything you need to reach your goal" sub="A coach, a plan and a tracker in one place, designed for the way Indian households actually eat." />
+        <div className="grid g3 feat">
+          {FEATURES.map(([i, t, d], k) => (
+            <div key={t} className="card feat__card reveal" style={{ transitionDelay: `${k * 50}ms` }}>
+              <span className="feat__icon"><Icon name={i} size={20} /></span>
+              <h3>{t}</h3>
+              <p className="muted">{d}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -161,32 +177,26 @@ export function Reel() {
 }
 
 const STEPS = [
-  ["01", "spill the tea", "Goal, height, weight, PCOS / thyroid, veg or non-veg, foods you love and hate. 3 minutes.", "var(--butter)", "📝"],
-  ["02", "coach builds it", "Your calories and protein worked out, then meals from everyday Indian food. Checked before it reaches you.", "var(--pink)", "🧑‍🍳"],
-  ["03", "tick, swap, log", "Today's meals on your dashboard. Tick them off, swap a dish you're not feeling, log water, steps and weight.", "var(--sky)", "✅"],
-  ["04", "plan evolves", "Weight drops? Numbers update. Stuck for 2–3 weeks? Plan changes. Hit your goal? We switch to maintain or build.", "var(--lime)", "📈"],
+  ["Tell us about you", "Goal, height, weight, health conditions, diet type and the foods you love or avoid. About 3 minutes."],
+  ["Your coach builds the plan", "Targets are calculated, meals are matched to your preferences, and your coach reviews everything."],
+  ["Follow it day to day", "Today's meals on your dashboard. Tick them off, swap a dish, log water, steps and weight."],
+  ["It evolves with you", "Progress, plateaus and goals all trigger a reviewed update, so the plan always fits where you are now."],
 ];
 
 export function How() {
   return (
-    <section id="how" className="section wrap">
-      <div className="kicker reveal"><span className="dot" /><span className="eyebrow">how it works</span></div>
-      <h2 className="display reveal" style={{ maxWidth: 900 }}>
-        4 steps. <span className="serif">zero</span> guesswork.
-      </h2>
-      <div className="grid g4" style={{ marginTop: 50 }}>
-        {STEPS.map(([n, t, d, c, e], k) => (
-          <Tilt key={n} className="card step reveal wobble" style={{ background: c, transitionDelay: `${k * 80}ms` }} data-cursor={e}>
-            <div className="row between">
-              <span className="n">{n}</span>
-              <span style={{ fontSize: 40 }}>{e}</span>
+    <section id="how" className="section alt">
+      <div className="wrap">
+        <SectionHead eyebrow="How it works" title="From sign-up to your first plan in 24 hours" />
+        <div className="steps">
+          {STEPS.map(([t, d], k) => (
+            <div key={t} className="step reveal" style={{ transitionDelay: `${k * 60}ms` }}>
+              <span className="step__n">{k + 1}</span>
+              <h3>{t}</h3>
+              <p className="muted">{d}</p>
             </div>
-            <div>
-              <h3 className="display" style={{ fontSize: 32, marginBottom: 10 }}>{t}</h3>
-              <p style={{ fontSize: 15 }}>{d}</p>
-            </div>
-          </Tilt>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -206,128 +216,65 @@ export function TryIt() {
   );
   const t = plan.targets;
   const meals = plan.diet[day].meals;
-  const kcalP = (t.protein * 4) / t.calories, kcalC = (t.carbs * 4) / t.calories;
-  const C = 2 * Math.PI * 54;
   const Seg = ({ set, val, opts }) => (
     <div className="seg">
       {opts.map(([v, l]) => (
-        <button key={v} className={val === v ? "on" : ""} onClick={() => set(v)}>{l}</button>
+        <button key={v} type="button" className={val === v ? "on" : ""} onClick={() => set(v)}>{l}</button>
       ))}
     </div>
   );
+  const macros = [["Protein", t.protein, "var(--c-green)"], ["Carbs", t.carbs, "var(--c-blue)"], ["Fat", t.fat, "var(--c-amber)"]];
 
   return (
-    <section id="try" className="section" style={{ background: "var(--lilac)", borderBlock: "var(--line)" }}>
+    <section id="demo" className="section">
       <div className="wrap">
-        <div className="kicker reveal"><span className="dot" /><span className="eyebrow">play with it</span></div>
-        <h2 className="display reveal">see a sample day <span className="serif">rn.</span></h2>
-        <div className="grid g2" style={{ marginTop: 40, alignItems: "start" }}>
-          <div className="card demo stack reveal">
-            <div><span className="label">goal</span><Seg set={setGoal} val={goal} opts={[["fat_loss", "lose fat 🔥"], ["recomp", "tone up ✨"], ["muscle_gain", "build muscle 💪"]]} /></div>
-            <div><span className="label">i eat</span><Seg set={setDiet} val={diet} opts={[["vegan", "vegan"], ["veg", "veg"], ["egg", "veg + eggs"], ["nonveg", "non-veg"]]} /></div>
-            <div><span className="label">i am</span><Seg set={setSex} val={sex} opts={[["female", "woman"], ["male", "man"]]} /></div>
+        <SectionHead eyebrow="Live preview" title="See a sample day in seconds" sub="This runs on the same engine your coach starts from. Change the inputs and the plan updates." />
+        <div className="card demo reveal">
+          <div className="demo__controls">
+            <div><span className="label">Goal</span><Seg set={setGoal} val={goal} opts={[["fat_loss", "Lose fat"], ["recomp", "Tone up"], ["muscle_gain", "Build muscle"]]} /></div>
+            <div><span className="label">Diet</span><Seg set={setDiet} val={diet} opts={[["vegan", "Vegan"], ["veg", "Vegetarian"], ["egg", "Eggetarian"], ["nonveg", "Non-veg"]]} /></div>
+            <div><span className="label">Sex</span><Seg set={setSex} val={sex} opts={[["female", "Female"], ["male", "Male"]]} /></div>
             <div>
-              <span className="label">weight: <b>{w} kg</b></span>
+              <span className="label">Weight · <b style={{ color: "var(--ink)" }}>{w} kg</b></span>
               <input type="range" className="range" min={45} max={130} value={w} onChange={(e) => setW(+e.target.value)} />
             </div>
-            <div className="row" style={{ gap: 22, marginTop: 18, flexWrap: "wrap" }}>
-              <svg className="donut" viewBox="0 0 140 140">
-                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--butter)" strokeWidth="22" />
-                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--pink)" strokeWidth="22" strokeDasharray={`${C * kcalP} ${C}`} transform="rotate(-90 70 70)" style={{ transition: "all .5s" }} />
-                <circle cx="70" cy="70" r="54" fill="none" stroke="var(--sky)" strokeWidth="22" strokeDasharray={`${C * kcalC} ${C}`} strokeDashoffset={-C * kcalP} transform="rotate(-90 70 70)" style={{ transition: "all .5s" }} />
-                <circle cx="70" cy="70" r="65" fill="none" stroke="var(--ink)" strokeWidth="2" />
-                <circle cx="70" cy="70" r="43" fill="#fffdf7" stroke="var(--ink)" strokeWidth="2" />
-                <text x="70" y="68" textAnchor="middle" style={{ fontFamily: "var(--display)", fontWeight: 800, fontSize: 24 }}>{t.calories}</text>
-                <text x="70" y="86" textAnchor="middle" style={{ fontFamily: "var(--mono)", fontSize: 10 }}>KCAL / DAY</text>
-              </svg>
-              <div className="stack mono" style={{ fontSize: 14 }}>
-                <div><span className="pill pink">protein</span> {t.protein}g</div>
-                <div><span className="pill sky">carbs</span> {t.carbs}g</div>
-                <div><span className="pill butter">fat</span> {t.fat}g</div>
-                <div>💧 {t.water / 1000}L · 👟 {t.steps.toLocaleString("en-IN")} steps</div>
+            <div className="demo__targets">
+              <div>
+                <div className="muted" style={{ fontSize: 13 }}>Daily target</div>
+                <div style={{ fontWeight: 700, fontSize: 30, letterSpacing: "-0.02em" }} className="mono">{t.calories.toLocaleString("en-IN")} <span className="muted" style={{ fontSize: 14, fontWeight: 500 }}>kcal</span></div>
               </div>
+              {macros.map(([k, v, c]) => (
+                <div key={k} className="demo__macro">
+                  <div className="row between" style={{ fontSize: 13 }}><span className="muted">{k}</span><b className="mono">{v} g</b></div>
+                  <div className="progress" style={{ height: 6, marginTop: 6 }}><i style={{ width: `${Math.min(100, ((v * (k === "Fat" ? 9 : 4)) / t.calories) * 100 * 1.6)}%`, background: c }} /></div>
+                </div>
+              ))}
+              <div className="muted" style={{ fontSize: 13 }}>Water {t.water / 1000} L · {t.steps.toLocaleString("en-IN")} steps</div>
             </div>
           </div>
-          <div className="reveal">
-            <div className="row wrapflex" style={{ marginBottom: 14, gap: 6 }}>
+          <div className="demo__plan">
+            <div className="tabs">
               {plan.diet.map((d, k) => (
-                <button key={d.day} className={`btn sm ${k === day ? "" : "ghost"}`} style={{ padding: "6px 12px" }} onClick={() => setDay(k)}>{d.day}</button>
+                <button key={d.day} type="button" className={k === day ? "on" : ""} onClick={() => setDay(k)}>{d.day}</button>
               ))}
             </div>
             <div className="plate" key={`${day}${goal}${diet}${sex}${w}`}>
               {meals.map((m, k) => (
-                <div className="m" key={k} style={{ animationDelay: `${k * 60}ms` }}>
-                  <div>
-                    <div className="eyebrow muted">{m.slot} · {m.time}</div>
-                    <b style={{ fontFamily: "var(--display)", fontSize: 18 }}>{m.name}</b>
-                    <div style={{ fontSize: 13, color: "var(--ink-2)" }}>{m.items.map((i) => `${i.qty} ${i.food.toLowerCase()}`).join(" · ")}</div>
+                <div className="m" key={k}>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="muted" style={{ fontSize: 12, textTransform: "capitalize" }}>{m.slot} · {m.time}</div>
+                    <div style={{ fontWeight: 600 }}>{m.name}</div>
+                    <div className="muted" style={{ fontSize: 13 }}>{m.items.map((i) => `${i.qty} ${i.food.toLowerCase()}`).join(" · ")}</div>
                   </div>
                   <div className="mono" style={{ textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}>
-                    {m.kcal} kcal<br /><span className="muted">{m.protein}g P</span>
+                    <b>{m.kcal} kcal</b><br /><span className="muted">{m.protein} g protein</span>
                   </div>
                 </div>
               ))}
             </div>
-            <p className="mono" style={{ fontSize: 12, marginTop: 12 }}>
-              ↑ a rough preview. your real plan uses your height, age, health conditions and the foods you love, and your coach checks it.
+            <p className="muted" style={{ fontSize: 13, marginTop: 14 }}>
+              A rough preview. Your real plan also uses your height, age, health conditions and food preferences, and is reviewed by your coach.
             </p>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function Bento() {
-  return (
-    <section className="section wrap">
-      <div className="kicker reveal"><span className="dot" /><span className="eyebrow">what you get</span></div>
-      <h2 className="display reveal">your own little <span className="serif">fitness HQ.</span></h2>
-      <div className="bento" style={{ marginTop: 44 }}>
-        <div className="card b-a reveal" style={{ background: "var(--ink)", color: "var(--paper)" }}>
-          <img src={IMG("1567188040759-fb8a883dc6d8", 1000)} alt="Paneer tikka" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.55 }} />
-          <div style={{ position: "relative", padding: 26, height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-            <span className="chip" style={{ background: "var(--lime)", color: "var(--ink)", alignSelf: "flex-start" }}>meal plan</span>
-            <div>
-              <h3 className="display" style={{ fontSize: 44 }}>paneer tikka <span className="serif">is</span> on the menu.</h3>
-              <p style={{ maxWidth: 380, marginTop: 8 }}>Indian food, with the calories and protein worked out. Not feeling it? Swap the dish in one tap.</p>
-            </div>
-          </div>
-        </div>
-        <div className="card b-b reveal" style={{ background: "var(--butter)", padding: 22 }}>
-          <span className="eyebrow">daily tracking</span>
-          <div className="row" style={{ marginTop: 14, gap: 10, flexWrap: "wrap" }}>
-            {["🥣 breakfast", "🍛 lunch", "🥜 snack", "🫓 dinner"].map((m, k) => (
-              <span key={m} className={`pill ${k < 2 ? "lime" : ""}`} style={{ fontSize: 13, padding: "6px 12px" }}>{k < 2 ? "✓ " : ""}{m}</span>
-            ))}
-          </div>
-          <div className="row" style={{ marginTop: 18, gap: 18 }}>
-            <span className="mono">💧 2.1 / 2.5L</span><span className="mono">👟 8,402</span><span className="mono">⚖️ 68.4</span>
-          </div>
-        </div>
-        <div className="card b-c reveal" style={{ padding: 0 }}>
-          <img src={IMG("1571019613454-1cb2f99b2d8b", 700)} alt="Home workout" style={{ width: "100%", height: "58%", objectFit: "cover", borderBottom: "var(--line)" }} />
-          <div style={{ padding: 18 }}>
-            <span className="eyebrow">workouts</span>
-            <h3 className="display" style={{ fontSize: 26, marginTop: 6 }}>home or gym. gets harder every week.</h3>
-          </div>
-        </div>
-        <div className="card b-d reveal" style={{ background: "var(--pink)", display: "grid", placeItems: "center", fontSize: 54 }} data-cursor="📸">📸</div>
-        <div className="card b-e reveal" style={{ background: "var(--sky)", padding: 22 }}>
-          <span className="eyebrow">progress</span>
-          <svg viewBox="0 0 300 80" style={{ width: "100%", height: 90, marginTop: 6 }}>
-            <polyline points="0,12 40,18 80,22 120,30 160,34 200,33 240,46 300,60" fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinejoin="round" strokeDasharray="400" strokeDashoffset="0">
-              <animate attributeName="stroke-dashoffset" from="400" to="0" dur="2s" fill="freeze" />
-            </polyline>
-            <circle cx="300" cy="60" r="6" fill="var(--lime)" stroke="var(--ink)" strokeWidth="2" />
-          </svg>
-          <div className="mono" style={{ fontSize: 13 }}>start vs now · weight, waist, photos</div>
-        </div>
-        <div className="card b-f reveal" style={{ background: "var(--lime)", padding: 22, display: "flex", gap: 16, alignItems: "center" }}>
-          <span style={{ fontSize: 48 }}>💬</span>
-          <div>
-            <span className="eyebrow">your coach</span>
-            <p className="serif" style={{ fontSize: 24, lineHeight: 1.15 }}>&ldquo;Scale stuck for 2 weeks? Totally normal. Tweaked your plan, check it out.&rdquo;</p>
           </div>
         </div>
       </div>
@@ -337,39 +284,28 @@ export function Bento() {
 
 export function Results() {
   return (
-    <section id="results" className="section" style={{ paddingBottom: 60 }}>
+    <section id="results" className="section alt">
       <div className="wrap">
-        <div className="kicker reveal"><span className="dot" /><span className="eyebrow">real people, real thalis</span></div>
-        <div className="row between wrapflex reveal" style={{ alignItems: "end" }}>
-          <h2 className="display">the <span className="serif">glow-up</span> files.</h2>
-          <span className="mono muted">drag / scroll →</span>
-        </div>
-      </div>
-      <div className="wrap" style={{ marginTop: 40 }}>
-        <div className="stories">
+        <SectionHead center eyebrow="Results" title="Real people, real food, real progress" />
+        <div className="grid g3" style={{ marginTop: 48 }}>
           {STORIES.map((s, k) => (
-            <Tilt key={s.name} className="card story" style={{ background: k % 2 ? "#fffdf7" : s.color }} data-cursor={s.emoji}>
+            <figure key={s.name} className="card quote reveal" style={{ transitionDelay: `${(k % 3) * 50}ms` }}>
               <div className="row between">
-                <span style={{ fontSize: 40, width: 64, height: 64, borderRadius: "50%", border: "var(--line)", background: k % 2 ? s.color : "#fffdf7", display: "grid", placeItems: "center" }}>{s.emoji}</span>
-                <span className="pill" style={{ background: "#fffdf7" }}>{s.tag}</span>
+                <span className="quote__result">{s.lost}</span>
+                <span className="pill">{s.tag}</span>
               </div>
-              <div className="display" style={{ fontSize: 58 }}>{s.lost}</div>
-              <p className="serif" style={{ fontSize: 22, lineHeight: 1.2 }}>&ldquo;{s.quote}&rdquo;</p>
-              <div className="row between mono" style={{ fontSize: 12, marginTop: "auto" }}>
-                <span>{s.name} · {s.city}</span>
-                <span>{s.weeks} wks</span>
-              </div>
-            </Tilt>
+              <blockquote>&ldquo;{s.quote}&rdquo;</blockquote>
+              <figcaption className="row">
+                <span className="avatar">{s.name.charAt(0)}</span>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{s.name}</div>
+                  <div className="muted" style={{ fontSize: 13 }}>{s.city} · {s.weeks} weeks</div>
+                </div>
+              </figcaption>
+            </figure>
           ))}
         </div>
-        <p className="mono muted" style={{ fontSize: 11 }}>individual results vary. consistency &gt; perfection.</p>
-      </div>
-      <div className="wrap grid g3" style={{ marginTop: 30 }}>
-        {["1589301760014-d929f3979dbc", "1626777552726-4a6b54c97e46", "1541534741688-6078c6bfb5c5"].map((id, k) => (
-          <Tilt key={id} className="card reveal" style={{ overflow: "hidden", aspectRatio: "4/3", rotate: `${[-2, 1.5, -1][k]}deg` }}>
-            <img src={IMG(id, 700)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </Tilt>
-        ))}
+        <p className="muted" style={{ fontSize: 12, marginTop: 20, textAlign: "center" }}>Individual results vary.</p>
       </div>
     </section>
   );
@@ -379,77 +315,100 @@ export function Pricing() {
   const [cur, setCur] = useState("INR");
   const sym = cur === "INR" ? "₹" : "$";
   return (
-    <section id="pricing" className="section wrap">
-      <div className="kicker reveal"><span className="dot" /><span className="eyebrow">pricing</span></div>
-      <div className="row between wrapflex reveal" style={{ alignItems: "end", gap: 20 }}>
-        <h2 className="display">cheaper than <span className="serif">your</span> swiggy bill.</h2>
-        <div className="toggle">
-          <button className={cur === "INR" ? "on" : ""} onClick={() => setCur("INR")}>🇮🇳 INR · UPI</button>
-          <button className={cur === "USD" ? "on" : ""} onClick={() => setCur("USD")}>🌍 USD</button>
+    <section id="pricing" className="section">
+      <div className="wrap">
+        <SectionHead center eyebrow="Pricing" title="Simple, transparent pricing" sub="One-time payment per programme. No auto-renewals, no hidden fees." />
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
+          <div className="tabs pill-tabs">
+            <button type="button" className={cur === "INR" ? "on" : ""} onClick={() => setCur("INR")}>INR · UPI & cards</button>
+            <button type="button" className={cur === "USD" ? "on" : ""} onClick={() => setCur("USD")}>USD · International</button>
+          </div>
         </div>
-      </div>
-      <div className="grid g2" style={{ marginTop: 44, maxWidth: 980 }}>
-        {Object.values(PLANS).map((p, k) => (
-          <Tilt key={p.id} className="card price reveal" max={5} style={{ background: k ? "var(--lime)" : "#fffdf7" }}>
-            {k === 1 && <span className="sticker" style={{ top: -18, right: 20, background: "var(--pink)", rotate: "6deg", cursor: "default" }}>most picked ⭐</span>}
-            <div className="eyebrow">{p.label}</div>
-            <div className="row" style={{ alignItems: "baseline", gap: 8 }}>
-              <span className="amt">{sym}{p[cur].toLocaleString("en-IN")}</span>
-              <span className="mono muted">/ {p.days} days</span>
+        <div className="prices">
+          {Object.values(PLANS).map((p, k) => (
+            <div key={p.id} className={`card price reveal ${k === 1 ? "featured" : ""}`}>
+              <div className="row between">
+                <h3>{p.label}</h3>
+                {k === 1 && <span className="pill lime">Most popular</span>}
+              </div>
+              <div className="muted" style={{ fontSize: 14 }}>{p.days}-day programme</div>
+              <div className="row" style={{ alignItems: "baseline", gap: 6, marginTop: 8 }}>
+                <span className="price__amt mono">{sym}{p[cur].toLocaleString("en-IN")}</span>
+                <span className="muted">one-time</span>
+              </div>
+              <div className="muted" style={{ fontSize: 13 }}>≈ {sym}{Math.round(p[cur] / p.days)} per day{k === 1 && " · save 17%"}</div>
+              <Link href={`/signup?plan=${p.id}`} className={`btn ${k === 1 ? "primary" : "ghost"}`} style={{ width: "100%", marginTop: 8 }}>
+                Start {p.days}-day plan
+              </Link>
+              <ul>{p.perks.map((x) => <li key={x}><Icon name="check" size={16} /> {x}</li>)}</ul>
             </div>
-            <div className="mono" style={{ fontSize: 13 }}>
-              ≈ {sym}{Math.round(p[cur] / p.days)}/day{k === 1 && " · save 17%"}
-            </div>
-            <ul>{p.perks.map((x) => <li key={x}>{x}</li>)}</ul>
-            <Link href={`/signup?plan=${p.id}`} className={`btn ${k ? "" : "lime"}`} onClick={(e) => burst(e.clientX, e.clientY)} data-cursor="yesss">
-              start {p.days}-day plan →
-            </Link>
-          </Tilt>
-        ))}
+          ))}
+        </div>
+        <p className="muted" style={{ marginTop: 20, fontSize: 13, textAlign: "center" }}>Have a discount code? Apply it at checkout.</p>
       </div>
-      <p className="mono muted" style={{ marginTop: 20, fontSize: 13 }}>UPI · cards · international cards · got a code? apply it at checkout.</p>
     </section>
   );
 }
 
 export function Faq() {
   return (
-    <section className="section wrap faq" style={{ paddingTop: 40 }}>
-      <div className="kicker reveal"><span className="dot" /><span className="eyebrow">faq</span></div>
-      <h2 className="display reveal" style={{ marginBottom: 30 }}>questions? <span className="serif">fair.</span></h2>
-      {FAQ.map(([q, a]) => (
-        <details key={q} className="reveal">
-          <summary data-cursor="open">{q}<span className="pm">+</span></summary>
-          <p>{a}</p>
-        </details>
-      ))}
+    <section id="faq" className="section alt">
+      <div className="wrap faq">
+        <SectionHead eyebrow="FAQ" title="Frequently asked questions" sub={<>Can&apos;t find what you&apos;re looking for? Sign up and message your coach directly.</>} />
+        <div>
+          {FAQ.map(([q, a]) => (
+            <details key={q}>
+              <summary>{q}<span className="pm" aria-hidden>+</span></summary>
+              <p>{a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="footer-cta">
-      <div className="wrap">
-        <div className="row between wrapflex" style={{ gap: 30, alignItems: "end" }}>
-          <div>
-            <p className="serif" style={{ fontSize: "clamp(28px,4vw,52px)", lineHeight: 1.05, maxWidth: 680 }}>
-              Your body, your food, your coach. Let&apos;s go.
-            </p>
-            <div className="row wrapflex" style={{ marginTop: 26 }}>
-              <Magnetic><Link href="/signup" className="btn lime" style={{ fontSize: 22, padding: "20px 34px", boxShadow: "4px 4px 0 var(--pink)" }} data-cursor="go">build my plan →</Link></Magnetic>
+    <>
+      <section className="section" style={{ paddingTop: 0, background: "var(--paper)" }}>
+        <div className="wrap">
+          <div className="cta">
+            <div>
+              <h2>Ready to start eating better?</h2>
+              <p>Answer a few questions and your coach will have your plan ready within 24 hours.</p>
+            </div>
+            <div className="row wrapflex" style={{ gap: 10 }}>
+              <Link href="/signup" className="btn lg cta__btn">Get your plan <Icon name="arrow" size={16} /></Link>
+              <a href="#pricing" className="btn lg cta__ghost">View pricing</a>
             </div>
           </div>
-          <div className="mono" style={{ fontSize: 13, opacity: 0.7, display: "grid", gap: 6 }}>
-            <a href="#how">how it works</a><a href="#pricing">pricing</a><Link href="/login">log in</Link>
+        </div>
+      </section>
+      <footer className="lfoot">
+        <div className="wrap lfoot__grid">
+          <div>
+            <Logo />
+            <p className="muted" style={{ marginTop: 14, fontSize: 14, maxWidth: 300 }}>Personal nutrition and training coaching, built around Indian food.</p>
+          </div>
+          <div>
+            <h4>Product</h4>
+            <a href="#features">Features</a><a href="#how">How it works</a><a href="#demo">Sample plan</a><a href="#pricing">Pricing</a>
+          </div>
+          <div>
+            <h4>Account</h4>
+            <Link href="/signup">Get started</Link><Link href="/login">Sign in</Link><Link href="/dashboard">Dashboard</Link>
+          </div>
+          <div>
+            <h4>Support</h4>
+            <a href="#faq">FAQ</a><a href="#results">Client results</a>
           </div>
         </div>
-        <div className="display huge" style={{ marginTop: 60 }}>khao<span style={{ color: "var(--pink)" }}>.</span></div>
-        <div className="row between wrapflex mono" style={{ fontSize: 12, opacity: 0.6, marginTop: 16 }}>
-          <span>© {new Date().getFullYear()} khao. made with ghee & grit in india.</span>
-          <span>not medical advice. talk to your doctor about health conditions.</span>
+        <div className="wrap lfoot__bottom">
+          <span>© {new Date().getFullYear()} Khao Nutrition &amp; Training. All rights reserved.</span>
+          <span>Not medical advice. Consult your doctor about any health condition.</span>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 }

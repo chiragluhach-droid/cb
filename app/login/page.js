@@ -26,15 +26,15 @@ function LoginForm() {
       {err && <div className="err">{err}</div>}
       <div><label className="label">email</label><input className="input" type="email" required value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></div>
       <div><label className="label">password</label><input className="input" type="password" required value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></div>
-      <button className="btn lime" style={{ width: "100%", marginTop: 20 }} disabled={busy}>{busy ? "one sec…" : "let me in →"}</button>
-      <p className="muted" style={{ textAlign: "center", marginTop: 18 }}>new here? <Link href="/signup" style={{ textDecoration: "underline", color: "var(--ink)" }}>get your plan</Link></p>
+      <button className="btn lime" style={{ width: "100%", marginTop: 8 }} disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
+      <p className="muted" style={{ textAlign: "center", marginTop: 20, fontSize: 14 }}>New to Khao? <Link href="/signup" style={{ color: "var(--brand-600)", fontWeight: 600 }}>Create an account</Link></p>
     </form>
   );
 }
 
 export default function Login() {
   return (
-    <AuthShell title={<>welcome <span className="serif">back.</span></>} sub="Your meals for today are waiting." img="1626777552726-4a6b54c97e46" color="var(--butter)">
+    <AuthShell title="Welcome back" sub="Sign in to see today's meals and your progress.">
       <Suspense><LoginForm /></Suspense>
     </AuthShell>
   );

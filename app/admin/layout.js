@@ -13,14 +13,15 @@ export default async function AdminLayout({ children }) {
   return (
     <div className="shell">
       <SideNav
+        home="/admin"
         items={[
-          ["/admin", "📊", "overview", alerts],
-          ["/admin/reviews", "🧾", "plan reviews", reviews],
-          ["/admin/users", "👥", "clients"],
-          ["/admin/payments", "💸", "payments"],
-          ["/admin/coupons", "🎟️", "coupons"],
+          ["/admin", "grid", "overview", alerts],
+          ["/admin/reviews", "inbox", "plan reviews", reviews],
+          ["/admin/users", "users", "clients"],
+          ["/admin/payments", "card", "payments"],
+          ["/admin/coupons", "tag", "coupons"],
         ]}
-        footer={<div className="chip" style={{ background: "var(--pink)", justifyContent: "center" }}>admin mode</div>}
+        footer={<div className="chip" style={{ justifyContent: "center" }}>Admin workspace</div>}
       />
       <main className="main">{children}</main>
     </div>

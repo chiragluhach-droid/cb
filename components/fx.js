@@ -17,86 +17,21 @@ export function RevealOnScroll() {
   return null;
 }
 
-// A sticker you can fling around
-export function Sticker({ children, style, className = "", rotate = 0 }) {
-  const ref = useRef(null);
-  const st = useRef({ x: 0, y: 0, sx: 0, sy: 0, drag: false });
-  const [r, setR] = useState(rotate);
-  useEffect(() => {
-    const el = ref.current;
-    const down = (e) => {
-      st.current = { ...st.current, drag: true, sx: e.clientX - st.current.x, sy: e.clientY - st.current.y };
-      el.setPointerCapture(e.pointerId);
-      setR(rotate + (Math.random() * 16 - 8));
-    };
-    const move = (e) => {
-      if (!st.current.drag) return;
-      st.current.x = e.clientX - st.current.sx;
-      st.current.y = e.clientY - st.current.sy;
-      el.style.translate = `${st.current.x}px ${st.current.y}px`;
-    };
-    const up = () => (st.current.drag = false);
-    el.addEventListener("pointerdown", down);
-    el.addEventListener("pointermove", move);
-    el.addEventListener("pointerup", up);
-    return () => { el.removeEventListener("pointerdown", down); el.removeEventListener("pointermove", move); el.removeEventListener("pointerup", up); };
-  }, [rotate]);
-  return (
-    <div ref={ref} className={`sticker ${className}`} data-cursor="drag me" style={{ ...style, rotate: `${r}deg`, transition: "rotate .3s cubic-bezier(.3,1.6,.6,1)" }}>
-      {children}
-    </div>
-  );
+// Small static badge
+export function Sticker({ children, style, className = "" }) {
+  return <div className={`sticker ${className}`} style={style}>{children}</div>;
 }
 
-// Element that leans toward the cursor
-export function Magnetic({ children, strength = 0.3, className = "", style }) {
-  const ref = useRef(null);
-  const onMove = (e) => {
-    const b = ref.current.getBoundingClientRect();
-    const x = (e.clientX - b.left - b.width / 2) * strength;
-    const y = (e.clientY - b.top - b.height / 2) * strength;
-    ref.current.style.transform = `translate(${x}px, ${y}px)`;
-  };
-  const reset = () => (ref.current.style.transform = "");
-  return (
-    <div ref={ref} onMouseMove={onMove} onMouseLeave={reset} className={className} style={{ display: "inline-block", transition: "transform .25s cubic-bezier(.3,1.6,.6,1)", ...style }}>
-      {children}
-    </div>
-  );
+// Kept for API compatibility: plain wrappers now that the playful effects are gone
+export function Magnetic({ children, className = "", style }) {
+  return <div className={className} style={{ display: "inline-block", ...style }}>{children}</div>;
 }
 
-// Tilts a card in 3D with the mouse
-export function Tilt({ children, className = "", style, max = 8, ...rest }) {
-  const ref = useRef(null);
-  const onMove = (e) => {
-    const b = ref.current.getBoundingClientRect();
-    const px = (e.clientX - b.left) / b.width - 0.5;
-    const py = (e.clientY - b.top) / b.height - 0.5;
-    ref.current.style.transform = `perspective(800px) rotateY(${px * max}deg) rotateX(${-py * max}deg)`;
-  };
-  return (
-    <div ref={ref} onMouseMove={onMove} onMouseLeave={() => (ref.current.style.transform = "")} className={className} style={{ transition: "transform .2s ease-out", ...style }} {...rest}>
-      {children}
-    </div>
-  );
+export function Tilt({ children, className = "", style, max, ...rest }) {
+  return <div className={className} style={style} {...rest}>{children}</div>;
 }
 
-export function burst(x, y, emojis = ["✨", "🔥", "💚", "⭐", "🥗"]) {
-  for (let i = 0; i < 14; i++) {
-    const s = document.createElement("span");
-    s.className = "confetti";
-    s.textContent = emojis[i % emojis.length];
-    s.style.left = x + "px";
-    s.style.top = y + "px";
-    const a = Math.random() * Math.PI * 2;
-    const d = 60 + Math.random() * 90;
-    s.style.setProperty("--dx", Math.cos(a) * d + "px");
-    s.style.setProperty("--dy", Math.sin(a) * d - 40 + "px");
-    s.style.setProperty("--r", Math.random() * 360 + "deg");
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 950);
-  }
-}
+export function burst() {}
 
 export function useToast() {
   const [msg, setMsg] = useState("");

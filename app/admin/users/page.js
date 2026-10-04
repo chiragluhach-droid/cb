@@ -17,7 +17,7 @@ export default async function Users() {
   }));
   return (
     <div style={{ maxWidth: 1300 }}>
-      <h1 className="display" style={{ fontSize: "clamp(42px, 6vw, 72px)" }}>all <span className="serif">clients</span></h1>
+      <h1 className="display" style={{ fontSize: 28 }}>all clients</h1>
       <UsersTable rows={plain(rows)} />
     </div>
   );

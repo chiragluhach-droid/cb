@@ -50,7 +50,7 @@ export default function PlanEditor({ plan }) {
   const day = diet[d];
   const dayTot = day ? day.meals.reduce((a, m) => { const s = sum(m.items); return { kcal: a.kcal + s.kcal, protein: a.protein + s.protein }; }, { kcal: 0, protein: 0 }) : { kcal: 0, protein: 0 };
   const off = t.calories ? (dayTot.kcal - t.calories) / t.calories : 0;
-  const statusColor = { active: "var(--lime)", review: "var(--pink)", drafting: "var(--butter)", archived: "#e3ddcf" }[plan.status];
+  const statusColor = { active: "var(--lime)", review: "var(--pink)", drafting: "var(--butter)", archived: "var(--paper-2)" }[plan.status];
 
   return (
     <div className="card" style={{ padding: 0, overflow: "hidden" }}>
@@ -62,7 +62,7 @@ export default function PlanEditor({ plan }) {
         {!readOnly && (
           <div className="row wrapflex">
             {plan.status !== "active" && <button className="btn sm ghost" onClick={discard}>🗑 discard</button>}
-            <button className="btn sm ghost" style={{ border: "var(--line)", background: "#fffdf7" }} disabled={!!busy} onClick={() => save("save")}>{busy === "save" ? "…" : plan.status === "active" ? "save (goes live now)" : "save draft"}</button>
+            <button className="btn sm ghost" style={{ border: "var(--line)", background: "#fff" }} disabled={!!busy} onClick={() => save("save")}>{busy === "save" ? "…" : plan.status === "active" ? "save (goes live now)" : "save draft"}</button>
             {plan.status !== "active" && <button className="btn sm" disabled={!!busy} onClick={() => save("save_approve")}>{busy === "save_approve" ? "…" : "✓ approve & send"}</button>}
           </div>
         )}
@@ -98,7 +98,7 @@ export default function PlanEditor({ plan }) {
               {day.meals.map((m, mi) => {
                 const s = sum(m.items);
                 return (
-                  <div key={mi} className="card" style={{ padding: 12, boxShadow: "none", background: "#fffdf7" }}>
+                  <div key={mi} className="card" style={{ padding: 12, boxShadow: "none", background: "#fff" }}>
                     <div className="row wrapflex" style={{ gap: 6 }}>
                       <input className="input" style={{ ...cell, width: 130 }} value={m.slot} disabled={readOnly} onChange={(e) => upDay((dd) => (dd.meals[mi].slot = e.target.value))} />
                       <input className="input" style={{ ...cell, width: 90 }} value={m.time} disabled={readOnly} onChange={(e) => upDay((dd) => (dd.meals[mi].time = e.target.value))} />

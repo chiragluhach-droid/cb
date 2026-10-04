@@ -4,8 +4,8 @@ import { getUser } from "@/lib/auth";
 import { activePlan, workoutWeek } from "@/lib/userData";
 import { weekdayIndex } from "@/lib/dates";
 import { DAYS } from "@/lib/planEngine";
+import Icon from "@/components/Icon";
 
-const COLORS = ["var(--lime)", "var(--pink)", "var(--sky)", "var(--butter)", "var(--lilac)"];
 
 export default async function Page() {
   await db();
@@ -18,53 +18,52 @@ export default async function Page() {
   const today = DAYS[weekdayIndex()];
 
   return (
-    <div style={{ maxWidth: 1100 }}>
-      <div className="row wrapflex" style={{ gap: 8 }}>
-        <span className="pill lime">{w.place === "gym" ? "🏋️ gym" : "🏠 home"}</span>
-        <span className="pill gray">{w.daysPerWeek} days / week</span>
-      </div>
-      <h1 className="display" style={{ fontSize: "clamp(42px, 6vw, 76px)", marginTop: 12 }}>move <span className="serif">that</span> body</h1>
-
-      <div className="card" style={{ marginTop: 24, padding: 20 }}>
-        <div className="eyebrow">4-week block · you&apos;re in week {week}</div>
-        <div className="grid g4" style={{ marginTop: 14 }}>
-          {w.progression.map((x) => (
-            <div key={x.week} className="card" style={{ padding: 14, boxShadow: x.week === week ? "var(--shadow)" : "none", background: x.week === week ? "var(--lime)" : x.week < week ? "var(--paper-2)" : "#fffdf7", opacity: x.week < week ? 0.6 : 1 }}>
-              <div className="display" style={{ fontSize: 22 }}>wk {x.week} {x.week < week ? "✓" : ""}</div>
-              <div className="mono" style={{ fontSize: 13 }}>{x.sets} sets × {x.reps}</div>
-              <div style={{ fontSize: 13, marginTop: 6 }}>{x.note}</div>
-            </div>
-          ))}
+    <div className="dpage">
+      <div className="ph">
+        <div>
+          <h1 className="display">Workout</h1>
+          <p>{w.place === "gym" ? "Gym" : "Home"} programme · {w.daysPerWeek} days a week · week {week} of 4</p>
         </div>
       </div>
 
-      <div className="grid g2" style={{ marginTop: 22 }}>
-        {w.sessions.map((s, k) => (
-          <div key={s.day} className="card reveal" style={{ padding: 20, background: s.day === today ? COLORS[k % 5] : "#fffdf7", transitionDelay: `${k * 60}ms` }}>
-            <div className="row between">
-              <span className="display" style={{ fontSize: 26 }}>{s.day} · {s.focus}</span>
-              {s.day === today && <span className="pill" style={{ background: "#fffdf7" }}>today</span>}
-            </div>
-            <table className="table" style={{ marginTop: 10 }}>
-              <tbody>
-                {s.exercises.map((x) => (
-                  <tr key={x.name}>
-                    <td><b>{x.name}</b></td>
-                    <td className="mono">{x.timed ? `${p.sets} × ${30 + week * 5}s` : `${p.sets} × ${p.reps}`}</td>
-                    <td className="mono muted">rest {x.rest}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="scroller" style={{ marginTop: 16 }}>
+        {w.progression.map((x) => (
+          <div key={x.week} className="card" style={{ padding: "12px 14px", width: 150, boxShadow: "none", borderColor: x.week === week ? "var(--brand)" : undefined, background: x.week === week ? "var(--brand-50)" : "#fff", opacity: x.week < week ? 0.6 : 1 }}>
+            <div className="row between" style={{ fontSize: 13, fontWeight: 600 }}>Week {x.week}{x.week < week && <Icon name="check" size={14} stroke={2.5} />}{x.week === week && <span className="pill lime" style={{ fontSize: 11, padding: "0 7px" }}>Now</span>}</div>
+            <div className="mono" style={{ fontSize: 13, marginTop: 4 }}>{x.sets} sets × {x.reps}</div>
+            <div className="muted clamp2" style={{ fontSize: 12, marginTop: 4 }}>{x.note}</div>
           </div>
         ))}
       </div>
 
-      <div className="grid g2" style={{ marginTop: 22 }}>
-        <div className="card" style={{ padding: 18 }}><div className="eyebrow">🔥 warm-up</div><p style={{ marginTop: 6 }}>{w.warmup}</p></div>
-        <div className="card" style={{ padding: 18 }}><div className="eyebrow">🧊 cool-down</div><p style={{ marginTop: 6 }}>{w.cooldown}</p></div>
+      <div className="sec-title"><h2>Sessions</h2><span>{w.sessions.length} this week</span></div>
+      <div className="grid g2" style={{ gap: 12 }}>
+        {w.sessions.map((s) => (
+          <div key={s.day} className="card" style={{ overflow: "hidden", borderColor: s.day === today ? "var(--brand)" : undefined }}>
+            <div className="row between" style={{ padding: "12px 16px", background: s.day === today ? "var(--brand-50)" : "var(--paper)", borderBottom: "var(--line)" }}>
+              <b style={{ textTransform: "capitalize" }}>{s.day} · {s.focus}</b>
+              {s.day === today && <span className="pill lime">Today</span>}
+            </div>
+            <div className="list">
+              {s.exercises.map((x) => (
+                <div key={x.name} className="row-item">
+                  <span style={{ fontWeight: 500, minWidth: 0 }}>{x.name}</span>
+                  <span className="mono" style={{ textAlign: "right", whiteSpace: "nowrap", fontSize: 13 }}>
+                    {x.timed ? `${p.sets} × ${30 + week * 5}s` : `${p.sets} × ${p.reps}`}
+                    <span className="muted" style={{ display: "block", fontSize: 11.5 }}>rest {x.rest}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
-      <p className="mono muted" style={{ fontSize: 12, marginTop: 16 }}>Something hurts (not muscle burn, actual pain)? Stop, and message your coach.</p>
+
+      <div className="card list" style={{ marginTop: 16 }}>
+        <div style={{ padding: "12px 16px" }}><div style={{ fontWeight: 600, fontSize: 14 }}>Warm-up</div><p className="muted" style={{ fontSize: 14, marginTop: 2 }}>{w.warmup}</p></div>
+        <div style={{ padding: "12px 16px" }}><div style={{ fontWeight: 600, fontSize: 14 }}>Cool-down</div><p className="muted" style={{ fontSize: 14, marginTop: 2 }}>{w.cooldown}</p></div>
+      </div>
+      <p className="muted" style={{ fontSize: 12, marginTop: 14 }}>Feel sharp pain (not muscle burn)? Stop and message your coach.</p>
     </div>
   );
 }

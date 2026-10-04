@@ -9,15 +9,15 @@ const DISLIKES = ["karela", "lauki", "baingan", "mushroom", "oats", "curd", "egg
 
 const Opt = ({ on, onClick, emoji, title, sub, color = "var(--lime)" }) => (
   <button type="button" onClick={(e) => { onClick(); if (!on) burst(e.clientX, e.clientY, [emoji]); }} className="card" data-cursor="pick"
-    style={{ textAlign: "left", padding: 18, cursor: "pointer", background: on ? color : "#fffdf7", transform: on ? "rotate(-1.5deg) translate(-2px,-2px)" : "", boxShadow: on ? "var(--shadow-lg)" : "var(--shadow)", transition: "all .2s cubic-bezier(.3,1.6,.6,1)" }}>
-    <div style={{ fontSize: 34 }}>{emoji}</div>
-    <div className="display" style={{ fontSize: 22, marginTop: 8 }}>{title}</div>
-    {sub && <div className="muted" style={{ fontSize: 14, marginTop: 4, color: on ? "var(--ink)" : undefined }}>{sub}</div>}
+    style={{ textAlign: "left", padding: 18, cursor: "pointer", background: on ? "var(--brand-50)" : "#fff", borderColor: on ? "var(--brand)" : undefined, boxShadow: on ? "0 0 0 1px var(--brand)" : "var(--shadow)", transition: "all .15s" }}>
+    <div style={{ fontSize: 22, lineHeight: 1 }}>{emoji}</div>
+    <div style={{ fontSize: 16, fontWeight: 600, marginTop: 10, textTransform: "capitalize" }}>{title}</div>
+    {sub && <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>{sub}</div>}
   </button>
 );
 
 const Tag = ({ on, onClick, children, color = "var(--lime)" }) => (
-  <button type="button" onClick={onClick} className="pill" style={{ fontSize: 14, padding: "8px 14px", cursor: "pointer", background: on ? color : "#fffdf7", transform: on ? "rotate(-3deg)" : "", transition: "transform .2s" }}>
+  <button type="button" onClick={onClick} className="pill" style={{ fontSize: 14, padding: "8px 14px", cursor: "pointer", background: on ? "var(--brand-50)" : "#fff", borderColor: on ? "var(--brand)" : undefined, color: on ? "var(--brand-700)" : undefined, transition: "all .15s" }}>
     {on ? "✓ " : "+ "}{children}
   </button>
 );
@@ -39,7 +39,7 @@ export default function Start() {
 
   const steps = [
     {
-      q: <>what&apos;s the <span className="serif">main</span> goal?</>,
+      q: <>what&apos;s the main goal?</>,
       ok: !!d.goal,
       body: (
         <div className="grid g2">
@@ -51,7 +51,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>a bit <span className="serif">about</span> you</>,
+      q: <>a bit about you</>,
       ok: d.sex && +d.age > 13,
       body: (
         <div className="stack">
@@ -64,7 +64,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>the <span className="serif">numbers</span></>,
+      q: <>the numbers</>,
       ok: +d.heightCm > 100 && +d.weightKg > 25,
       body: (
         <div className="stack">
@@ -74,7 +74,7 @@ export default function Start() {
             ))}
           </div>
           {bmi && (
-            <div className="card" style={{ padding: 16, marginTop: 18, background: "var(--butter)" }}>
+            <div className="card" style={{ padding: 16, marginTop: 18, background: "var(--paper)" }}>
               <span className="mono">BMI {bmi}</span> · {bmi < 18.5 ? "we'll focus on healthy gains 🌱" : bmi < 25 ? "solid base, let's sharpen it ✨" : bmi < 30 ? "very doable, we've got you 🔥" : "one step at a time, no crash diets 💚"}
               {d.targetWeightKg && d.weightKg && d.weightKg - d.targetWeightKg > 0 && (
                 <div className="mono muted" style={{ fontSize: 12, marginTop: 6 }}>~{Math.ceil((d.weightKg - d.targetWeightKg) / 0.6)} weeks at a sustainable pace</div>
@@ -85,7 +85,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>how <span className="serif">active</span> is a normal day?</>,
+      q: <>how active is a normal day?</>,
       ok: !!d.activity,
       body: (
         <div className="grid g2">
@@ -97,7 +97,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>what do you <span className="serif">eat?</span></>,
+      q: <>what do you eat?</>,
       ok: !!d.diet,
       body: (
         <div className="grid g3">
@@ -108,7 +108,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>any <span className="serif">health</span> stuff?</>,
+      q: <>any health conditions?</>,
       ok: d.conditions.length > 0,
       sub: "Pick all that apply. Your coach builds around these.",
       body: (
@@ -120,7 +120,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>foods you <span className="serif">love</span> 😍</>,
+      q: <>foods you love</>,
       ok: true,
       sub: "We'll put more of these in your plan.",
       body: (
@@ -136,7 +136,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>foods you <span className="serif">hate</span> 🤢</>,
+      q: <>foods you hate</>,
       ok: true,
       sub: "These never show up. Pinky promise.",
       body: (
@@ -152,7 +152,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>training <span className="serif">vibes</span></>,
+      q: <>training preferences</>,
       ok: !!d.workoutPlace,
       body: (
         <div className="stack">
@@ -180,7 +180,7 @@ export default function Start() {
       ),
     },
     {
-      q: <>anything <span className="serif">else</span> your coach should know?</>,
+      q: <>anything else your coach should know?</>,
       ok: true,
       sub: "Night shifts, a wedding in 3 months, knee pain, fasting days: tell us anything.",
       body: (
@@ -215,28 +215,26 @@ export default function Start() {
     return () => window.removeEventListener("keydown", k);
   });
 
-  const colors = ["var(--butter)", "var(--paper)", "var(--sky)", "var(--paper)", "var(--lime)", "var(--paper)", "var(--pink)", "var(--paper)", "var(--lilac)", "var(--paper)"];
-
   return (
-    <div style={{ minHeight: "100vh", background: colors[i], transition: "background .5s" }}>
+    <div style={{ minHeight: "100vh", background: "var(--paper)" }}>
       <div className="wrap" style={{ maxWidth: 860, padding: "26px 0 120px" }}>
         <div className="row between">
           <Logo />
-          <span className="mono">{String(i + 1).padStart(2, "0")} / {steps.length}</span>
+          <span className="muted" style={{ fontSize: 14 }}>Step {i + 1} of {steps.length}</span>
         </div>
         <div className="progress" style={{ marginTop: 18 }}><i style={{ width: `${((i + 1) / steps.length) * 100}%` }} /></div>
-        <div key={i} className="word-in" style={{ marginTop: 50 }}>
-          <h1 className="display" style={{ fontSize: "clamp(40px, 7vw, 82px)" }}>{step.q}</h1>
-          {step.sub && <p style={{ fontSize: 18, marginTop: 10 }}>{step.sub}</p>}
+        <div key={i} className="word-in" style={{ marginTop: 40 }}>
+          <h1 className="display" style={{ fontSize: 28 }}>{step.q}</h1>
+          {step.sub && <p className="muted" style={{ fontSize: 16, marginTop: 8 }}>{step.sub}</p>}
           <div style={{ marginTop: 34 }}>{step.body}</div>
         </div>
         {err && <div className="err" style={{ marginTop: 20 }}>{err}</div>}
       </div>
-      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, borderTop: "var(--line)", background: "#fffdf7", padding: "14px 0", zIndex: 40 }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, borderTop: "var(--line)", background: "rgba(255,255,255,.92)", backdropFilter: "blur(8px)", padding: "12px 0", zIndex: 40 }}>
         <div className="wrap row between" style={{ maxWidth: 860 }}>
-          <button className="btn ghost sm" disabled={i === 0} onClick={() => setI(i - 1)}>← back</button>
+          <button className="btn ghost sm" disabled={i === 0} onClick={() => setI(i - 1)}>Back</button>
           <button className="btn lime" disabled={!step.ok || busy} onClick={next} data-cursor={last ? "send" : "next"}>
-            {busy ? "sending to your coach…" : last ? "send to my coach 🚀" : "next →"}
+            {busy ? "Submitting…" : last ? "Submit to my coach" : "Continue"}
           </button>
         </div>
       </div>

@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
+import Icon from "@/components/Icon";
 
-const STAGE = { fat_loss: ["fat loss", "var(--orange)"], recomp: ["tone up", "var(--pink)"], maintain: ["maintain", "var(--sky)"], build: ["build muscle", "var(--lilac)"], muscle_gain: ["build muscle", "var(--lilac)"] };
+const STAGE = { fat_loss: "Fat loss", recomp: "Tone up", maintain: "Maintain", build: "Build muscle", muscle_gain: "Build muscle" };
 
 export default function PlanView({ plan, today, coach, stage }) {
   const [d, setD] = useState(today);
@@ -9,75 +10,73 @@ export default function PlanView({ plan, today, coach, stage }) {
   const t = plan.targets;
   const day = plan.diet[d];
   const tot = day.meals.reduce((a, m) => ({ kcal: a.kcal + m.kcal, protein: a.protein + m.protein }), { kcal: 0, protein: 0 });
-  const [label, color] = STAGE[stage] || STAGE.fat_loss;
 
   return (
-    <div style={{ maxWidth: 1100 }}>
-      <div className="row wrapflex" style={{ gap: 8 }}>
-        <span className="pill" style={{ background: color }}>phase: {label}</span>
-        <span className="pill gray">plan v{plan.version}</span>
-        <span className="pill gray">since {new Date(plan.activatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
-      </div>
-      <h1 className="display" style={{ fontSize: "clamp(42px, 6vw, 76px)", marginTop: 12 }}>your <span className="serif">plan</span></h1>
-
-      <div className="card reveal" style={{ marginTop: 22, padding: 24, background: "#fffdf7", position: "relative", rotate: "-0.4deg" }}>
-        <span className="sticker" style={{ top: -16, left: 20, background: "var(--lime)", cursor: "default", fontSize: 13, padding: "6px 12px" }}>📝 note from {coach}</span>
-        <p className="serif" style={{ fontSize: 23, lineHeight: 1.35, whiteSpace: "pre-line", marginTop: 10 }}>{plan.coachNote}</p>
+    <div className="dpage">
+      <div className="ph">
+        <div>
+          <h1 className="display">Your plan</h1>
+          <p>{STAGE[stage] || STAGE.fat_loss} phase · v{plan.version} · since {new Date(plan.activatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</p>
+        </div>
       </div>
 
-      <div className="grid g4" style={{ marginTop: 22 }}>
-        {[["calories", t.calories, "kcal", "var(--orange)"], ["protein", t.protein, "g", "var(--pink)"], ["carbs", t.carbs, "g", "var(--sky)"], ["fat", t.fat, "g", "var(--butter)"]].map(([k, v, u, c]) => (
-          <div key={k} className="card stat" style={{ background: c }}>
-            <div className="v">{v}<span className="mono" style={{ fontSize: 14 }}>{u}</span></div>
-            <div className="k" style={{ color: "var(--ink)" }}>{k} / day</div>
+      {plan.coachNote && (
+        <div className="card note" style={{ alignItems: "flex-start" }}>
+          <span className="note__av">{coach.charAt(0)}</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 12, color: "var(--muted)" }}>Note from {coach}</div>
+            <p style={{ fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-line", marginTop: 2 }}>{plan.coachNote}</p>
           </div>
+        </div>
+      )}
+
+      <div className="card kv" style={{ marginTop: 16 }}>
+        {[["Calories", t.calories, "kcal"], ["Protein", t.protein, "g"], ["Carbs", t.carbs, "g"], ["Fat", t.fat, "g"]].map(([k, v, u]) => (
+          <div key={k}><b>{v.toLocaleString("en-IN")}<small style={{ fontSize: 12, fontWeight: 500, color: "var(--muted)" }}> {u}</small></b><span>{k} per day</span></div>
         ))}
       </div>
-      <div className="mono" style={{ marginTop: 12, fontSize: 13 }}>💧 {t.water / 1000}L water · 👟 {t.steps.toLocaleString("en-IN")} steps daily</div>
+      <div className="muted" style={{ marginTop: 10, fontSize: 13 }}>Daily: {t.water / 1000} L water · {t.steps.toLocaleString("en-IN")} steps</div>
 
-      <div className="row wrapflex" style={{ marginTop: 34, gap: 8 }}>
+      <div className="sec-title"><h2>Meals by day</h2><span>{tot.kcal} kcal · {tot.protein} g protein</span></div>
+      <div className="scroller" role="tablist">
         {plan.diet.map((x, k) => (
-          <button key={x.day} onClick={() => setD(k)} className={`btn sm ${k === d ? "" : "ghost"}`} style={{ border: "var(--line)" }}>
-            {x.day}{k === today ? " •" : ""}
+          <button key={x.day} role="tab" aria-selected={k === d} onClick={() => setD(k)} className={`daypill ${k === d ? "on" : ""}`}>
+            {x.day}{k === today && <span className="dot" aria-label="today" />}
           </button>
         ))}
       </div>
-      <div className="mono muted" style={{ marginTop: 10, fontSize: 12 }}>{day.day}: {tot.kcal} kcal · {tot.protein}g protein</div>
 
-      <div className="stack" style={{ marginTop: 16 }} key={d}>
+      <div className="stack" style={{ marginTop: 12 }} key={d}>
         {day.meals.map((m, i) => (
-          <div key={i} className="card word-in" style={{ padding: 18, animationDelay: `${i * 50}ms` }}>
-            <div className="row between wrapflex">
-              <div>
-                <div className="eyebrow muted">{m.slot} · {m.time}</div>
-                <div className="display" style={{ fontSize: 24 }}>{m.name}</div>
+          <div key={i} className="card word-in" style={{ overflow: "hidden" }}>
+            <div className="row between" style={{ padding: "14px 16px 10px", alignItems: "flex-start" }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12, color: "var(--muted)" }}><span style={{ textTransform: "capitalize" }}>{m.slot}</span> · {m.time}</div>
+                <div style={{ fontSize: 16, fontWeight: 600, marginTop: 2 }}>{m.name}</div>
               </div>
-              <div className="row" style={{ gap: 6 }}>
-                <span className="pill butter">{m.kcal} kcal</span>
-                <span className="pill pink">{m.protein}g P</span>
-              </div>
+              <div className="mono" style={{ textAlign: "right", fontSize: 13, whiteSpace: "nowrap" }}><b>{m.kcal} kcal</b><div className="muted">{m.protein} g protein</div></div>
             </div>
-            <div className="tablewrap" style={{ marginTop: 12 }}>
-              <table className="table">
-                <tbody>
-                  {m.items.map((it, k) => (
-                    <tr key={k}><td>{it.food}</td><td className="mono">{it.qty}</td><td className="mono muted">{it.kcal} kcal · {it.protein}g P</td></tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="list" style={{ borderTop: "var(--line)" }}>
+              {m.items.map((it, k) => (
+                <div key={k} className="row-item">
+                  <span style={{ minWidth: 0 }}>{it.food} <span className="muted">· {it.qty}</span></span>
+                  <span className="mono muted" style={{ fontSize: 12.5, whiteSpace: "nowrap" }}>{it.kcal} kcal</span>
+                </div>
+              ))}
             </div>
             {m.swaps?.length > 0 && (
-              <div style={{ marginTop: 12 }}>
-                <button className="mono" style={{ background: "none", border: 0, cursor: "pointer", textDecoration: "underline", fontSize: 13, padding: 0 }} onClick={() => setOpen(open === i ? null : i)}>
-                  {open === i ? "hide" : "show"} {m.swaps.length} swap options ⇄
+              <div style={{ borderTop: "var(--line)", background: "var(--paper)" }}>
+                <button onClick={() => setOpen(open === i ? null : i)} className="row-item" style={{ width: "100%", background: "none", border: 0, cursor: "pointer", fontWeight: 500, color: "var(--brand-700)" }} aria-expanded={open === i}>
+                  <span className="row" style={{ gap: 6 }}><Icon name="refresh" size={15} /> {m.swaps.length} swap option{m.swaps.length > 1 ? "s" : ""}</span>
+                  <Icon name="chevron" size={16} style={{ transform: open === i ? "rotate(90deg)" : "none", transition: "transform .2s" }} />
                 </button>
                 {open === i && (
-                  <div className="grid g2" style={{ marginTop: 10 }}>
+                  <div className="grid g2" style={{ padding: "0 12px 12px", gap: 8 }}>
                     {m.swaps.map((s) => (
-                      <div key={s.name} className="card" style={{ padding: 14, background: "var(--paper-2)", boxShadow: "none" }}>
-                        <b>{s.name}</b>
-                        <div style={{ fontSize: 13 }}>{s.items.map((it) => `${it.qty} ${it.food.toLowerCase()}`).join(" · ")}</div>
-                        <div className="mono muted" style={{ fontSize: 12, marginTop: 4 }}>{s.kcal} kcal · {s.protein}g P</div>
+                      <div key={s.name} className="card" style={{ padding: 12, boxShadow: "none" }}>
+                        <b style={{ fontSize: 14 }}>{s.name}</b>
+                        <div className="muted" style={{ fontSize: 13, marginTop: 2 }}>{s.items.map((it) => `${it.qty} ${it.food.toLowerCase()}`).join(" · ")}</div>
+                        <div className="mono muted" style={{ fontSize: 12, marginTop: 4 }}>{s.kcal} kcal · {s.protein} g protein</div>
                       </div>
                     ))}
                   </div>

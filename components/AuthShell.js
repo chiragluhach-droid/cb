@@ -1,30 +1,43 @@
-"use client";
 import Logo from "./Logo";
-import { Sticker } from "./fx";
+import Icon from "./Icon";
 
-export default function AuthShell({ children, title, sub, img, color = "var(--lime)" }) {
+const POINTS = [
+  "Meal plans built around Indian home food",
+  "Every plan reviewed by your coach",
+  "Adjusts automatically as you progress",
+];
+
+export default function AuthShell({ children, title, sub }) {
   return (
-    <div style={{ minHeight: "100vh", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)" }} className="auth">
+    <div className="auth" style={{ minHeight: "100vh", display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", background: "var(--surface)" }}>
       <style>{`@media (min-width: 861px) { .auth-logo-mobile { display: none; } } @media (max-width: 860px) { .auth { grid-template-columns: 1fr !important; } .auth-art { display: none !important; } }`}</style>
-      <div className="auth-art" style={{ background: color, borderRight: "var(--line)", position: "relative", overflow: "hidden", padding: 36, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-        <Logo />
-        <div style={{ position: "relative", margin: "30px auto", width: "min(420px, 90%)" }}>
-          <div className="card" style={{ overflow: "hidden", aspectRatio: "4/5", rotate: "-3deg", boxShadow: "var(--shadow-lg)" }}>
-            <img src={`https://images.unsplash.com/photo-${img}?w=800&q=75&auto=format&fit=crop`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </div>
-          <Sticker style={{ top: -16, right: -20, background: "var(--pink)" }} rotate={10}>real coach 🧑‍🍳</Sticker>
-          <Sticker style={{ bottom: 40, left: -30, background: "#fffdf7" }} rotate={-8}>desi food only 🍛</Sticker>
-          <Sticker style={{ bottom: -18, right: 30, background: "var(--sky)" }} rotate={4}>no crash diets</Sticker>
+      <div style={{ display: "grid", placeItems: "center", padding: "48px 20px" }}>
+        <div style={{ width: "min(400px, 100%)" }}>
+          <div className="auth-logo-mobile" style={{ marginBottom: 32 }}><Logo /></div>
+          <h1 className="display" style={{ fontSize: 28 }}>{title}</h1>
+          {sub && <p className="muted" style={{ marginTop: 8, fontSize: 15 }}>{sub}</p>}
+          <div style={{ marginTop: 28 }}>{children}</div>
         </div>
-        <p className="serif" style={{ fontSize: 30, lineHeight: 1.1 }}>&ldquo;Finally, a plan that knows what besan chilla is.&rdquo;</p>
       </div>
-      <div style={{ display: "grid", placeItems: "center", padding: "40px 16px" }}>
-        <div style={{ width: "min(460px, 100%)" }}>
-          <div className="auth-logo-mobile" style={{ marginBottom: 30 }}><Logo /></div>
-          <h1 className="display" style={{ fontSize: "clamp(44px, 6vw, 72px)" }}>{title}</h1>
-          {sub && <p className="muted" style={{ marginTop: 10, fontSize: 17 }}>{sub}</p>}
-          <div style={{ marginTop: 30 }}>{children}</div>
+      <div className="auth-art" style={{ background: "linear-gradient(160deg, #14532d 0%, #166534 55%, #15803d 100%)", color: "#fff", padding: 48, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <Logo light />
+        <div style={{ maxWidth: 440 }}>
+          <p style={{ fontSize: 22, lineHeight: 1.45, fontWeight: 500, letterSpacing: "-0.01em" }}>
+            &ldquo;Finally a plan that works with the food I actually eat. My coach adjusted it twice when I plateaued, and I never felt like I was dieting.&rdquo;
+          </p>
+          <div className="row" style={{ marginTop: 20 }}>
+            <span style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,.15)", display: "grid", placeItems: "center", fontWeight: 600 }}>S</span>
+            <div style={{ fontSize: 14 }}>
+              <div style={{ fontWeight: 600 }}>Simran K.</div>
+              <div style={{ opacity: 0.7 }}>Client, 10 weeks</div>
+            </div>
+          </div>
         </div>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10, fontSize: 14, opacity: 0.9 }}>
+          {POINTS.map((p) => (
+            <li key={p} className="row" style={{ gap: 10 }}><Icon name="check" size={16} /> {p}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );

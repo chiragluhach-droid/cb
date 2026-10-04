@@ -1,0 +1,74 @@
+/* ---------- client dashboard (mobile first) ---------- */
+.today, .dpage { max-width: 1100px; }
+
+/* coach note */
+.note { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-top: 16px; background: var(--brand-50); border-color: #bbf7d0; box-shadow: none; }
+.note__av { width: 34px; height: 34px; flex: none; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+
+/* progress rings: always 3 across */
+.rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 16px 10px; margin-top: 16px; }
+.ring { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+.ring svg { width: 64px; height: 64px; }
+.ring__k { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.ring__v { font-size: 14px; font-weight: 700; }
+.ring__v span { font-size: 11px; font-weight: 500; color: var(--muted); }
+@media (min-width: 861px) {
+  .rings { padding: 22px; }
+  .ring { flex-direction: row; text-align: left; gap: 14px; display: grid; grid-template-columns: 76px 1fr; grid-template-rows: auto auto; align-items: end; }
+  .ring svg { width: 76px; height: 76px; grid-row: span 2; align-self: center; }
+  .ring__k { margin: 0; font-size: 13px; }
+  .ring__v { align-self: start; font-size: 20px; }
+  .ring__v span { font-size: 13px; }
+}
+
+/* meals */
+.today__grid { display: grid; grid-template-columns: 1fr; gap: 0 24px; }
+@media (min-width: 1000px) { .today__grid { grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); align-items: start; } }
+.meal { display: flex; gap: 4px; padding: 14px 14px 14px 6px; transition: background .2s; }
+.meal.done { background: var(--paper); }
+.meal__tick { flex: none; width: 44px; height: 44px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; margin-top: -8px; }
+.meal__tick .tick { width: 26px; height: 26px; border-radius: 8px; }
+.meal__tick .tick svg { width: 14px; height: 14px; }
+.meal__slot { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.meal__name { font-size: 15.5px; font-weight: 600; margin-top: 2px; line-height: 1.35; }
+.meal.done .meal__name { color: var(--muted); text-decoration: line-through; }
+.meal__items { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+.meal__foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--ink-2); }
+.meal__swap { display: inline-flex; align-items: center; gap: 5px; border: var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); cursor: pointer; min-height: 32px; }
+.meal__swap:active { background: var(--paper-2); }
+
+/* tracking cards: water + workout full width, steps / weight side by side */
+.track { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.track__water, .track__work { grid-column: 1 / -1; padding: 16px; }
+.track__num { padding: 14px; display: grid; gap: 10px; align-content: start; }
+.track__num .btn { width: 100%; }
+.track__ic { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; flex: none; }
+.glasses { display: grid; grid-template-columns: repeat(auto-fill, minmax(18px, 1fr)); gap: 5px; margin-top: 14px; }
+.glasses i { height: 22px; border-radius: 3px 3px 6px 6px; border: 1px solid var(--border-2); background: var(--surface); transition: background .2s, border-color .2s; }
+.glasses i.on { background: #93c5fd; border-color: #60a5fa; }
+
+/* generic dashboard bits */
+.kv { display: grid; grid-template-columns: repeat(4, 1fr); }
+.kv > div { padding: 14px 16px; }
+.kv > div + div { border-left: var(--line); }
+.kv b { display: block; font-size: 20px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kv span { font-size: 12px; color: var(--muted); }
+@media (max-width: 600px) {
+  .kv { grid-template-columns: 1fr 1fr; }
+  .kv > div:nth-child(3) { border-left: 0; }
+  .kv > div:nth-child(n+3) { border-top: var(--line); }
+}
+.row-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 16px; font-size: 14px; }
+.inbox-item { display: flex; gap: 12px; padding: 14px 16px; position: relative; }
+.inbox-item.unread { background: var(--brand-50); }
+.inbox-item .unread-dot { position: absolute; top: 20px; right: 16px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+
+/* waiting: review progress steps */
+.wsteps { list-style: none; padding: 14px 0 0; margin: 14px 0 0; border-top: var(--line); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 12px; color: var(--muted); text-align: center; }
+.wsteps li { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
+.wsteps li span { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--paper-2); color: var(--muted); position: relative; z-index: 1; }
+.wsteps li + li::before { content: ""; position: absolute; top: 12px; right: 50%; width: 100%; height: 2px; background: var(--border); }
+.wsteps li.done span { background: var(--brand); color: #fff; }
+.wsteps li.done + li::before, .wsteps li.done + li.done::before { background: var(--brand); }
+.wsteps li.now span { background: var(--butter); color: #854d0e; box-shadow: 0 0 0 3px #fef3c7; }
+.wsteps li.done, .wsteps li.now { color: var(--ink-2); font-weight: 500; }
