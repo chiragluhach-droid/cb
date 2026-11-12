@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { BowlMark, RingMark, SproutMark } from "@/components/brand/Marks";
 import { BowlLockup, RingWordmark, SproutLockup } from "@/components/brand/Lockups";
 import { LogoMark } from "@/components/Logo";
+import { Monogram, Seal, SealBadge } from "@/components/brand/Seal";
 
 export const metadata: Metadata = {
   title: "Logo concepts",
@@ -93,11 +94,58 @@ export default function BrandPage() {
           <div className="flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 ring-1 ring-ink/10">
             <LogoMark className="h-10 w-10" />
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink/40">Current</p>
-              <p className="text-sm font-semibold text-ink">Live-site icon, for comparison</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink/40">Chosen · 03 Ring</p>
+              <p className="text-sm font-semibold text-ink">App icon & favicon</p>
             </div>
           </div>
         </div>
+
+        {/* Brand seal */}
+        <section className="mt-14 border-t border-ink/10 pt-10 lg:mt-20 lg:pt-14">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-4">
+              <p className="text-sm font-semibold text-brand">Brand seal</p>
+              <h2 className="mt-2 font-sans text-4xl font-semibold tracking-[-0.045em] text-ink sm:text-5xl">EW seal</h2>
+              <p className="mt-4 max-w-sm text-pretty text-base leading-relaxed text-stone">
+                The original Evowell emblem, used alongside the Ring wordmark: social profile picture, footer, sign-in screen and the coach&apos;s avatar.
+              </p>
+              <ul className="mt-6 space-y-2">
+                {["Seal for badges, social and print", "EW monogram for small spaces", "Paints in any brand colour"].map((w) => (
+                  <li key={w} className="flex items-start gap-2.5 text-sm font-medium text-ink">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:col-span-8">
+              <Panel className="col-span-2 row-span-2 aspect-square bg-forest">
+                <Seal className="h-[72%] w-[72%]" color="#FAFAF8" />
+              </Panel>
+              <Panel className="aspect-square bg-white ring-1 ring-ink/10">
+                <Seal className="h-[78%] w-[78%]" color={G} />
+              </Panel>
+              <Panel className="aspect-square bg-mint">
+                <SealBadge className="h-[80%] w-[80%]" disc={F} />
+              </Panel>
+              <Panel className="aspect-square">
+                <span className="flex h-[72%] w-[72%] items-center justify-center rounded-[22%]" style={{ background: G }}>
+                  <Monogram className="h-[62%] w-[62%]" color="#FAFAF8" />
+                </span>
+              </Panel>
+              <Panel className="aspect-square justify-around gap-2 bg-white px-3 ring-1 ring-ink/10">
+                {[40, 28, 20].map((px) => (
+                  <span key={px} className="flex flex-col items-center gap-1.5">
+                    <span className="flex items-center justify-center rounded-full bg-forest" style={{ width: px, height: px }}>
+                      <Monogram className="h-[62%] w-[62%]" color="#FAFAF8" />
+                    </span>
+                    <span className="text-[10px] tabular-nums text-ink/40">{px}px</span>
+                  </span>
+                ))}
+              </Panel>
+            </div>
+          </div>
+        </section>
 
         <div className="mt-14 space-y-20 lg:mt-20 lg:space-y-28">
           {concepts.map((c) => (

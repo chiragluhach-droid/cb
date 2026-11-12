@@ -6,7 +6,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { nav } from "@/lib/site";
 import { CHECKOUT_MODE } from "@/lib/plans";
-import { LogoMark, Wordmark } from "@/components/Logo";
+import { useSession } from "@/lib/demo-store";
+import { Wordmark } from "@/components/Logo";
+import { SealBadge } from "@/components/brand/Seal";
 
 // The header stays visible until the hero is mostly scrolled past (80% of
 // its height). Pages without the #top hero use 60% of the viewport instead.
@@ -21,6 +23,9 @@ export default function Navbar() {
   const lastY = useRef(0);
   const [open, setOpen] = useState(false);
   const onHome = usePathname() === "/";
+  // Signed-in visitors get a Dashboard link instead of Log in.
+  const { hydrated, user } = useSession();
+  const account = hydrated && user ? { href: "/dashboard", label: "Dashboard" } : { href: "/login", label: "Log in" };
 
   // Once you scroll, the bar shrinks into a floating frosted "island".
   const island = scrolled;
@@ -72,9 +77,29 @@ export default function Navbar() {
               island ? "py-2 pl-4 pr-2 sm:pl-5" : "px-3 py-5 sm:px-6 lg:px-12"
             }`}
           >
-            <a href={onHome ? "#top" : "/"} className="flex items-center gap-2.5 text-ink" aria-label="Evowell home">
-              <LogoMark className="h-8 w-8 sm:h-9 sm:w-9" />
-              <Wordmark className="text-2xl sm:text-[1.65rem]" />
+            {/* Seal + wordmark at the top (all screens); once scrolled into the island,
+                the wordmark tucks away and the seal spins in as the logo. */}
+            <a href={onHome ? "#top" : "/"} className="group flex items-center text-ink" aria-label="Evowell home">
+              <motion.span
+                className="relative inline-flex"
+                initial={false}
+                animate={{ rotate: island ? 360 : 0 }}
+                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <SealBadge
+                  className={`shadow-[0_8px_20px_-10px_rgba(14,26,19,0.7)] transition-all duration-500 ease-expo group-hover:rotate-[20deg] ${island ? "h-11 w-11 sm:h-10 sm:w-10" : "h-12 w-12 max-[380px]:h-11 max-[380px]:w-11 sm:h-[2.875rem] sm:w-[2.875rem]"}`}
+                  disc="#0E1A13"
+                  color="#FAFAF8"
+                />
+              </motion.span>
+              <motion.span
+                className="block overflow-hidden"
+                initial={false}
+                animate={{ width: island ? 0 : "auto", opacity: island ? 0 : 1, marginLeft: island ? 0 : 12 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Wordmark className="whitespace-nowrap text-[1.8rem] max-[380px]:text-[1.6rem] sm:text-[1.6rem]" />
+              </motion.span>
             </a>
 
             <ul className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-9 lg:flex xl:gap-12">
@@ -88,15 +113,21 @@ export default function Navbar() {
               ))}
             </ul>
 
-            <a
-              href={resolve("#pricing")}
-              className={`group hidden items-center gap-2 rounded-full bg-ink text-[15px] font-semibold text-canvas transition-all duration-500 ease-expo hover:bg-brand md:inline-flex ${
-                island ? "px-6 py-3" : "px-7 py-3.5"
-              }`}
-            >
-              Get your plan
-              <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </a>
+            <div className="hidden items-center gap-5 md:flex">
+              <a href={account.href} className="group relative text-[15px] font-semibold text-ink">
+                {account.label}
+                <span className="absolute -bottom-1 left-0 h-px w-0 bg-brand transition-all duration-300 ease-expo group-hover:w-full" />
+              </a>
+              <a
+                href={resolve("#pricing")}
+                className={`group inline-flex items-center gap-2 rounded-full bg-ink text-[15px] font-semibold text-canvas transition-all duration-500 ease-expo hover:bg-brand ${
+                  island ? "px-6 py-3" : "px-7 py-3.5"
+                }`}
+              >
+                Get your plan
+                <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            </div>
 
             <button
               onClick={() => setOpen(true)}
@@ -124,10 +155,7 @@ export default function Navbar() {
             data-lenis-prevent
           >
             <div className="container-x flex items-center justify-between py-5">
-              <span className="flex items-center gap-2 text-ink">
-                <LogoMark className="h-7 w-7" />
-                <Wordmark className="text-xl" />
-              </span>
+              <SealBadge className="h-12 w-12" disc="#0E1A13" color="#FAFAF8" />
               <button
                 onClick={() => setOpen(false)}
                 className="flex h-11 w-11 items-center justify-center rounded-full bg-ink/[0.06] text-ink transition-colors hover:bg-ink/10"
@@ -177,6 +205,13 @@ export default function Navbar() {
                 >
                   Get your plan
                   <ArrowUpRight size={16} />
+                </a>
+                <a
+                  href={account.href}
+                  onClick={() => setOpen(false)}
+                  className="mt-3 flex w-full items-center justify-center rounded-full py-4 text-sm font-semibold text-ink ring-1 ring-ink/15 active:bg-ink/5"
+                >
+                  {account.label}
                 </a>
               </div>
             </motion.div>

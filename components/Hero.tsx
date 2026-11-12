@@ -164,15 +164,46 @@ function Katori({
 const mobileBowls = [
   { img: photos.idliLeaf, cls: "right-0 top-[2%] w-[68%]", float: 3.2, spin: 26, delay: 0.45 },
   { img: photos.palakPaneer, cls: "left-[2%] top-[44%] w-[50%]", float: 3.8, spin: -32, delay: 0.55 },
-  { img: photos.paneerTikka, cls: "right-[4%] top-[70%] w-[34%]", float: 2.9, spin: 22, delay: 0.65 },
+  { img: photos.paneerTikka, cls: "right-[9%] top-[60%] w-[34%]", float: 2.9, spin: 22, delay: 0.65 },
 ];
+
+/** Types "Coach-approved" letter by letter, holds, erases, and loops. */
+const BADGE = "Coach-approved";
+function TypedBadgeText({ reduce }: { reduce: boolean }) {
+  const [n, setN] = useState(reduce ? BADGE.length : 0);
+  const [erasing, setErasing] = useState(false);
+
+  useEffect(() => {
+    if (reduce) return;
+    let delay: number;
+    if (!erasing && n < BADGE.length) delay = n === 0 ? 450 : 85; // typing
+    else if (!erasing) delay = 2200; // hold the full word
+    else if (n > 0) delay = 35; // erasing
+    else delay = 0;
+    const t = setTimeout(() => {
+      if (!erasing && n < BADGE.length) setN(n + 1);
+      else if (!erasing) setErasing(true);
+      else if (n > 0) setN(n - 1);
+      else setErasing(false);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [n, erasing, reduce]);
+
+  return (
+    <span className="inline-flex items-center">
+      {BADGE.slice(0, n)}
+      {!reduce && <span className="ml-px inline-block h-[1.1em] w-[1.5px] animate-pulse bg-white/90" />}
+    </span>
+  );
+}
 
 function MobileBowls({ reduce }: { reduce: boolean }) {
   return (
     <div aria-hidden className="pointer-events-none absolute -right-[2%] top-0 h-[42vw] w-[34vw] sm:hidden">
       {mobileBowls.map((b, i) => (
         // Static wrapper positions; motion children own their transforms.
-        <div key={b.img} className={`absolute aspect-square ${b.cls}`}>
+        // The coach-approved thali (first bowl) sits on top of the others, badge included.
+        <div key={b.img} className={`absolute aspect-square ${b.cls} ${i === 0 ? "z-10" : ""}`}>
           <motion.div
             className="h-full w-full"
             initial={{ scale: 0, rotate: -40 }}
@@ -194,14 +225,18 @@ function MobileBowls({ reduce }: { reduce: boolean }) {
             </motion.div>
           </motion.div>
           {i === 0 && (
-            <motion.span
-              className="absolute -bottom-1 -left-3 flex items-center gap-1 rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold text-white shadow-md"
-              initial={{ opacity: 0, scale: 0.5, rotate: -12 }}
-              animate={{ opacity: 1, scale: 1, rotate: -6 }}
-              transition={{ type: "spring", stiffness: 300, damping: 14, delay: 0.9 }}
-            >
-              <Check size={10} strokeWidth={3.5} /> Coach-approved
-            </motion.span>
+            // Static wrapper anchors the badge over the top of the thali, clear of the bowls below; the motion span only animates.
+            <span className="absolute -left-5 -top-2.5 flex">
+              <motion.span
+                className="flex items-center gap-1 whitespace-nowrap rounded-full bg-brand px-2 py-1 text-[10px] font-bold leading-none text-white shadow-[0_8px_16px_-8px_rgba(14,26,19,0.6)] ring-2 ring-white"
+                initial={{ opacity: 0, scale: 0.5, rotate: -12 }}
+                animate={{ opacity: 1, scale: 1, rotate: -6 }}
+                transition={{ type: "spring", stiffness: 300, damping: 14, delay: 0.9 }}
+              >
+                <Check size={10} strokeWidth={3.5} className="shrink-0" />
+                <TypedBadgeText reduce={reduce} />
+              </motion.span>
+            </span>
           )}
         </div>
       ))}
@@ -280,7 +315,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="inline-flex items-center gap-2 rounded-full bg-mint px-3.5 py-1.5 text-xs font-semibold text-brand-deep sm:text-sm"
+            className="inline-flex items-center gap-2 rounded-full bg-mint px-3.5 py-1.5 text-xs font-semibold text-brand-deep max-[380px]:px-3 max-[380px]:text-[11px] sm:text-sm"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
@@ -347,7 +382,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.35 }}
-            className="mt-6 max-w-lg text-pretty text-base leading-relaxed text-stone sm:text-lg"
+            className="mt-6 max-w-lg text-pretty text-base leading-relaxed text-stone max-[380px]:text-[15px] sm:text-lg"
           >
             A personal diet — and workout — plan made from dal, roti, sabzi, paneer and idli. Drafted in seconds, checked by a real coach, and adjusted as your body changes.
           </motion.p>
@@ -356,18 +391,18 @@ export default function Hero() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.45 }}
-            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4"
+            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4 max-[380px]:gap-x-4"
           >
             <a
               href="#pricing"
-              className="group inline-flex items-center gap-3 rounded-full bg-brand py-2 pl-6 pr-2 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(22,163,74,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-deep"
+              className="group inline-flex items-center gap-2.5 rounded-full bg-brand py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white max-[380px]:gap-2 max-[380px]:pl-4 max-[380px]:text-[13px] shadow-[0_14px_30px_-12px_rgba(22,163,74,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-deep"
             >
               Get your plan
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-brand transition-transform duration-300 group-hover:rotate-45">
-                <ArrowUpRight size={15} />
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-brand transition-transform duration-300 group-hover:rotate-45">
+                <ArrowUpRight size={14} />
               </span>
             </a>
-            <a href="#sample" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-ink">
+            <a href="#sample" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-ink max-[380px]:text-[13px]">
               <span className="relative">
                 See a sample day
                 <span className="absolute -bottom-0.5 left-0 h-px w-full origin-left scale-x-0 bg-brand transition-transform duration-300 group-hover:scale-x-100" />
@@ -438,7 +473,7 @@ export default function Hero() {
               <div className="absolute inset-[27%] rounded-full bg-[radial-gradient(circle_at_35%_28%,#ffffff,#EEF1EE_45%,#D3D9D3_100%)] shadow-[0_30px_60px_-25px_rgba(14,26,19,0.55),inset_0_-6px_14px_rgba(0,0,0,0.08)]">
                 <div className="absolute inset-[7%] rounded-full bg-[radial-gradient(circle_at_40%_30%,#ffffff,#F1F3F0_60%,#E2E7E2)] ring-1 ring-black/5" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center px-[14%] text-center">
-                  <AnimatePresence mode="wait" initial={false}>
+                  <>
                     {shown ? (
                       <motion.div key={`dish-${shown.name}`} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.18 }}>
                         <p className="text-[clamp(0.65rem,2.6vw,0.95rem)] font-semibold leading-tight tracking-[-0.02em] text-ink">{shown.name}</p>
@@ -456,7 +491,7 @@ export default function Hero() {
                         </p>
                       </motion.div>
                     )}
-                  </AnimatePresence>
+                  </>
                 </div>
               </div>
 
@@ -523,7 +558,7 @@ export default function Hero() {
                 </div>
               </LayoutGroup>
               <div className="h-9">
-                <AnimatePresence mode="wait">
+                <>
                   <motion.p
                     key={diet.key}
                     initial={{ opacity: 0, y: 8 }}
@@ -535,7 +570,7 @@ export default function Hero() {
                     <ArrowLeftRight size={13} className="text-sprout" />
                     {diet.note}
                   </motion.p>
-                </AnimatePresence>
+                </>
               </div>
               <p className="text-center text-xs text-ink/40">
                 <span className="hidden sm:inline">Hover a bowl · drag to spin the plate</span>

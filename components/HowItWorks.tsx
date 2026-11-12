@@ -79,21 +79,34 @@ const coverBox: CSSProperties = {
   height: `max(100cqh, calc(100cqw / ${SCALE_AR}))`,
 };
 
-/** Glowing LCD digits that count the weight down when the card comes into view. */
+// Weekly weigh-ins the readout cycles through (a steady downward trend, then repeat).
+const READINGS = [72.4, 71.8, 71.1, 70.6, 69.9, 69.3, 68.8, 68.2];
+
+/** Glowing LCD digits that step to the next weigh-in every 2 seconds while in view. */
 function ScaleReadout() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-20% 0px" });
+  const inView = useInView(ref, { margin: "-10% 0px" });
   const reduce = useReducedMotion();
-  const kg = useMotionValue(72.4);
+  const kg = useMotionValue(READINGS[0]);
   const text = useTransform(kg, (v) => v.toFixed(1));
+  const idx = useRef(0);
+
   useEffect(() => {
-    if (!inView) return;
     if (reduce) {
-      kg.set(68.2);
+      kg.set(READINGS[READINGS.length - 1]);
       return;
     }
-    const c = animate(kg, 68.2, { duration: 2.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 });
-    return () => c.stop();
+    if (!inView) return;
+    let c: ReturnType<typeof animate> | undefined;
+    const t = setInterval(() => {
+      idx.current = (idx.current + 1) % READINGS.length;
+      // Quick count to the new reading, like a scale settling.
+      c = animate(kg, READINGS[idx.current], { duration: idx.current === 0 ? 0.9 : 0.7, ease: [0.16, 1, 0.3, 1] });
+    }, 2000);
+    return () => {
+      clearInterval(t);
+      c?.stop();
+    };
   }, [inView, reduce, kg]);
 
   return (

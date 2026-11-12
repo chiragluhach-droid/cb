@@ -6,6 +6,8 @@ import { Camera, Check, Dumbbell, Footprints, Home, LineChart, MessageCircle, Mi
 import Reveal from "@/components/ui/Reveal";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
 import { LogoMark } from "@/components/Logo";
+import { CoachAvatar } from "@/components/app/CoachAvatar";
+import { coach } from "@/lib/site";
 
 type Tab = "today" | "workout" | "progress" | "coach";
 
@@ -279,9 +281,9 @@ function Chat() {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 border-b border-ink/10 pb-3">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">C</span>
+        <CoachAvatar className="h-9 w-9" />
         <div>
-          <p className="text-sm font-semibold">Your coach</p>
+          <p className="text-sm font-semibold">{coach.name} · your coach</p>
           <p className="flex items-center gap-1 text-[11px] text-brand">
             <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Replies within the day
           </p>
@@ -387,7 +389,7 @@ export default function Dashboard() {
                     <span className="text-[11px] text-ink/45">Week 6</span>
                   </div>
                   <div className="relative flex-1 overflow-y-auto px-4 pb-3" data-lenis-prevent>
-                    <AnimatePresence mode="wait">
+                    <>
                       <motion.div
                         key={tab}
                         initial={{ opacity: 0, y: 12 }}
@@ -401,7 +403,7 @@ export default function Dashboard() {
                         {tab === "progress" && <Progress />}
                         {tab === "coach" && <Chat />}
                       </motion.div>
-                    </AnimatePresence>
+                    </>
                   </div>
                   <nav className="grid grid-cols-4 border-t border-ink/10 bg-white px-2 pb-4 pt-2" aria-label="App tabs">
                     {(Object.keys(tabIcons) as Tab[]).map((t) => {
@@ -419,7 +421,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            <AnimatePresence mode="wait">
+            <>
               <motion.p
                 key={tab}
                 initial={{ opacity: 0, y: 6 }}
@@ -429,7 +431,7 @@ export default function Dashboard() {
               >
                 <b className="text-canvas">{current.title}.</b> {current.body}
               </motion.p>
-            </AnimatePresence>
+            </>
           </Reveal>
         </div>
       </div>

@@ -128,7 +128,7 @@ export function targets(i: Inputs) {
   return { kcal, protein, fat, carbs };
 }
 
-const dietOk = (d: Dish, diet: Diet) => {
+export const dietOk = (d: Dish, diet: Diet) => {
   if (diet === "nonveg") return true;
   if (diet === "egg") return d.type !== "nonveg";
   if (diet === "veg") return d.type === "veg";
@@ -168,6 +168,17 @@ export type Draft = {
 };
 
 const quarter = (n: number) => Math.round(n * 4) / 4;
+
+/** Dishes that fit this person for a slot (diet, allergies and conditions). */
+export function optionsFor(i: Inputs, slot: Slot) {
+  return dishes.filter((d) => d.slots.includes(slot) && dietOk(d, i.diet) && !clash(d, i));
+}
+
+/** Scale a dish to a slot's calories, in quarter servings. */
+export function portion(dish: Dish, slotKcal: number) {
+  const servings = Math.min(2, Math.max(0.75, quarter(slotKcal / dish.kcal)));
+  return { servings, kcal: Math.round(dish.kcal * servings), protein: Math.round(dish.protein * servings) };
+}
 
 /** Draft one day. `day` (0–6) rotates dishes so each day differs. */
 export function draftDay(i: Inputs, day: number): Draft {

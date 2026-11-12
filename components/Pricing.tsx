@@ -50,13 +50,13 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
         <p className="text-5xl font-semibold tabular-nums tracking-[-0.05em]">
           <Price value={price} />
         </p>
-        <AnimatePresence mode="wait">
+        <>
           {duration === 90 && (
             <motion.p key="was" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className={`pb-1.5 text-base tabular-nums line-through ${dark ? "text-canvas/35" : "text-ink/30"}`}>
               {inr(p.monthly * 3)}
             </motion.p>
           )}
-        </AnimatePresence>
+        </>
       </div>
       <p className={`mt-1 text-sm ${dark ? "text-canvas/55" : "text-stone"}`}>
         {duration === 90 ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { LayoutGroup, motion } from "framer-motion";
 import Reveal from "@/components/ui/Reveal";
@@ -20,21 +20,32 @@ const filters: { v: DietFilter; l: string }[] = [
 
 const ALL: DietFilter[] = ["veg", "egg", "nonveg"];
 
-const foods: { name: string; note: string; img: string; fits: DietFilter[] }[] = [
+// `desktopOnly` cards are hidden on phones to keep the grid short.
+const foods: { name: string; note: string; img: string; fits: DietFilter[]; desktopOnly?: boolean }[] = [
   { name: "Idli + sambar", note: "300 kcal · 11g protein", img: photos.idliCoffee, fits: [...ALL, "vegan"] },
   { name: "Roti, sabzi & dal", note: "520 kcal · 20g protein", img: photos.rotiSabzi, fits: [...ALL, "vegan"] },
   { name: "Moong dal khichdi", note: "470 kcal · 19g protein", img: photos.khichdi, fits: [...ALL, "jain"] },
   { name: "Palak paneer", note: "540 kcal · 26g protein", img: photos.palakPaneer, fits: ALL },
   { name: "Masala dosa", note: "Sunday dosa, still on track", img: photos.masalaDosa, fits: [...ALL, "vegan"] },
-  { name: "Home thali", note: "560 kcal · 21g protein", img: photos.thali, fits: ALL },
-  { name: "Paneer tikka", note: "270 kcal · 18g protein", img: photos.paneerTikka, fits: ALL },
-  { name: "Chicken curry", note: "560 kcal · 38g protein", img: photos.chickenCurry, fits: ["nonveg"] },
-  { name: "Pantry staples", note: "Dals, millets, spices", img: photos.spices, fits: [...ALL, "jain", "vegan"] },
+  { name: "Home thali", note: "560 kcal · 21g protein", img: photos.thali, fits: ALL, desktopOnly: true },
+  { name: "Paneer tikka", note: "270 kcal · 18g protein", img: photos.paneerTikka, fits: ALL, desktopOnly: true },
+  { name: "Chicken curry", note: "560 kcal · 38g protein", img: photos.chickenCurry, fits: ["nonveg"], desktopOnly: true },
+  { name: "Pantry staples", note: "Dals, millets, spices", img: photos.spices, fits: [...ALL, "jain", "vegan"], desktopOnly: true },
 ];
 
 export default function Kitchen() {
   const [f, setF] = useState<DietFilter>("all");
-  const fitCount = foods.filter((x) => f === "all" || x.fits.includes(f)).length;
+  // Phones show fewer cards, so the "x of y fit" count follows what's visible.
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  const shown = phone ? foods.filter((x) => !x.desktopOnly) : foods;
+  const fitCount = shown.filter((x) => f === "all" || x.fits.includes(f)).length;
 
   return (
     <section id="food" className="relative bg-canvas py-20 lg:py-32">
@@ -74,7 +85,7 @@ export default function Kitchen() {
             })}
           </LayoutGroup>
           <span className="ml-auto text-sm tabular-nums text-stone">
-            <b className="text-ink">{fitCount}</b> of {foods.length} fit
+            <b className="text-ink">{fitCount}</b> of {shown.length} fit
           </span>
         </Reveal>
 
@@ -88,7 +99,7 @@ export default function Kitchen() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-8% 0px" }}
                 transition={{ duration: 0.7, delay: (i % 4) * 0.06, ease: [0.16, 1, 0.3, 1] }}
-                className={`group relative isolate overflow-hidden rounded-[1.5rem] ${i === 0 ? "col-span-2 row-span-2" : ""}`}
+                className={`group relative isolate overflow-hidden rounded-[1.5rem] ${i === 0 ? "col-span-2 row-span-2" : ""} ${x.desktopOnly ? "hidden sm:block" : ""}`}
               >
                 <Image
                   src={unsplash(x.img, 900)}

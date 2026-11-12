@@ -6,28 +6,40 @@ import { ArrowUp, ArrowUpRight } from "lucide-react";
 import { nav } from "@/lib/site";
 import { CHECKOUT_MODE } from "@/lib/plans";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
-import { LogoMark, Wordmark } from "@/components/Logo";
+import { Wordmark } from "@/components/Logo";
+import { RingMark } from "@/components/brand/Marks";
+import { Seal } from "@/components/brand/Seal";
 
 const letterGreens = ["#16A34A", "#8AF0A0", "#0E7A37", "#4ADE80"];
 
-// Each letter of the giant wordmark jumps and turns green on hover.
+// The giant wordmark: each letter jumps and turns green on hover; the ring
+// (the "o") spins a full turn.
 function GiantWordmark() {
   const reduce = useReducedMotion();
+  const letters = ["e", "v", "o", "w", "e", "l", "l"];
   return (
-    <p aria-hidden className="flex select-none justify-center whitespace-nowrap font-sans text-[23vw] font-semibold leading-[0.8] tracking-[-0.07em] text-ink sm:text-[21vw]">
-      {"Evowell".split("").map((l, i) => (
-        <motion.span
-          key={i}
-          className="inline-block cursor-default"
-          whileHover={reduce ? {} : { y: "-0.12em", rotate: i % 2 ? 6 : -6, color: letterGreens[i % letterGreens.length] }}
-          transition={{ type: "spring", stiffness: 400, damping: 12 }}
-        >
-          {l}
-        </motion.span>
-      ))}
-      <motion.span className="inline-block cursor-default text-brand" whileHover={reduce ? {} : { scale: 1.3 }} transition={{ type: "spring", stiffness: 400, damping: 12 }}>
-        .
-      </motion.span>
+    <p aria-hidden className="flex select-none items-baseline justify-center whitespace-nowrap font-sans text-[25vw] font-semibold leading-[0.8] tracking-[-0.07em] text-ink sm:text-[23vw]">
+      {letters.map((l, i) =>
+        l === "o" ? (
+          <motion.span
+            key={i}
+            className="relative top-[0.14em] mx-[-0.04em] inline-block h-[0.86em] w-[0.86em] cursor-default"
+            whileHover={reduce ? {} : { rotate: -360, scale: 1.06 }}
+            transition={{ type: "spring", stiffness: 90, damping: 14 }}
+          >
+            <RingMark className="h-full w-full" ink="#16A34A" leaf="#8AF0A0" track="transparent" vein="#0E1A13" />
+          </motion.span>
+        ) : (
+          <motion.span
+            key={i}
+            className="inline-block cursor-default"
+            whileHover={reduce ? {} : { y: "-0.12em", rotate: i % 2 ? 6 : -6, color: letterGreens[i % letterGreens.length] }}
+            transition={{ type: "spring", stiffness: 400, damping: 12 }}
+          >
+            {l}
+          </motion.span>
+        )
+      )}
     </p>
   );
 }
@@ -44,16 +56,20 @@ export default function Footer() {
       <div className="container-x">
         <div className="flex flex-col gap-8 pb-12 lg:flex-row lg:items-end lg:justify-between lg:pb-16">
           <div>
-            <div className="flex items-center gap-2.5 text-ink">
-              <LogoMark className="h-9 w-9" />
-              <Wordmark className="text-2xl" />
-            </div>
+            <Wordmark className="text-[2.25rem]" />
             <AnimatedHeading
               text="Eat better, / without eating different."
               className="mt-6 max-w-3xl font-sans text-[10vw] font-normal leading-[0.98] tracking-[-0.055em] text-ink sm:text-6xl lg:text-7xl"
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+            <motion.span
+              className="mr-2 inline-flex cursor-default"
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Seal className="h-24 w-24 sm:h-28 sm:w-28" color="#16A34A" />
+            </motion.span>
             <a
               href={resolve("#pricing")}
               className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-[15px] font-semibold text-canvas transition-colors duration-300 hover:bg-brand"

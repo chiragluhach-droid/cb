@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Ticker from "@/components/Ticker";
+import PromiseStrip from "@/components/PromiseStrip";
 import FoodStrip from "@/components/FoodStrip";
 import HowItWorks from "@/components/HowItWorks";
 import SampleDay from "@/components/SampleDay";
@@ -27,9 +27,7 @@ export default function Home() {
         <Kitchen />
         <Coach />
         <Dashboard />
-        <div className="overflow-hidden bg-canvas py-6 sm:py-10">
-          <Ticker items={["Coach-reviewed", "Ghar ka khana", "No crash diets", "Plans that adapt"]} reverse tilt={1.5} />
-        </div>
+        <PromiseStrip />
         <Pricing />
         <Faq />
         <InstagramFeed />

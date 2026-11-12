@@ -5,6 +5,8 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { AlertTriangle, ArrowRight, Check, Send } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
+import { CoachAvatar } from "@/components/app/CoachAvatar";
+import { coach } from "@/lib/site";
 
 type Topic = {
   id: string;
@@ -82,6 +84,9 @@ function Review({ topic }: { topic: Topic }) {
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40">Admin · plan review</p>
           <p className="mt-1 text-lg font-semibold tracking-[-0.02em]">{topic.client}</p>
+          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-stone">
+            <CoachAvatar className="h-5 w-5" /> Reviewing: {coach.name}
+          </p>
         </div>
         <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${sent ? "bg-brand text-white" : "bg-warn/20 text-[#8A5A00]"}`}>{sent ? "Sent" : "Draft"}</span>
       </div>
@@ -166,7 +171,7 @@ function Review({ topic }: { topic: Topic }) {
             transition={{ type: "spring", stiffness: 300, damping: 16 }}
             className="pointer-events-none absolute -right-2 -top-4 rounded-xl border-2 border-brand bg-white px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.12em] text-brand shadow-xl sm:-right-5"
           >
-            Coach approved
+            {coach.name} approved
           </motion.div>
         )}
       </AnimatePresence>
@@ -192,8 +197,21 @@ export default function Coach() {
             />
             <Reveal delay={0.1}>
               <p className="mt-6 max-w-md text-pretty text-base leading-relaxed text-stone">
-                The draft does the maths. Your coach does the thinking — a checklist and risk warnings help them catch anything that doesn&apos;t suit you before it reaches your plate.
+                The <span className="font-semibold text-ink">Evowell Engine</span> does the maths — calories, protein and portions, in seconds. {coach.name} does the thinking: a checklist and risk warnings help her catch anything that doesn&apos;t suit you before it reaches your plate.
               </p>
+            </Reveal>
+
+            <Reveal delay={0.12} className="mt-8">
+              <div className="flex max-w-md items-center gap-4 rounded-[1.75rem] bg-white p-3 pr-5 shadow-[0_24px_50px_-36px_rgba(10,10,10,0.55)] ring-1 ring-ink/[0.06]">
+                <CoachAvatar className="h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]" online />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40">Meet your coach</p>
+                  <p className="mt-0.5 text-2xl font-medium leading-none tracking-[-0.04em] text-ink">
+                    <span className="font-serif italic text-brand">{coach.name}</span>
+                  </p>
+                  <p className="mt-1.5 text-sm leading-snug text-stone">Reviews every plan, answers your messages, and adjusts as you go.</p>
+                </div>
+              </div>
             </Reveal>
 
             <Reveal delay={0.15} className="mt-8">
@@ -214,7 +232,7 @@ export default function Coach() {
                 </div>
               </LayoutGroup>
 
-              <AnimatePresence mode="wait">
+              <>
                 <motion.ul
                   key={topic.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -232,7 +250,7 @@ export default function Coach() {
                     </li>
                   ))}
                 </motion.ul>
-              </AnimatePresence>
+              </>
               <p className="mt-6 text-xs leading-relaxed text-ink/45">We coach food and training, not medicine. Always keep your doctor in the loop.</p>
             </Reveal>
           </div>

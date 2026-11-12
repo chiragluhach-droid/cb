@@ -64,7 +64,7 @@ body {
     text-wrap: pretty;
   }
   .container-x {
-    @apply mx-auto w-full max-w-[1600px] px-6 sm:px-10 lg:px-16;
+    @apply mx-auto w-full max-w-[1600px] px-6 max-[380px]:px-5 sm:px-10 lg:px-16;
   }
   .eyebrow {
     @apply text-[11px] font-medium uppercase tracking-[0.28em] text-stone;
@@ -127,4 +127,37 @@ input[type="range"].evo-range:focus-visible::-webkit-slider-thumb {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Light-surface sliders (onboarding, dashboard) */
+input[type="range"].evo-range-light {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #16a34a var(--fill, 50%), rgba(10, 10, 10, 0.08) var(--fill, 50%));
+  outline: none;
+}
+input[type="range"].evo-range-light::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #fff;
+  border: 6px solid #16a34a;
+  cursor: grab;
+  box-shadow: 0 4px 14px -4px rgba(14, 26, 19, 0.45);
+}
+input[type="range"].evo-range-light::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 6px solid #16a34a;
+  cursor: grab;
+}
+input[type="range"].evo-range-light:focus-visible::-webkit-slider-thumb {
+  outline: 3px solid #8af0a0;
+  outline-offset: 2px;
 }

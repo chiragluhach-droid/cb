@@ -46,3 +46,9 @@ export const photos = {
   videoCall: "1758691462749-a95ce1bd7f96",
   scale: "1522844990619-4951c40f7eda",
 };
+
+/** The Evowell coach shown in the dashboard and the phone demo. */
+export const coach = {
+  name: "Simone",
+  photo: "/coach/simone.jpg",
+};

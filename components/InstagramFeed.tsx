@@ -7,6 +7,7 @@ import { ArrowUpRight, Instagram } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
 import { instagramHandle, photos, unsplash } from "@/lib/site";
+import { Seal } from "@/components/brand/Seal";
 
 // Post previews floating around the "coming soon" card (tablet/desktop).
 // `spread` is the hover nudge outward — full class strings so Tailwind keeps them.
@@ -115,8 +116,14 @@ export default function InstagramFeed() {
               ))}
             </div>
 
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sprout via-brand to-brand-deep text-white shadow-[0_12px_30px_-10px_rgba(22,163,74,0.9)] transition-transform duration-500 ease-expo group-hover:rotate-12 group-hover:scale-110">
-              <Instagram size={24} />
+            {/* Profile picture with a story ring */}
+            <span className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-sprout via-brand to-brand-deep p-[3px] shadow-[0_12px_30px_-10px_rgba(22,163,74,0.9)] transition-transform duration-500 ease-expo group-hover:scale-110 sm:h-28 sm:w-28">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-[#0B140F] ring-[3px] ring-forest">
+                <Seal className="h-[82%] w-[82%] transition-transform duration-700 ease-expo group-hover:rotate-[360deg]" color="#FAFAF8" />
+              </span>
+              <span className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-canvas text-forest ring-[3px] ring-forest">
+                <Instagram size={15} />
+              </span>
             </span>
             <p className="mt-6 font-sans text-5xl font-normal tracking-[-0.05em] sm:text-6xl lg:text-7xl">
               Coming <span className="font-serif italic text-sprout">soon.</span>

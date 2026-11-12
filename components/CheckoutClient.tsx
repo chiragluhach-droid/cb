@@ -137,11 +137,11 @@ function PaySheet({ amount, onClose, onResult }: { amount: number; onClose: () =
 
 /* ───────────── Success ───────────── */
 
-function Success({ name, email, planName, duration, orderId, free }: { name: string; email: string; planName: string; duration: Duration; orderId: string; free: boolean }) {
+function Success({ name, email, phone, planId, planName, duration, orderId, free }: { name: string; email: string; phone: string; planId: string; planName: string; duration: Duration; orderId: string; free: boolean }) {
   const steps = [
+    { t: "Create your account", s: "Verify your email and mobile number — takes a minute." },
     { t: "Answer the questionnaire", s: "Measurements, goal, diet, health and allergies — about 3 minutes." },
-    { t: "Your coach builds & reviews your plan", s: "Ready within 24 hours, checked by hand." },
-    { t: "Follow it on your dashboard", s: "Tick meals, log progress, message your coach." },
+    { t: "Your coach reviews your plan", s: "Ready within 24 hours, then follow it on your dashboard." },
   ];
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="mx-auto max-w-2xl text-center">
@@ -180,9 +180,12 @@ function Success({ name, email, planName, duration, orderId, free }: { name: str
       </ol>
 
       <div className="mt-10 flex flex-wrap justify-center gap-3">
-        <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-ink/[0.06] px-6 py-3.5 text-sm font-semibold text-ink/40" title="Coming in the next build">
-          Start questionnaire · soon
-        </span>
+        <Link
+          href={`/login?${new URLSearchParams({ mode: "signup", plan: planId, name, email, phone }).toString()}`}
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-deep"
+        >
+          Create your account
+        </Link>
         <Link href="/" className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-semibold text-canvas transition-colors hover:bg-brand">
           Back to home
         </Link>
@@ -261,7 +264,7 @@ export default function CheckoutClient({ initialKind, initialDuration, mode }: P
   if (orderId) {
     return (
       <div className="container-x">
-        <Success name={form.name.trim()} email={form.email} planName={plans[kind].name} duration={duration} orderId={orderId} free={free} />
+        <Success name={form.name.trim()} email={form.email} phone={form.phone} planId={`${kind}-${duration}`} planName={plans[kind].name} duration={duration} orderId={orderId} free={free} />
       </div>
     );
   }
