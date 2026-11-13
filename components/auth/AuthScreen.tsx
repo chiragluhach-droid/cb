@@ -12,7 +12,7 @@ import { RingMark } from "@/components/brand/Marks";
 import { Seal } from "@/components/brand/Seal";
 import { photos, unsplash } from "@/lib/site";
 import { PlanId, parsePlan, plans } from "@/lib/plans";
-import { DEMO_OTP, checkLogin, checkSignup, completeLogin, completeSignup, maskPhone, useSession } from "@/lib/demo-store";
+import { startAuth, useSession, verifyAuth } from "@/lib/demo-store";
 
 type Mode = "login" | "signup";
 type Props = { initialMode: Mode; plan: string | null; name: string; email: string; phone: string; next: string | null };
@@ -218,6 +218,9 @@ export default function AuthScreen(props: Props) {
   const [busy, setBusy] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState(false);
+  const [otpMsg, setOtpMsg] = useState("");
+  // Dummy email mode: the server hands back the code to show on screen.
+  const [devCode, setDevCode] = useState<string | null>(null);
   const [resendIn, setResendIn] = useState(0);
   const [justSent, setJustSent] = useState(false);
 
@@ -244,7 +247,7 @@ export default function AuthScreen(props: Props) {
     setOtp("");
   };
 
-  const sendCode = (e: FormEvent) => {
+  const sendCode = async (e: FormEvent) => {
     e.preventDefault();
     const er: typeof errors = {};
     if (mode === "signup" && name.trim().length < 2) er.name = "Please enter your full name.";
@@ -254,7 +257,9 @@ export default function AuthScreen(props: Props) {
     setFormError(null);
     if (Object.keys(er).length) return;
 
-    const res = mode === "signup" ? checkSignup(email, fullPhone) : checkLogin(email, fullPhone);
+    setBusy(true);
+    const res = await startAuth({ mode, name: mode === "signup" ? name : undefined, email, phone: fullPhone, plan: mode === "signup" ? planId : undefined });
+    setBusy(false);
     if (!res.ok) {
       if (res.field) setErrors({ [res.field]: res.error });
       setFormError({
@@ -263,37 +268,43 @@ export default function AuthScreen(props: Props) {
       });
       return;
     }
-    setBusy(true);
-    setTimeout(() => {
-      setBusy(false);
-      setStep("otp");
-      setOtp("");
-      setOtpError(false);
-      setResendIn(30);
-      setJustSent(true);
-    }, 700);
+    setDevCode(res.devCode ?? null);
+    setStep("otp");
+    setOtp("");
+    setOtpError(false);
+    setOtpMsg("");
+    setResendIn(30);
+    setJustSent(true);
   };
 
-  const verify = (code: string) => {
+  const resend = async () => {
+    setOtpMsg("");
+    const res = await startAuth({ mode, name: mode === "signup" ? name : undefined, email, phone: fullPhone, plan: mode === "signup" ? planId : undefined });
+    if (res.ok) {
+      setDevCode(res.devCode ?? null);
+      setResendIn(30);
+      setJustSent(true);
+    } else {
+      setOtpMsg(res.error);
+      if (res.wait) setResendIn(res.wait);
+    }
+  };
+
+  const verify = async (code: string) => {
     if (code.length < 6 || busy) return;
     setBusy(true);
-    setTimeout(() => {
-      if (code !== DEMO_OTP) {
-        setBusy(false);
-        setOtpError(true);
-        setTimeout(() => setOtpError(false), 500);
-        return;
-      }
-      let dest = props.next && props.next.startsWith("/") ? props.next : "/dashboard";
-      if (mode === "signup") {
-        completeSignup({ name, email, phone: fullPhone, plan: planId });
-        dest = "/onboarding";
-      } else {
-        completeLogin(email);
-      }
-      setStep("done");
-      setTimeout(() => router.push(dest), 900);
-    }, 650);
+    setOtpMsg("");
+    const res = await verifyAuth(email, code);
+    if (!res.ok) {
+      setBusy(false);
+      setOtpError(true);
+      setOtpMsg(res.error);
+      setTimeout(() => setOtpError(false), 500);
+      return;
+    }
+    const dest = res.isNew ? "/onboarding" : props.next && props.next.startsWith("/") ? props.next : "/dashboard";
+    setStep("done");
+    setTimeout(() => router.push(dest), 900);
   };
 
   // Already signed in?
@@ -395,7 +406,7 @@ export default function AuthScreen(props: Props) {
                     <h1 className="text-4xl font-medium tracking-[-0.055em] text-ink sm:text-[2.75rem]">{mode === "login" ? "Welcome back." : "Create your account."}</h1>
                     <p className="mt-2 text-[0.9375rem] leading-relaxed text-stone">
                       {mode === "login"
-                        ? "Enter the email and phone number on your account. We'll text you a code."
+                        ? "Enter the email and phone number on your account. We'll email you a code."
                         : "Email and phone are both needed — your coach uses them to reach you."}
                     </p>
 
@@ -483,7 +494,7 @@ export default function AuthScreen(props: Props) {
                         {mode === "login" ? "Create an account" : "Log in"}
                       </button>
                     </p>
-                    <p className="mt-6 text-center text-xs leading-relaxed text-ink/40">Demo sign-in — accounts are saved in this browser only. No SMS is actually sent.</p>
+                    <p className="mt-6 text-center text-xs leading-relaxed text-ink/40">We&apos;ll send a 6-digit code to your email to confirm it&apos;s you.</p>
                   </motion.form>
                 )}
 
@@ -495,22 +506,22 @@ export default function AuthScreen(props: Props) {
                     <span className="mt-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-mint text-brand">
                       <Phone size={24} />
                     </span>
-                    <h1 className="mt-6 text-4xl font-medium tracking-[-0.055em] text-ink">Check your phone.</h1>
+                    <h1 className="mt-6 text-4xl font-medium tracking-[-0.055em] text-ink">Check your email.</h1>
                     <p className="mt-2 text-[0.9375rem] leading-relaxed text-stone">
-                      Enter the 6-digit code sent to <b className="whitespace-nowrap text-ink">{maskPhone(dial, num)}</b>.
+                      Enter the 6-digit code sent to <b className="break-all text-ink">{email.trim().toLowerCase()}</b>.
                     </p>
 
                     <AnimatePresence>
-                      {justSent && (
+                      {justSent && devCode && (
                         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-dashed border-warn bg-warn/10 px-4 py-3 text-sm">
                           <span>
-                            <b>Demo code:</b> <span className="font-mono tabular-nums tracking-widest">{DEMO_OTP}</span>
+                            <b>Email isn&apos;t connected yet.</b> Your code: <span className="font-mono tabular-nums tracking-widest">{devCode}</span>
                           </span>
                           <button
                             type="button"
                             onClick={() => {
-                              setOtp(DEMO_OTP);
-                              verify(DEMO_OTP);
+                              setOtp(devCode);
+                              verify(devCode);
                             }}
                             className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-canvas"
                           >
@@ -532,7 +543,9 @@ export default function AuthScreen(props: Props) {
                       />
                     </div>
                     <div className="mt-3 h-5 text-sm">
-                      {otpError ? (
+                      {otpMsg ? (
+                        <span className="font-medium text-red-600">{otpMsg}</span>
+                      ) : otpError ? (
                         <span className="font-medium text-red-600">That code didn&apos;t match. Try again.</span>
                       ) : busy ? (
                         <span className="inline-flex items-center gap-2 text-stone">
@@ -546,19 +559,13 @@ export default function AuthScreen(props: Props) {
                       {resendIn > 0 ? (
                         <span className="tabular-nums">Resend in 0:{String(resendIn).padStart(2, "0")}</span>
                       ) : (
-                        <button
-                          onClick={() => {
-                            setResendIn(30);
-                            setJustSent(true);
-                          }}
-                          className="font-semibold text-ink underline-offset-4 hover:underline"
-                        >
+                        <button onClick={resend} className="font-semibold text-ink underline-offset-4 hover:underline">
                           Resend code
                         </button>
                       )}
                     </p>
                     <p className="mt-2 text-sm text-stone">
-                      We&apos;ll also email <b className="text-ink">{email.trim().toLowerCase()}</b> your plan updates.
+                      Codes expire after 10 minutes. Check your spam folder if it doesn&apos;t arrive.
                     </p>
                   </motion.div>
                 )}

@@ -1,13 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Check, Plus, RotateCcw, Tag, Trash2, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, Check, Loader2, Plus, RotateCcw, Tag, Trash2, X } from "lucide-react";
 import { Card, CardTitle } from "@/components/app/ui";
 import { PageTitle } from "@/components/admin/bits";
-import { resetSampleClients } from "@/lib/admin";
 import { PlanKind, inr } from "@/lib/plans";
-import { PlanSettings, Settings, priceFor, resetSettings, updateSettings, useSettings } from "@/lib/settings";
+import { PlanSettings, Settings, priceFor, reloadSettings, resetSettings, updateSettings, useSaveState, useSettings } from "@/lib/settings";
 
 const input =
   "w-full rounded-xl bg-[#F4F5F1] px-3.5 py-2.5 text-sm text-ink outline-none ring-1 ring-transparent transition-shadow placeholder:text-ink/35 focus:bg-white focus:ring-brand";
@@ -100,10 +99,15 @@ function PlanEditor({ kind, s }: { kind: PlanKind; s: Settings }) {
 
 export default function SubscriptionsPage() {
   const s = useSettings();
+  const save = useSaveState();
+  // Discount codes are private, so load the coach's full copy.
+  useEffect(() => {
+    reloadSettings();
+  }, []);
   const [code, setCode] = useState("");
   const [pct, setPct] = useState(10);
   const [codeErr, setCodeErr] = useState("");
-  const [confirmReset, setConfirmReset] = useState<null | "settings" | "clients">(null);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const addCode = (e: FormEvent) => {
     e.preventDefault();
@@ -130,7 +134,19 @@ export default function SubscriptionsPage() {
         }
       />
       <p className="mt-4 flex items-center gap-2 text-xs text-stone">
-        <Check size={13} className="text-brand" /> Changes save as you type and show on the public site straight away (demo: in this browser).
+        {save === "saving" ? (
+          <>
+            <Loader2 size={13} className="animate-spin text-ink/40" /> Saving…
+          </>
+        ) : save === "error" ? (
+          <span className="flex items-center gap-2 font-semibold text-red-600">
+            <AlertTriangle size={13} /> Couldn&apos;t save — check your connection and try again.
+          </span>
+        ) : (
+          <>
+            <Check size={13} className="text-brand" /> {save === "saved" ? "Saved." : "Changes save as you type."} They show on the public site within about 30 seconds.
+          </>
+        )}
       </p>
 
       {/* Plans */}
@@ -196,36 +212,30 @@ export default function SubscriptionsPage() {
         </Card>
       </div>
 
-      {/* Demo resets */}
+      {/* Reset */}
       <div className="mt-8 flex flex-col gap-3 border-t border-ink/[0.08] pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-stone">Demo tools</p>
-        <div className="flex flex-wrap gap-2">
-          {(["settings", "clients"] as const).map((k) =>
-            confirmReset === k ? (
-              <span key={k} className="inline-flex items-center gap-2 rounded-full bg-red-50 py-1 pl-4 pr-1 text-xs font-semibold text-red-700">
-                {k === "settings" ? "Reset prices, plans & codes?" : "Reset the sample clients?"}
-                <button
-                  onClick={() => {
-                    if (k === "settings") resetSettings();
-                    else resetSampleClients();
-                    setConfirmReset(null);
-                  }}
-                  className="rounded-full bg-red-600 px-3 py-1.5 text-white"
-                >
-                  Reset
-                </button>
-                <button onClick={() => setConfirmReset(null)} className="rounded-full px-2 py-1.5 text-red-700/70">
-                  Cancel
-                </button>
-              </span>
-            ) : (
-              <button key={k} onClick={() => setConfirmReset(k)} className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-ink/70 ring-1 ring-ink/[0.08] transition-colors hover:text-ink">
-                {k === "settings" ? <RotateCcw size={13} /> : <Users size={13} />}
-                {k === "settings" ? "Reset to defaults" : "Reset sample clients"}
-              </button>
-            )
-          )}
-        </div>
+        <p className="text-xs text-stone">Start over with the original prices, plan contents and codes.</p>
+        {confirmReset ? (
+          <span className="inline-flex w-fit items-center gap-2 rounded-full bg-red-50 py-1 pl-4 pr-1 text-xs font-semibold text-red-700">
+            Reset prices, plans &amp; codes?
+            <button
+              onClick={() => {
+                resetSettings();
+                setConfirmReset(false);
+              }}
+              className="rounded-full bg-red-600 px-3 py-1.5 text-white"
+            >
+              Reset
+            </button>
+            <button onClick={() => setConfirmReset(false)} className="rounded-full px-2 py-1.5 text-red-700/70">
+              Cancel
+            </button>
+          </span>
+        ) : (
+          <button onClick={() => setConfirmReset(true)} className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-xs font-semibold text-ink/70 ring-1 ring-ink/[0.08] transition-colors hover:text-ink">
+            <RotateCcw size={13} /> Reset to defaults
+          </button>
+        )}
       </div>
     </div>
   );

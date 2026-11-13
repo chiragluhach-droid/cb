@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
+import SettingsBoot from "@/components/SettingsBoot";
+import { getSettings } from "@/lib/server/repo";
 import { SITE_URL, site } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -30,10 +32,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Prices and plan contents from Admin › Subscriptions (codes stay private).
+  const settings = { ...(await getSettings()), codes: [] };
   return (
     <html lang="en" className={`${inter.variable} ${serif.variable}`}>
       <body className="font-sans antialiased">
+        <SettingsBoot initial={settings} />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

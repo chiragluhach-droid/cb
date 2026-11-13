@@ -55,16 +55,6 @@ export default function TodayPage() {
       weights: [...d.weights.filter((w) => w.date !== key), { date: key, kg: Math.round(kg * 10) / 10 }],
     }));
 
-  const approve = () =>
-    update((d) => ({
-      ...d,
-      planStatus: "approved",
-      messages: [
-        ...d.messages,
-        { id: newId(), from: "coach", text: "Your plan is approved ✓ I've kept your favourites and balanced protein across the day. Tick meals off as you go and message me anytime.", at: Date.now() },
-      ],
-    }));
-
   const swapMeal = swapSlot ? meals.find((m) => m.slot === swapSlot)! : null;
 
   return (
@@ -105,9 +95,6 @@ export default function TodayPage() {
               <p className="font-semibold">{coach.name} is reviewing your plan</p>
               <p className="mt-0.5 text-sm text-canvas/60">You&apos;re seeing the draft below. Most plans are approved within 24 hours.</p>
             </div>
-            <button onClick={approve} className="inline-flex items-center justify-center gap-2 rounded-full bg-canvas/10 px-4 py-2.5 text-xs font-semibold text-canvas ring-1 ring-canvas/15 transition-colors hover:bg-canvas/15">
-              <Sparkles size={14} className="text-sprout" /> Simulate approval (demo)
-            </button>
           </motion.div>
         ) : null}
       </AnimatePresence>

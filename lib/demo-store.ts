@@ -1,17 +1,17 @@
 /*
- * DEMO DATA LAYER — accounts, sessions and dashboard data saved in this
- * browser's localStorage. Nothing leaves the device.
+ * CLIENT DATA LAYER — accounts and dashboard data, stored in MongoDB via the
+ * /api routes. (The file keeps its old name so screens don't need new imports.)
  *
- * When a real backend arrives, replace the functions in this file
- * (signup / login / update / logout) with API calls; the screens only talk
- * to this module.
+ * Screens use `useSession()` exactly as before. Changes show instantly
+ * (optimistic) and are saved in the background, in order. Only the fields that
+ * changed are sent, so the coach's edits and messages are never overwritten.
+ * Data refreshes every 20s and when the tab regains focus, so coach replies and
+ * plan approvals appear without a reload.
  */
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type { Inputs, Slot } from "@/lib/engine";
 import type { PlanId } from "@/lib/plans";
-
-export const DEMO_OTP = "123456";
 
 export type User = {
   id: string;
@@ -21,8 +21,6 @@ export type User = {
   phone: string;
   plan: PlanId;
   createdAt: number;
-  /** Sample client created for the admin demo. */
-  seeded?: boolean;
 };
 
 export type Profile = Inputs & { workoutPlace: "home" | "gym"; dislikes: string };
@@ -58,75 +56,6 @@ export type UserData = {
   aiDraft?: { at: number; model: string; note: string; instruction?: string; picks: Record<string, string>; prevEdits?: Record<string, string> };
 };
 
-export type DemoState = {
-  users: User[];
-  session: string | null;
-  data: Record<string, UserData>;
-  /** Coach panel sign-in (demo). */
-  admin?: { signedIn: boolean };
-  /** Sample clients have been added for the admin demo. */
-  seeded?: boolean;
-};
-
-const KEY = "evowell.demo.v1";
-const EMPTY: DemoState = { users: [], session: null, data: {} };
-
-let cache: DemoState = EMPTY;
-let raw: string | null = null;
-const listeners = new Set<() => void>();
-
-function read(): DemoState {
-  if (typeof window === "undefined") return EMPTY;
-  let r: string | null = null;
-  try {
-    r = window.localStorage.getItem(KEY);
-  } catch {
-    return cache;
-  }
-  if (r === raw) return cache;
-  raw = r;
-  try {
-    cache = r ? { ...EMPTY, ...(JSON.parse(r) as DemoState) } : EMPTY;
-  } catch {
-    cache = EMPTY;
-  }
-  return cache;
-}
-
-function write(next: DemoState) {
-  cache = next;
-  raw = JSON.stringify(next);
-  try {
-    window.localStorage.setItem(KEY, raw);
-  } catch {
-    // Storage full or blocked — keep working in memory.
-  }
-  listeners.forEach((l) => l());
-}
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  const onStorage = (e: StorageEvent) => e.key === KEY && cb();
-  window.addEventListener("storage", onStorage);
-  return () => {
-    listeners.delete(cb);
-    window.removeEventListener("storage", onStorage);
-  };
-}
-
-export function useDemo() {
-  return useSyncExternalStore(subscribe, read, () => EMPTY);
-}
-
-/** False during server render / hydration, true once running in the browser. */
-export function useHydrated() {
-  return useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false
-  );
-}
-
 /* ───────────── Helpers ───────────── */
 
 export const dayKey = (d = new Date()) => {
@@ -150,6 +79,7 @@ export const newData = (): UserData => ({
 });
 
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+export const newId = uid;
 
 export const normEmail = (e: string) => e.trim().toLowerCase();
 
@@ -163,83 +93,178 @@ export const formatPhone = (p: string) => {
 
 export const maskPhone = (dial: string, num: string) => `${dial} ${num.slice(0, 2)}•••••${num.slice(-3)}`;
 
+/** False during server render / hydration, true once running in the browser. */
+export function useHydrated() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+}
+
+/* ───────────── Store ───────────── */
+
+type MeState = { status: "idle" | "loading" | "ready" | "anon" | "error"; user: User | null; data: UserData | null };
+const SERVER: MeState = { status: "idle", user: null, data: null };
+let me: MeState = SERVER;
+const listeners = new Set<() => void>();
+const emit = (next: MeState) => {
+  me = next;
+  listeners.forEach((l) => l());
+};
+const subscribe = (cb: () => void) => {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+};
+
+let pending = 0;
+let queue: Promise<unknown> = Promise.resolve();
+
+async function refresh() {
+  if (pending) return; // don't overwrite changes that are still saving
+  try {
+    const res = await fetch("/api/me", { cache: "no-store" });
+    if (pending) return;
+    if (res.status === 401) return emit({ status: "anon", user: null, data: null });
+    if (!res.ok) throw new Error(String(res.status));
+    const j = (await res.json()) as { user: User; data: UserData };
+    emit({ status: "ready", user: j.user, data: j.data });
+  } catch {
+    if (me.status !== "ready") emit({ ...me, status: "error" });
+  }
+}
+
+let started = false;
+function start() {
+  if (started || typeof window === "undefined") return;
+  started = true;
+  emit({ ...me, status: me.status === "idle" ? "loading" : me.status });
+  refresh();
+  const tick = () => document.visibilityState === "visible" && me.status !== "anon" && refresh();
+  window.setInterval(tick, 20000);
+  window.addEventListener("focus", tick);
+  document.addEventListener("visibilitychange", tick);
+}
+
+/** Run saves one after another; apply the server's copy once nothing else is waiting. */
+function enqueue(job: () => Promise<{ user: User; data: UserData } | null>) {
+  pending++;
+  queue = queue
+    .then(job)
+    .then((res) => {
+      pending--;
+      if (res && pending === 0) emit({ status: "ready", user: res.user, data: res.data });
+    })
+    .catch(() => {
+      pending--;
+      if (pending === 0) refresh(); // fall back to the server's truth
+    });
+}
+
+async function patchMe(body: unknown) {
+  const res = await fetch("/api/me", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(String(res.status));
+  return (await res.json()) as { user: User; data: UserData };
+}
+
+/** Work out what changed between two copies of the data and send just that. */
+function save(prev: UserData, next: UserData) {
+  const body: Record<string, unknown> = {};
+  if (next.profile !== prev.profile && next.profile) body.profile = next.profile;
+  if (next.weights !== prev.weights) body.weights = next.weights;
+  const days: Record<string, DayLog> = {};
+  for (const [k, v] of Object.entries(next.days)) if (v !== prev.days[k]) days[k] = v;
+  if (Object.keys(days).length) body.days = days;
+  const seen = new Set(prev.messages.map((m) => m.id));
+  const msgs = next.messages.filter((m) => !seen.has(m.id) && m.from === "me");
+  if (msgs.length) body.messages = msgs.map((m) => ({ id: m.id, text: m.text }));
+
+  const oldPhotos = new Set(prev.photos.map((p) => p.id));
+  const newPhotos = new Set(next.photos.map((p) => p.id));
+  const added = next.photos.filter((p) => !oldPhotos.has(p.id) && p.src.startsWith("data:"));
+  const removed = prev.photos.filter((p) => !newPhotos.has(p.id));
+
+  if (!Object.keys(body).length && !added.length && !removed.length) return;
+  enqueue(async () => {
+    for (const p of added) {
+      const r = await fetch("/api/me/photos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: p.id, date: p.date, dataUrl: p.src }) });
+      if (!r.ok) throw new Error("photo");
+    }
+    for (const p of removed) await fetch(`/api/me/photos/${encodeURIComponent(p.id)}`, { method: "DELETE" });
+    return patchMe(body); // returns the fresh copy (also when only photos changed)
+  });
+}
+
 /* ───────────── Auth ───────────── */
 
-export type AuthResult = { ok: true } | { ok: false; error: string; field?: "email" | "phone" };
+export type StartResult = { ok: true; devCode?: string } | { ok: false; error: string; field?: "email" | "phone" | "name"; wait?: number };
 
-/** Check a sign-up before sending the code. */
-export function checkSignup(email: string, phone: string): AuthResult {
-  const s = read();
-  if (s.users.some((u) => u.email === normEmail(email))) return { ok: false, field: "email", error: "An account with this email already exists. Log in instead." };
-  if (s.users.some((u) => u.phone === phone)) return { ok: false, field: "phone", error: "This phone number is already registered. Log in instead." };
-  return { ok: true };
-}
-
-export function completeSignup(input: { name: string; email: string; phone: string; plan: PlanId }) {
-  const s = read();
-  const user: User = { id: uid(), name: input.name.trim(), email: normEmail(input.email), phone: input.phone, plan: input.plan, createdAt: Date.now() };
-  write({ users: [...s.users, user], session: user.id, data: { ...s.data, [user.id]: newData() } });
-  return user;
-}
-
-/** Both email and phone must belong to the same account. */
-export function checkLogin(email: string, phone: string): AuthResult {
-  const s = read();
-  const byEmail = s.users.find((u) => u.email === normEmail(email));
-  if (!byEmail) {
-    if (s.users.some((u) => u.phone === phone)) return { ok: false, field: "email", error: "That email doesn't match the account for this phone number." };
-    return { ok: false, error: "No account found with this email and phone. Sign up first?" };
+/** Check the details and send a sign-in code. In dummy mode the code comes back as `devCode`. */
+export async function startAuth(input: { mode: "signup" | "login"; name?: string; email: string; phone: string; plan?: PlanId }): Promise<StartResult> {
+  try {
+    const res = await fetch("/api/auth/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+    return (await res.json()) as StartResult;
+  } catch {
+    return { ok: false, error: "Couldn't reach the server. Check your connection." };
   }
-  if (byEmail.phone !== phone) return { ok: false, field: "phone", error: "This phone number doesn't match the account for that email." };
-  return { ok: true };
 }
 
-export function completeLogin(email: string) {
-  const s = read();
-  const u = s.users.find((x) => x.email === normEmail(email));
-  if (u) write({ ...s, session: u.id });
-  return u ?? null;
+export type VerifyResult = { ok: true; isNew: boolean } | { ok: false; error: string; wrong?: boolean };
+
+export async function verifyAuth(email: string, code: string): Promise<VerifyResult> {
+  try {
+    const res = await fetch("/api/auth/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code }) });
+    const j = (await res.json()) as VerifyResult;
+    if (j.ok) {
+      emit({ status: "loading", user: null, data: null });
+      await refresh();
+    }
+    return j;
+  } catch {
+    return { ok: false, error: "Couldn't reach the server. Check your connection." };
+  }
 }
 
-export function logout() {
-  write({ ...read(), session: null });
+export async function logout() {
+  emit({ status: "anon", user: null, data: null });
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch {
+    // cookie clears on the next successful request
+  }
 }
 
 /* ───────────── Session hook ───────────── */
 
 export function useSession() {
-  const hydrated = useHydrated();
-  const s = useDemo();
-  const user = s.users.find((u) => u.id === s.session) ?? null;
-  const data = user ? s.data[user.id] ?? newData() : null;
+  const s = useSyncExternalStore(subscribe, () => me, () => SERVER);
+  useEffect(start, []);
+  const hydrated = s.status === "ready" || s.status === "anon";
+  const { user, data } = s;
 
   const update = (fn: (d: UserData) => UserData) => {
-    const cur = read();
-    const id = cur.session;
-    if (!id) return;
-    write({ ...cur, data: { ...cur.data, [id]: fn(cur.data[id] ?? newData()) } });
+    if (!me.data) return;
+    const prev = me.data;
+    const next = fn(prev);
+    emit({ ...me, data: next });
+    save(prev, next);
   };
 
   const updateDay = (key: string, fn: (d: DayLog) => DayLog) =>
     update((d) => ({ ...d, days: { ...d.days, [key]: fn(d.days[key] ?? emptyDay()) } }));
 
   const updateUser = (patch: Partial<Pick<User, "name" | "plan">>) => {
-    const cur = read();
-    write({ ...cur, users: cur.users.map((u) => (u.id === cur.session ? { ...u, ...patch } : u)) });
+    if (!me.user) return;
+    emit({ ...me, user: { ...me.user, ...patch } });
+    enqueue(() => patchMe({ user: patch }));
   };
 
   /** Wipe this account's dashboard data (keeps the account). */
   const resetData = () => {
-    const cur = read();
-    if (!cur.session) return;
-    write({ ...cur, data: { ...cur.data, [cur.session]: newData() } });
+    if (!me.data) return;
+    emit({ ...me, data: newData() });
+    enqueue(() => patchMe({ reset: true }));
   };
 
   return { hydrated, user, data, update, updateDay, updateUser, resetData };
 }
-
-export const newId = uid;
-
-/** Low-level access for the admin panel (lib/admin.ts). Screens should use the hooks. */
-export const readState = read;
-export const writeState = write;

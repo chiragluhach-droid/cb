@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, ClipboardCheck, CreditCard, LayoutGrid, Loader2, LogOut, MessageCircle, Users } from "lucide-react";
 import { SealLogo } from "@/components/brand/SealLogo";
 import { CoachAvatar } from "@/components/app/CoachAvatar";
-import { adminSignOut, ensureSeeded, useAdmin } from "@/lib/admin";
+import { adminSignOut, useAdmin } from "@/lib/admin";
 import { coach } from "@/lib/site";
 
 export default function AdminShell({ children }: { children: ReactNode }) {
@@ -18,7 +18,6 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     if (!signedIn) router.replace("/admin/login");
-    else ensureSeeded();
   }, [hydrated, signedIn, router]);
 
   if (!hydrated || !signedIn) {

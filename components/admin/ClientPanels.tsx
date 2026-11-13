@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Check, Droplet, ExternalLink, Footprints, Mail, Phone, Scale, Utensils } from "lucide-react";
+import { Check, Droplet, Footprints, Mail, Phone, Scale, Utensils } from "lucide-react";
 import { Card, CardTitle } from "@/components/app/ui";
 import { WeightChart, fmtDay } from "@/components/app/WeightChart";
 import { stepGoal } from "@/components/app/meals";
 import { activityLabel, condLabel, dietLabel, goalLabel, planLabel } from "@/components/admin/bits";
 import { ClientRow, saveCoachNotes } from "@/lib/admin";
-import { completeLogin, dayKey, formatPhone } from "@/lib/demo-store";
+import { dayKey, formatPhone } from "@/lib/demo-store";
 import { slotSplit, targets } from "@/lib/engine";
 
 const lastDays = (n: number) => Array.from({ length: n }, (_, i) => dayKey(new Date(Date.now() - (n - 1 - i) * 86400000)));
@@ -106,7 +105,6 @@ export function ClientProgress({ row }: { row: ClientRow }) {
 }
 
 export function ClientProfile({ row }: { row: ClientRow }) {
-  const router = useRouter();
   const { user, data } = row;
   const p = data.profile;
   const [notes, setNotes] = useState(data.coachNotes ?? "");
@@ -137,11 +135,6 @@ export function ClientProfile({ row }: { row: ClientRow }) {
         ["Training", p.workoutPlace === "gym" ? "Gym" : "Home"],
       ]
     : [];
-
-  const viewAsClient = () => {
-    completeLogin(user.email);
-    window.open("/dashboard", "_blank");
-  };
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
@@ -214,13 +207,6 @@ export function ClientProfile({ row }: { row: ClientRow }) {
           )}
         </Card>
 
-        <button onClick={viewAsClient} className="flex w-full items-center justify-between rounded-[1.5rem] bg-white px-5 py-4 text-left text-sm ring-1 ring-ink/[0.06] transition-colors hover:ring-brand">
-          <span>
-            <span className="block font-semibold text-ink">See {user.name.split(" ")[0]}&apos;s dashboard</span>
-            <span className="block text-xs text-stone">Demo only — signs this browser in as the client, in a new tab.</span>
-          </span>
-          <ExternalLink size={16} className="shrink-0 text-ink/40" />
-        </button>
       </div>
     </div>
   );

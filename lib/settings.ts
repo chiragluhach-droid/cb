@@ -1,108 +1,102 @@
 /*
- * Admin › Subscriptions settings — prices, plan contents, discount codes and
- * checkout mode. DEMO: saved in this browser's localStorage, so a change made
- * in the admin panel shows on the public site in the same browser.
+ * Admin › Subscriptions settings in the browser — prices, plan contents and
+ * discount codes, stored in MongoDB via /api/settings.
  *
- * Defaults come from lib/plans.ts. When a real backend arrives, load and save
- * these through an API instead; screens only use `useSettings()` and the
- * helpers below.
+ * The root layout loads them on the server and primes this store
+ * (<SettingsBoot>), so prices are right on first paint. The coach's edits show
+ * instantly and save ~0.6s after typing stops.
  */
 
-import { useSyncExternalStore } from "react";
-import { CHECKOUT_MODE, Duration, PlanKind, discountCodes, ninetyDayExtras, plans } from "@/lib/plans";
+import { useEffect, useSyncExternalStore } from "react";
+import { Settings, defaultSettings } from "@/lib/settings-core";
 
-export type DiscountCode = { code: string; pct: number; active: boolean };
+export * from "@/lib/settings-core";
 
-export type PlanSettings = { name: string; tagline: string; monthly: number; features: string[] };
-
-export type Settings = {
-  checkout: "free" | "paid";
-  plans: Record<PlanKind, PlanSettings>;
-  ninetyDayExtras: string[];
-  codes: DiscountCode[];
-};
-
-export const defaultSettings: Settings = {
-  checkout: CHECKOUT_MODE,
-  plans: {
-    meal: { ...plans.meal, features: [...plans.meal.features] },
-    "meal-workout": { ...plans["meal-workout"], features: [...plans["meal-workout"].features] },
-  },
-  ninetyDayExtras: [...ninetyDayExtras],
-  codes: Object.entries(discountCodes).map(([code, c]) => ({ code, pct: c.pct, active: true })),
-};
-
-const KEY = "evowell.settings.v1";
 let cache: Settings = defaultSettings;
-let raw: string | null = null;
+let primed = false;
 const listeners = new Set<() => void>();
-
-function read(): Settings {
-  if (typeof window === "undefined") return defaultSettings;
-  let r: string | null = null;
-  try {
-    r = window.localStorage.getItem(KEY);
-  } catch {
-    return cache;
-  }
-  if (r === raw) return cache;
-  raw = r;
-  try {
-    const saved = r ? (JSON.parse(r) as Partial<Settings>) : {};
-    cache = {
-      ...defaultSettings,
-      ...saved,
-      plans: { ...defaultSettings.plans, ...(saved.plans ?? {}) },
-    };
-  } catch {
-    cache = defaultSettings;
-  }
-  return cache;
-}
-
-function write(next: Settings) {
+const emit = (next: Settings) => {
   cache = next;
-  raw = JSON.stringify(next);
-  try {
-    window.localStorage.setItem(KEY, raw);
-  } catch {
-    // Storage blocked — keep the change in memory for this visit.
-  }
   listeners.forEach((l) => l());
-}
-
-function subscribe(cb: () => void) {
+};
+const subscribe = (cb: () => void) => {
   listeners.add(cb);
-  const onStorage = (e: StorageEvent) => e.key === KEY && cb();
-  window.addEventListener("storage", onStorage);
-  return () => {
-    listeners.delete(cb);
-    window.removeEventListener("storage", onStorage);
-  };
+  return () => listeners.delete(cb);
+};
+
+/** Called during render by <SettingsBoot> with the server's copy. */
+export function primeSettings(s: Settings) {
+  // On the server every request re-renders with fresh values; in the browser, prime once.
+  if (typeof window === "undefined") {
+    cache = s;
+    return;
+  }
+  if (primed) return;
+  primed = true;
+  cache = s;
 }
 
-/** Current settings. Renders the defaults on the server, then the saved values. */
+/** Fetch the latest copy (includes discount codes when the coach is signed in). */
+export async function reloadSettings() {
+  try {
+    const res = await fetch("/api/settings", { cache: "no-store" });
+    if (res.ok) emit((await res.json()) as Settings);
+  } catch {
+    // keep what we have
+  }
+}
+
 export function useSettings() {
-  return useSyncExternalStore(subscribe, read, () => defaultSettings);
+  const s = useSyncExternalStore(subscribe, () => cache, () => cache);
+  useEffect(() => {
+    if (!primed) {
+      primed = true;
+      reloadSettings();
+    }
+  }, []);
+  return s;
 }
 
+let timer: ReturnType<typeof setTimeout> | undefined;
+export type SaveState = "idle" | "saving" | "saved" | "error";
+let saveState: SaveState = "idle";
+const saveListeners = new Set<() => void>();
+const setSave = (s: SaveState) => {
+  saveState = s;
+  saveListeners.forEach((l) => l());
+};
+/** "saving" / "saved" / "error" for the coach's Subscriptions page. */
+export const useSaveState = () =>
+  useSyncExternalStore(
+    (cb) => {
+      saveListeners.add(cb);
+      return () => saveListeners.delete(cb);
+    },
+    () => saveState,
+    () => "idle" as SaveState
+  );
+
+async function put(s: Settings) {
+  setSave("saving");
+  try {
+    const res = await fetch("/api/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(s) });
+    if (!res.ok) throw new Error(String(res.status));
+    setSave("saved");
+  } catch {
+    setSave("error");
+  }
+}
+
+/** Coach edit: show now, save shortly after typing stops. */
 export function updateSettings(fn: (s: Settings) => Settings) {
-  write(fn(read()));
+  emit(fn(cache));
+  setSave("saving");
+  clearTimeout(timer);
+  timer = setTimeout(() => put(cache), 600);
 }
 
 export function resetSettings() {
-  try {
-    window.localStorage.removeItem(KEY);
-  } catch {
-    // ignore
-  }
-  raw = null;
-  cache = defaultSettings;
-  listeners.forEach((l) => l());
+  clearTimeout(timer);
+  emit(defaultSettings);
+  put(defaultSettings);
 }
-
-/** 90 days costs the same as two months, so the third month is free. */
-export const priceFor = (s: Settings, kind: PlanKind, d: Duration) => (d === 30 ? s.plans[kind].monthly : s.plans[kind].monthly * 2);
-
-/** An active discount code, matched case-insensitively. */
-export const findCode = (s: Settings, code: string) => s.codes.find((c) => c.active && c.code === code.trim().toUpperCase()) ?? null;

@@ -4,12 +4,12 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ClipboardCheck, KeyRound, Loader2, MessageCircle, ShieldCheck, Wand2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, ClipboardCheck, KeyRound, Loader2, MessageCircle, ShieldCheck } from "lucide-react";
 import { SealLogo } from "@/components/brand/SealLogo";
 import { Seal } from "@/components/brand/Seal";
 import { RingMark } from "@/components/brand/Marks";
 import { CoachAvatar } from "@/components/app/CoachAvatar";
-import { ADMIN_CODE, ADMIN_EMAIL, adminSignIn, useAdmin } from "@/lib/admin";
+import { adminSignIn, useAdmin } from "@/lib/admin";
 import { coach } from "@/lib/site";
 
 const field =
@@ -19,7 +19,7 @@ export default function AdminLogin() {
   const router = useRouter();
   const { hydrated, signedIn } = useAdmin();
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -27,17 +27,16 @@ export default function AdminLogin() {
     if (hydrated && signedIn && !busy) router.replace("/admin");
   }, [hydrated, signedIn, busy, router]);
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setBusy(true);
-    setTimeout(() => {
-      if (adminSignIn(email, code)) router.push("/admin");
-      else {
-        setBusy(false);
-        setError("That email and passcode don't match the coach account.");
-      }
-    }, 600);
+    const res = await adminSignIn(email, password);
+    if (res.ok) router.push("/admin");
+    else {
+      setBusy(false);
+      setError(res.error || "That email and password don't match the coach account.");
+    }
   };
 
   return (
@@ -111,18 +110,17 @@ export default function AdminLogin() {
               <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="coach@…" className={field} />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-sm font-semibold text-ink">Passcode</span>
+              <span className="mb-1.5 block text-sm font-semibold text-ink">Password</span>
               <span className="relative block">
                 <KeyRound size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/35" />
                 <input
                   type="password"
-                  inputMode="numeric"
                   required
                   autoComplete="current-password"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  placeholder="6 digits"
-                  className={`${field} pl-11 tracking-[0.3em] placeholder:tracking-normal`}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Your coach password"
+                  className={`${field} pl-11`}
                 />
               </span>
             </label>
@@ -137,26 +135,6 @@ export default function AdminLogin() {
             </button>
           </form>
 
-          <div className="mt-6 flex items-start gap-3 rounded-2xl bg-mint p-4">
-            <Wand2 size={16} className="mt-0.5 shrink-0 text-brand-deep" />
-            <div className="text-sm text-brand-deep">
-              <p className="font-semibold">Demo coach account</p>
-              <p className="mt-0.5 text-brand-deep/75">
-                {ADMIN_EMAIL} · passcode {ADMIN_CODE}
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail(ADMIN_EMAIL);
-                  setCode(ADMIN_CODE);
-                  setError("");
-                }}
-                className="mt-2 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-brand-deep ring-1 ring-brand/20 transition-colors hover:bg-brand hover:text-white"
-              >
-                Fill in demo details
-              </button>
-            </div>
-          </div>
           <p className="mt-6 text-xs text-ink/40">Client? <Link href="/login" className="font-semibold text-ink/60 underline-offset-2 hover:underline">Log in to your dashboard</Link></p>
         </div>
       </div>

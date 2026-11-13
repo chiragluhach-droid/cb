@@ -6,7 +6,6 @@ import { CalendarCheck, Send, Video, X } from "lucide-react";
 import { CoachAvatar } from "@/components/app/CoachAvatar";
 import { coach } from "@/lib/site";
 import { newId, useSession } from "@/lib/demo-store";
-import { coachReply } from "@/lib/coach";
 import { parsePlan } from "@/lib/plans";
 
 const suggestions = ["Can I swap tonight's dinner?", "Wedding this weekend 😅", "Scale hasn't moved in 2 weeks", "Feeling hungry in the evenings"];
@@ -58,14 +57,10 @@ export default function CoachPage() {
 
   const send = (msg: string) => {
     const m = msg.trim();
-    if (!m || typing) return;
+    if (!m) return;
     setText("");
+    // Simone replies from the coach panel; new replies arrive on the next refresh (every ~20s).
     update((d) => ({ ...d, messages: [...d.messages, { id: newId(), from: "me", text: m, at: Date.now() }] }));
-    setTyping(true);
-    timer.current = setTimeout(() => {
-      setTyping(false);
-      update((d) => ({ ...d, messages: [...d.messages, { id: newId(), from: "coach", text: coachReply(m, user.name), at: Date.now() }] }));
-    }, 1400);
   };
 
   const book = (s: { day: string; label: string }) => {
@@ -198,7 +193,7 @@ export default function CoachPage() {
                   </button>
                 ))}
               </div>
-              <p className="mt-4 text-xs text-ink/40">Demo — picking a slot sends a booking request in the chat.</p>
+              <p className="mt-4 text-xs text-ink/40">Picking a slot sends a booking request to your coach in the chat.</p>
             </motion.div>
           </motion.div>
         )}

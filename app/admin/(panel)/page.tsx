@@ -226,7 +226,7 @@ export default function AdminOverview() {
           <Card>
             <CardTitle action={<Link href="/admin/subscriptions" className="text-xs font-semibold text-brand-deep">Manage</Link>}>Plans sold</CardTitle>
             <p className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-ink">{inr(booked)}</p>
-            <p className="text-xs text-stone">Plan value at current prices · demo, no real payments</p>
+            <p className="text-xs text-stone">Plan value at current prices · no online payments yet</p>
             <ul className="mt-5 space-y-2.5">
               {mix.map((m) => (
                 <li key={m.label} className="text-xs">

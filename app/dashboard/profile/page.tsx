@@ -178,11 +178,11 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <button onClick={() => setConfirmReset(true)} className="flex w-full items-center gap-3 rounded-2xl bg-[#F7F8F5] px-4 py-3.5 text-left text-sm font-semibold text-red-600 transition-colors hover:bg-red-50">
-                  <RotateCcw size={16} /> Reset demo data
+                  <RotateCcw size={16} /> Start over
                 </button>
               )}
             </div>
-            <p className="mt-4 text-xs text-ink/40">Demo account — everything is saved in this browser only.</p>
+            <p className="mt-4 text-xs text-ink/40">Your data is saved to your Evowell account, so it&apos;s the same on every device you log in from.</p>
           </Card>
         </div>
       </div>

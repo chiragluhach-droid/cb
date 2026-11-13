@@ -189,7 +189,7 @@ export default function ProgressPage() {
               </div>
             </>
           )}
-          <p className="mt-4 text-xs text-ink/40">Demo: photos are stored in this browser only (up to 12).</p>
+          <p className="mt-4 text-xs text-ink/40">Private to you and your coach. Your latest 12 photos are kept.</p>
         </Card>
       </div>
 
