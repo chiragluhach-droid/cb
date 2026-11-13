@@ -15,8 +15,12 @@ type Payload = { uid: string; role: "client" | "admin"; exp: number };
 
 const secret = () => {
   const s = process.env.SESSION_SECRET;
-  if (!s || s.length < 16) throw new Error("SESSION_SECRET is missing or too short");
-  return s;
+  if (s && s.length >= 16) return s;
+  // Fallback until SESSION_SECRET is set (e.g. on Vercel): derive a key from the
+  // database URI, which is also a server-only secret. Cookies stay signed.
+  const uri = process.env.MONGODB_URI;
+  if (uri) return createHash("sha256").update(`evowell-session:${uri}`).digest("hex");
+  throw new Error("Set SESSION_SECRET (or MONGODB_URI) on the server");
 };
 
 const b64 = (s: string | Buffer) => Buffer.from(s).toString("base64url");
