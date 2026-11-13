@@ -12,7 +12,7 @@ import { RingMark } from "@/components/brand/Marks";
 import { Seal } from "@/components/brand/Seal";
 import { photos, unsplash } from "@/lib/site";
 import { PlanId, parsePlan, plans } from "@/lib/plans";
-import { canUseApp, startAuth, useSession, verifyAuth } from "@/lib/demo-store";
+import { canUseApp, logout, startAuth, useSession, verifyAuth } from "@/lib/demo-store";
 
 type Mode = "login" | "signup";
 type Props = { initialMode: Mode; plan: string | null; name: string; email: string; phone: string; next: string | null };
@@ -373,7 +373,10 @@ export default function AuthScreen(props: Props) {
                 onClick={() => router.push(user && !canUseApp(user) ? `/checkout?plan=${user.plan}` : data?.profile ? "/dashboard" : "/onboarding")}
                 className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-brand py-4 text-sm font-semibold text-white transition-colors hover:bg-brand-deep"
               >
-                {data?.profile ? "Go to your dashboard" : "Finish your questionnaire"} <ArrowRight size={16} />
+                {user && !canUseApp(user) ? "Continue to payment" : data?.profile ? "Go to your dashboard" : "Finish your questionnaire"} <ArrowRight size={16} />
+              </button>
+              <button onClick={() => logout()} className="mt-4 w-full text-center text-sm font-semibold text-ink/50 underline-offset-2 transition-colors hover:text-ink hover:underline">
+                Not you? Log out
               </button>
             </motion.div>
           ) : (

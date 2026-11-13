@@ -130,14 +130,19 @@ const subscribe = (cb: () => void) => {
 let pending = 0;
 let queue: Promise<unknown> = Promise.resolve();
 
+/** Bumped on sign-out so a refresh that started before it can't sign the user back in. */
+let epoch = 0;
+
 async function refresh() {
   if (pending) return; // don't overwrite changes that are still saving
+  const started = epoch;
   try {
     const res = await fetch("/api/me", { cache: "no-store" });
-    if (pending) return;
+    if (pending || started !== epoch) return;
     if (res.status === 401) return emit({ status: "anon", user: null, data: null });
     if (!res.ok) throw new Error(String(res.status));
     const j = (await res.json()) as { user: User; data: UserData };
+    if (started !== epoch) return;
     emit({ status: "ready", user: j.user, data: j.data });
   } catch {
     if (me.status !== "ready") emit({ ...me, status: "error" });
@@ -163,7 +168,7 @@ function enqueue(job: () => Promise<{ user: User; data: UserData } | null>) {
     .then(job)
     .then((res) => {
       pending--;
-      if (res && pending === 0) emit({ status: "ready", user: res.user, data: res.data });
+      if (res && pending === 0 && me.status !== "anon") emit({ status: "ready", user: res.user, data: res.data });
     })
     .catch(() => {
       pending--;
@@ -239,6 +244,7 @@ export async function verifyAuth(email: string, code: string): Promise<VerifyRes
 export const reloadSession = () => refresh();
 
 export async function logout() {
+  epoch++;
   emit({ status: "anon", user: null, data: null });
   try {
     await fetch("/api/auth/logout", { method: "POST" });
