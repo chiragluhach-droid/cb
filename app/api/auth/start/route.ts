@@ -1,15 +1,16 @@
 import { randomInt } from "crypto";
 import { NextResponse } from "next/server";
+import { emailOn, sendSignInCode } from "@/lib/server/email";
 import { cols } from "@/lib/server/mongo";
 import { hashCode } from "@/lib/server/session";
 import { normEmail, validEmail, validName, validPhone, validPlan } from "@/lib/server/validate";
 
 /*
- * POST /api/auth/start — check the details, then issue a 6-digit sign-in code.
+ * POST /api/auth/start — check the details, then email a 6-digit sign-in code.
  *
- * EMAIL DELIVERY IS A DUMMY FOR NOW: the code is returned to the browser and
- * shown on screen instead of being emailed. To go live, send it by email in
- * `deliver()` (e.g. via Resend) and stop returning `devCode`.
+ * With RESEND_API_KEY set, the code is emailed (lib/server/email.ts). Without
+ * it (local dev, or before email is set up) the code is returned to the
+ * browser and shown on screen instead.
  */
 
 export const runtime = "nodejs";
@@ -17,10 +18,23 @@ export const runtime = "nodejs";
 const CODE_TTL_MIN = 10;
 const RESEND_AFTER_SEC = 30;
 
-async function deliver(email: string, code: string): Promise<{ devCode?: string }> {
-  void email;
-  return { devCode: code }; // dummy mode
+async function deliver(email: string, code: string, name: string | undefined, signup: boolean): Promise<{ devCode?: string }> {
+  if (!emailOn()) return { devCode: code }; // dummy mode
+  await sendSignInCode(email, code, { name, signup, minutes: CODE_TTL_MIN });
+  return {};
 }
+
+// Each code costs an email (free plan: 100 a day), so cap requests per IP: 6 per 10 minutes.
+const hits = new Map<string, number[]>();
+const limited = (ip: string) => {
+  const now = Date.now();
+  const recent = (hits.get(ip) ?? []).filter((t) => now - t < 600000);
+  recent.push(now);
+  hits.set(ip, recent);
+  return recent.length > 6;
+};
+
+const byName = (u: { name?: string } | null) => u?.name;
 
 const fail = (error: string, field?: "email" | "phone" | "name", status = 400) => NextResponse.json({ ok: false, error, field }, { status });
 
@@ -37,6 +51,8 @@ export async function POST(req: Request) {
   if (mode === "signup" && !validName(b.name)) return fail("Please enter your full name.", "name");
   const email = normEmail(b.email);
   const phone = b.phone;
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "local";
+  if (emailOn() && limited(ip)) return NextResponse.json({ ok: false, error: "Too many codes asked for. Try again in a few minutes.", wait: 120 }, { status: 429 });
 
   try {
     const { users, otps } = await cols();
@@ -69,7 +85,14 @@ export async function POST(req: Request) {
       },
       { upsert: true }
     );
-    const sent = await deliver(email, code);
+    let sent: { devCode?: string };
+    try {
+      sent = await deliver(email, code, mode === "signup" ? (b.name as string).trim() : byName(await users.findOne({ email })), mode === "signup");
+    } catch (e) {
+      console.error("sign-in email failed", e);
+      await otps.deleteOne({ _id: email }); // let them try again straight away
+      return fail("We couldn't send the email. Check the address and try again.", "email", 502);
+    }
     return NextResponse.json({ ok: true, ...sent });
   } catch (e) {
     console.error("auth/start failed", e);

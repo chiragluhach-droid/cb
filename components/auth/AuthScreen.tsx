@@ -537,6 +537,7 @@ export default function AuthScreen(props: Props) {
                         </motion.div>
                       )}
                     </AnimatePresence>
+                    {!devCode && <p className="mt-3 text-xs text-ink/45">Can&apos;t see it? It can take a minute — check your spam or Promotions folder too.</p>}
 
                     <div className="mt-6">
                       <OtpInput

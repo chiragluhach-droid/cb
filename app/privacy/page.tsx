@@ -41,6 +41,9 @@ export default function PrivacyPage() {
             <b className="text-ink">Vercel</b> — hosts the website.
           </li>
           <li>
+            <b className="text-ink">Google (Gmail) and Resend</b> — send sign-in codes and account emails.
+          </li>
+          <li>
             <b className="text-ink">Groq</b> — when your coach uses AI to draft a week of meals, your questionnaire answers (not your name, email or phone) are sent to Groq to generate
             the draft. Your coach reviews every draft.
           </li>
