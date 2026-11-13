@@ -121,12 +121,12 @@ export default function TodayPage() {
                 <span className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-ink">
                   <Num value={Math.max(0, t.kcal - kcal)} />
                 </span>
-                <span className="text-[11px] font-medium text-stone">kcal left</span>
+                <span className="text-[0.6875rem] font-medium text-stone">kcal left</span>
               </Ring>
               <div className="flex-1 space-y-4">
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/45">Eaten today</p>
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/45">Eaten today</p>
                     <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em]">
                       <Num value={kcal} /> <span className="text-base font-medium text-ink/40">/ {t.kcal.toLocaleString("en-IN")} kcal</span>
                     </p>
@@ -283,11 +283,11 @@ export default function TodayPage() {
               <div className="mb-3 flex items-center justify-between">
                 <span className="flex items-center gap-2.5">
                   <CoachAvatar className="h-8 w-8" online ring="ring-forest" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">From {coach.name}</span>
+                  <span className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">From {coach.name}</span>
                 </span>
                 <MessageCircle size={16} className="text-sprout" />
               </div>
-              <p className="line-clamp-3 text-[15px] leading-relaxed text-canvas/85">{lastCoach?.text ?? "Message your coach any time."}</p>
+              <p className="line-clamp-3 text-[0.9375rem] leading-relaxed text-canvas/85">{lastCoach?.text ?? "Message your coach any time."}</p>
               <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
                 Reply <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
               </p>

@@ -104,7 +104,7 @@ export default function AdminOverview() {
                         )}
                       </div>
                       <span
-                        className={`hidden shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold sm:inline-flex ${
+                        className={`hidden shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold sm:inline-flex ${
                           c.flags ? "bg-warn/20 text-[#8A5A00]" : "bg-mint text-brand-deep"
                         }`}
                       >
@@ -135,7 +135,7 @@ export default function AdminOverview() {
                       <li key={c.user.id}>
                         <Link href={`/admin/clients/${c.user.id}`} className="grid grid-cols-[minmax(0,9rem)_1fr_auto] items-center gap-3 sm:grid-cols-[minmax(0,11rem)_1fr_6rem]">
                           <span className="flex min-w-0 items-center gap-2.5">
-                            <ClientAvatar name={c.user.name} className="h-8 w-8 text-[11px]" />
+                            <ClientAvatar name={c.user.name} className="h-8 w-8 text-[0.6875rem]" />
                             <span className="truncate text-sm font-semibold text-ink">{c.user.name.split(" ")[0]}</span>
                           </span>
                           <span className="relative h-2.5 overflow-hidden rounded-full bg-ink/[0.06]">
@@ -171,7 +171,7 @@ export default function AdminOverview() {
           {/* Needs attention */}
           <Card className="bg-forest text-canvas ring-0">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">Needs attention</span>
+              <span className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">Needs attention</span>
               <AlertTriangle size={16} className="text-warn" />
             </div>
             {attention.length ? (
@@ -209,7 +209,7 @@ export default function AdminOverview() {
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center justify-between gap-2">
                           <span className="truncate text-sm font-semibold text-ink">{c.user.name}</span>
-                          <span className="shrink-0 text-[11px] text-stone">{c.lastMessage && timeAgo(c.lastMessage.at)}</span>
+                          <span className="shrink-0 text-[0.6875rem] text-stone">{c.lastMessage && timeAgo(c.lastMessage.at)}</span>
                         </span>
                         <span className="line-clamp-2 text-xs text-stone">{c.lastMessage?.text}</span>
                       </span>

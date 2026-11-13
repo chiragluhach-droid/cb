@@ -12,7 +12,7 @@ type Mode = "free" | "paid";
 type Props = { initialKind: PlanKind; initialDuration: Duration; mode?: Mode };
 
 const field =
-  "w-full rounded-2xl bg-white px-4 py-3.5 text-[15px] text-ink outline-none ring-1 ring-ink/10 transition-shadow placeholder:text-ink/35 focus:ring-2 focus:ring-brand";
+  "w-full rounded-2xl bg-white px-4 py-3.5 text-[0.9375rem] text-ink outline-none ring-1 ring-ink/10 transition-shadow placeholder:text-ink/35 focus:ring-2 focus:ring-brand";
 
 function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
   return (
@@ -79,7 +79,7 @@ function PaySheet({ amount, onClose, onResult }: { amount: number; onClose: () =
       >
         <div className="flex items-start justify-between">
           <div>
-            <p className="inline-flex items-center gap-1.5 rounded-full bg-warn/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8A5A00]">Demo payment</p>
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-warn/20 px-2.5 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-[#8A5A00]">Demo payment</p>
             <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.04em]">{inr(amount)}</p>
             <p className="text-sm text-stone">Evowell Nutrition & Training</p>
           </div>
@@ -383,7 +383,7 @@ export default function CheckoutClient({ initialKind, initialDuration, mode }: P
         {/* Summary */}
         <aside className="lg:col-span-5">
           <div className="rounded-[2rem] bg-white p-6 ring-1 ring-ink/10 lg:sticky lg:top-28 sm:p-7">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/45">Order summary</p>
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/45">Order summary</p>
             <div className="mt-4 flex items-start justify-between gap-4 border-b border-ink/10 pb-5">
               <div>
                 <p className="text-lg font-semibold tracking-[-0.02em]">{plans[kind].name}</p>

@@ -54,16 +54,16 @@ export function ChatThread({ clientId, name, messages, className = "" }: { clien
           const mine = m.from === "coach";
           return (
             <div key={m.id}>
-              {showDay && <p className="my-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/35">{dl}</p>}
+              {showDay && <p className="my-3 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-ink/35">{dl}</p>}
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
-                {!mine && <ClientAvatar name={name} className="h-7 w-7 text-[10px]" />}
+                {!mine && <ClientAvatar name={name} className="h-7 w-7 text-[0.625rem]" />}
                 <div
-                  className={`max-w-[85%] rounded-[1.25rem] px-4 py-2.5 text-[15px] leading-relaxed sm:max-w-[70%] ${
+                  className={`max-w-[85%] rounded-[1.25rem] px-4 py-2.5 text-[0.9375rem] leading-relaxed sm:max-w-[70%] ${
                     mine ? "rounded-br-md bg-forest text-canvas" : "rounded-bl-md bg-white text-ink ring-1 ring-ink/[0.06]"
                   }`}
                 >
                   {m.text}
-                  <span className={`mt-1 block text-right text-[10px] ${mine ? "text-canvas/45" : "text-ink/35"}`}>{time(m.at)}</span>
+                  <span className={`mt-1 block text-right text-[0.625rem] ${mine ? "text-canvas/45" : "text-ink/35"}`}>{time(m.at)}</span>
                 </div>
                 {mine && <CoachAvatar className="h-7 w-7" />}
               </motion.div>
@@ -85,7 +85,7 @@ export function ChatThread({ clientId, name, messages, className = "" }: { clien
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={`Reply to ${name.split(" ")[0]}…`}
-            className="min-w-0 flex-1 rounded-full bg-[#F4F5F1] px-5 py-3.5 text-[15px] outline-none ring-1 ring-transparent transition-shadow placeholder:text-ink/35 focus:ring-brand"
+            className="min-w-0 flex-1 rounded-full bg-[#F4F5F1] px-5 py-3.5 text-[0.9375rem] outline-none ring-1 ring-transparent transition-shadow placeholder:text-ink/35 focus:ring-brand"
             aria-label="Message"
           />
           <button type="submit" disabled={!text.trim()} aria-label="Send" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand text-white transition-transform active:scale-90 disabled:opacity-40">

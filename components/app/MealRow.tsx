@@ -33,11 +33,11 @@ export function MealRow({
     <div className={`flex items-center gap-3 rounded-[1.25rem] p-2.5 pr-3 transition-colors sm:gap-4 sm:p-3 ${done ? "bg-mint/60" : "bg-[#F7F8F5]"}`}>
       <DishThumb dish={meal.dish} size="h-14 w-14 sm:h-16 sm:w-16" />
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">
+        <p className="flex items-center gap-2 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink/40">
           {meal.label} · {meal.time}
-          {meal.swapped && <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[9px] tracking-[0.1em] text-brand-deep">Swapped</span>}
+          {meal.swapped && <span className="rounded-full bg-brand/10 px-1.5 py-0.5 text-[0.5625rem] tracking-[0.1em] text-brand-deep">Swapped</span>}
         </p>
-        <p className={`truncate text-[15px] font-semibold tracking-[-0.01em] transition-colors ${done ? "text-ink/50 line-through decoration-ink/20" : "text-ink"}`}>
+        <p className={`truncate text-[0.9375rem] font-semibold tracking-[-0.01em] transition-colors ${done ? "text-ink/50 line-through decoration-ink/20" : "text-ink"}`}>
           {meal.dish ? meal.dish.name : "Your coach plans this one"}
         </p>
         {meal.dish && (
@@ -122,7 +122,7 @@ export function SwapSheet({
           >
             <div className="flex items-start justify-between gap-4 p-5 pb-3 sm:p-6 sm:pb-3">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/40">Swap a dish</p>
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/40">Swap a dish</p>
                 <p className="mt-1 text-xl font-semibold tracking-[-0.03em] text-ink">{title}</p>
                 <p className="mt-0.5 text-sm text-stone">Portions are adjusted to keep your calories on track.</p>
               </div>
@@ -144,12 +144,12 @@ export function SwapSheet({
                 <button key={o.dish.id} onClick={() => onPick(o.dish.id)} className="flex w-full items-center gap-3 rounded-[1.25rem] bg-white p-2.5 pr-4 text-left ring-1 ring-ink/[0.06] transition-all hover:ring-brand/40">
                   <DishThumb dish={o.dish} size="h-12 w-12" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[15px] font-semibold text-ink">{o.dish.name}</span>
+                    <span className="block truncate text-[0.9375rem] font-semibold text-ink">{o.dish.name}</span>
                     <span className="block truncate text-xs text-stone">{o.dish.serving}</span>
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block text-sm font-semibold tabular-nums">{o.kcal}</span>
-                    <span className="block text-[11px] font-semibold tabular-nums text-brand-deep">{o.protein}g P</span>
+                    <span className="block text-[0.6875rem] font-semibold tabular-nums text-brand-deep">{o.protein}g P</span>
                   </span>
                 </button>
               ))}

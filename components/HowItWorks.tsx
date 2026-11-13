@@ -2,7 +2,7 @@
 
 import { CSSProperties, useEffect, useRef } from "react";
 import Image from "next/image";
-import { animate, motion, MotionValue, useInView, useMotionValue, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { animate, motion, MotionValue, useMotionValue, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ClipboardList, MessageCircle, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
@@ -85,29 +85,40 @@ const READINGS = [72.4, 71.8, 71.1, 70.6, 69.9, 69.3, 68.8, 68.2];
 /** Glowing LCD digits that step to the next weigh-in every 2 seconds while in view. */
 function ScaleReadout() {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { margin: "-10% 0px" });
   const reduce = useReducedMotion();
   const kg = useMotionValue(READINGS[0]);
   const text = useTransform(kg, (v) => v.toFixed(1));
   const idx = useRef(0);
 
+  // Always moving: flicker past each reading, settle, pause briefly, next one.
   useEffect(() => {
     if (reduce) {
       kg.set(READINGS[READINGS.length - 1]);
       return;
     }
-    if (!inView) return;
     let c: ReturnType<typeof animate> | undefined;
-    const t = setInterval(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    let alive = true;
+    const step = () => {
+      if (!alive) return;
       idx.current = (idx.current + 1) % READINGS.length;
-      // Quick count to the new reading, like a scale settling.
-      c = animate(kg, READINGS[idx.current], { duration: idx.current === 0 ? 0.9 : 0.7, ease: [0.16, 1, 0.3, 1] });
-    }, 2000);
+      const target = READINGS[idx.current];
+      c = animate(kg, [kg.get(), target + 0.7, target - 0.4, target + 0.15, target], {
+        duration: 1.1,
+        times: [0, 0.3, 0.55, 0.8, 1],
+        ease: "easeOut",
+        onComplete: () => {
+          timer = setTimeout(step, 400);
+        },
+      });
+    };
+    timer = setTimeout(step, 400);
     return () => {
-      clearInterval(t);
+      alive = false;
+      clearTimeout(timer);
       c?.stop();
     };
-  }, [inView, reduce, kg]);
+  }, [reduce, kg]);
 
   return (
     <div
@@ -181,11 +192,11 @@ function StepCard({ step, i, total, progress }: { step: (typeof steps)[number]; 
         </div>
 
         <div className="flex flex-col justify-end px-2 pb-3 sm:px-3 lg:col-span-7 lg:px-0 lg:py-8 lg:pr-8">
-          <span className={`mb-4 w-fit rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${t.chip}`}>
+          <span className={`mb-4 w-fit rounded-full border px-3 py-1 text-[0.625rem] font-semibold uppercase tracking-[0.2em] ${t.chip}`}>
             Step {i + 1} / {total}
           </span>
           <h3 className="font-sans text-3xl font-semibold tracking-[-0.04em] sm:text-5xl lg:text-6xl">{step.title}</h3>
-          <p className={`mt-3 max-w-xl text-pretty text-[15px] leading-relaxed sm:mt-4 sm:text-lg ${t.muted}`}>{step.body}</p>
+          <p className={`mt-3 max-w-xl text-pretty text-[0.9375rem] leading-relaxed sm:mt-4 sm:text-lg ${t.muted}`}>{step.body}</p>
           <div className="mt-5 flex flex-wrap gap-2 sm:mt-6">
             {step.tags.map((tag) => (
               <span key={tag} className={`rounded-full border px-3.5 py-1.5 text-xs font-medium ${t.chip}`}>

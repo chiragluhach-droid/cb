@@ -54,15 +54,15 @@ function PlanEditor({ kind, s }: { kind: PlanKind; s: Settings }) {
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/40">Plan</p>
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/40">Plan</p>
           <p className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-ink">{p.name}</p>
         </div>
-        <span className="rounded-full bg-mint px-2.5 py-1 text-[11px] font-semibold text-brand-deep">30 & 90 days</span>
+        <span className="rounded-full bg-mint px-2.5 py-1 text-[0.6875rem] font-semibold text-brand-deep">30 & 90 days</span>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="block rounded-2xl bg-forest p-4 text-canvas">
-          <span className="text-[11px] font-semibold text-canvas/55">Monthly price</span>
+          <span className="text-[0.6875rem] font-semibold text-canvas/55">Monthly price</span>
           <span className="mt-1 flex items-baseline gap-1">
             <span className="text-2xl font-semibold text-sprout">₹</span>
             <input
@@ -77,13 +77,13 @@ function PlanEditor({ kind, s }: { kind: PlanKind; s: Settings }) {
           </span>
         </label>
         <div className="rounded-2xl bg-[#F7F8F5] p-4">
-          <p className="text-[11px] font-semibold text-stone">30-day price</p>
+          <p className="text-[0.6875rem] font-semibold text-stone">30-day price</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-ink">{inr(priceFor(s, kind, 30))}</p>
         </div>
         <div className="rounded-2xl bg-[#F7F8F5] p-4">
-          <p className="text-[11px] font-semibold text-stone">90-day price</p>
+          <p className="text-[0.6875rem] font-semibold text-stone">90-day price</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-ink">{inr(p90)}</p>
-          <p className="text-[11px] text-brand-deep">saves {inr(p.monthly * 3 - p90)}</p>
+          <p className="text-[0.6875rem] text-brand-deep">saves {inr(p.monthly * 3 - p90)}</p>
         </div>
       </div>
 

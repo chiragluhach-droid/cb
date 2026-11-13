@@ -117,7 +117,7 @@ export default function ProfilePage() {
 
         <div className="space-y-4 lg:col-span-5 lg:space-y-6">
           <Card className="bg-forest text-canvas ring-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">Your plan</p>
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">Your plan</p>
             <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{settings.plans[plan.kind].name}</p>
             <p className="text-sm text-canvas/55">
               {plan.duration}-day programme · {inr(priceFor(settings, plan.kind, plan.duration))} one-time
@@ -131,11 +131,11 @@ export default function ProfilePage() {
             <div className="mt-5 grid grid-cols-2 gap-2">
               <div className="rounded-2xl bg-canvas/[0.06] p-3">
                 <p className="text-lg font-semibold tabular-nums text-sprout">{t.kcal.toLocaleString("en-IN")}</p>
-                <p className="text-[11px] text-canvas/50">kcal / day</p>
+                <p className="text-[0.6875rem] text-canvas/50">kcal / day</p>
               </div>
               <div className="rounded-2xl bg-canvas/[0.06] p-3">
                 <p className="text-lg font-semibold tabular-nums">{t.protein}g</p>
-                <p className="text-[11px] text-canvas/50">protein / day</p>
+                <p className="text-[0.6875rem] text-canvas/50">protein / day</p>
               </div>
             </div>
             {(plan.kind === "meal" || plan.duration === 30) && (

@@ -56,7 +56,7 @@ function Field({ label, icon, error, children }: { label: string; icon: ReactNod
   );
 }
 
-const inputCls = "h-full min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink/30";
+const inputCls = "h-full min-w-0 flex-1 bg-transparent text-[0.9375rem] text-ink outline-none placeholder:text-ink/30";
 
 /** Six boxes; typing advances, backspace goes back, pasting fills all. */
 function OtpInput({ value, onChange, error, disabled }: { value: string; onChange: (v: string) => void; error: boolean; disabled: boolean }) {
@@ -309,9 +309,16 @@ export default function AuthScreen(props: Props) {
       {/* Visual — phones: compact band */}
       <div className="relative isolate overflow-hidden bg-forest px-6 pb-14 pt-6 text-canvas lg:hidden">
         <div aria-hidden className="absolute -right-24 -top-24 -z-10 h-72 w-72 rounded-full bg-brand/30 blur-3xl" />
-        <motion.div aria-hidden className="absolute -right-10 top-10 -z-10 h-44 w-44 opacity-80" style={{ originX: 29 / 64, originY: 0.5 }} animate={{ rotate: 360 }} transition={{ duration: 40, repeat: Infinity, ease: "linear" }}>
-          <RingMark className="h-full w-full" ink="#8AF0A0" leaf="#FAFAF8" track="rgba(250,250,248,0.07)" vein="#16A34A" />
-        </motion.div>
+        {/* Ring with the spinning seal in its hole (ring centre is 29/64 across the box).
+            Scales with the fluid base size in globals.css, like everything else. */}
+        <div aria-hidden className="absolute -right-5 top-4 -z-10 h-44 w-44">
+          <motion.div className="h-full w-full opacity-80" style={{ originX: 29 / 64, originY: 0.5 }} animate={{ rotate: 360 }} transition={{ duration: 40, repeat: Infinity, ease: "linear" }}>
+            <RingMark className="h-full w-full" ink="#8AF0A0" leaf="#FAFAF8" track="rgba(250,250,248,0.07)" vein="#16A34A" />
+          </motion.div>
+          <span className="absolute left-[28.3%] top-[33%] h-[34%] w-[34%]">
+            <Seal className="h-full w-full" color="#FAFAF8" spin="reverse" />
+          </span>
+        </div>
         <Link href="/" aria-label="Evowell home" className="inline-block">
           <SealLogo tone="dark" />
         </Link>
@@ -386,7 +393,7 @@ export default function AuthScreen(props: Props) {
                     className="mt-8"
                   >
                     <h1 className="text-4xl font-medium tracking-[-0.055em] text-ink sm:text-[2.75rem]">{mode === "login" ? "Welcome back." : "Create your account."}</h1>
-                    <p className="mt-2 text-[15px] leading-relaxed text-stone">
+                    <p className="mt-2 text-[0.9375rem] leading-relaxed text-stone">
                       {mode === "login"
                         ? "Enter the email and phone number on your account. We'll text you a code."
                         : "Email and phone are both needed — your coach uses them to reach you."}
@@ -421,7 +428,7 @@ export default function AuthScreen(props: Props) {
                             value={dial}
                             onChange={(e) => setDial(e.target.value)}
                             aria-label="Country code"
-                            className="h-full appearance-none bg-transparent pr-5 text-[15px] font-semibold text-ink outline-none"
+                            className="h-full appearance-none bg-transparent pr-5 text-[0.9375rem] font-semibold text-ink outline-none"
                           >
                             {dials.map((d) => (
                               <option key={d.code} value={d.code}>
@@ -489,7 +496,7 @@ export default function AuthScreen(props: Props) {
                       <Phone size={24} />
                     </span>
                     <h1 className="mt-6 text-4xl font-medium tracking-[-0.055em] text-ink">Check your phone.</h1>
-                    <p className="mt-2 text-[15px] leading-relaxed text-stone">
+                    <p className="mt-2 text-[0.9375rem] leading-relaxed text-stone">
                       Enter the 6-digit code sent to <b className="whitespace-nowrap text-ink">{maskPhone(dial, num)}</b>.
                     </p>
 

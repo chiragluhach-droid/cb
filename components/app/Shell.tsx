@@ -80,7 +80,7 @@ export default function Shell({ children }: { children: ReactNode }) {
               <Link
                 key={n.href}
                 href={n.href}
-                className={`relative flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[15px] font-semibold transition-colors ${on ? "text-canvas" : "text-ink/60 hover:bg-ink/[0.04] hover:text-ink"}`}
+                className={`relative flex items-center gap-3 rounded-2xl px-3.5 py-3 text-[0.9375rem] font-semibold transition-colors ${on ? "text-canvas" : "text-ink/60 hover:bg-ink/[0.04] hover:text-ink"}`}
               >
                 {on && <motion.span layoutId="side-pill" className="absolute inset-0 rounded-2xl bg-forest" transition={{ type: "spring", stiffness: 450, damping: 36 }} />}
                 <Icon size={18} className={`relative ${on ? "text-sprout" : ""}`} />
@@ -93,7 +93,7 @@ export default function Shell({ children }: { children: ReactNode }) {
 
         <div className="mt-auto space-y-4">
           <div className="rounded-[1.5rem] bg-mint p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-deep/70">{plans[plan.kind].name}</p>
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-brand-deep/70">{plans[plan.kind].name}</p>
             <p className="mt-1 text-sm font-semibold text-ink">
               Day {day} <span className="font-medium text-ink/45">of {total}</span>
             </p>
@@ -139,7 +139,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             const on = isActive(n.href);
             const Icon = n.icon;
             return (
-              <Link key={n.href} href={n.href} className={`relative flex flex-col items-center gap-0.5 rounded-2xl py-1.5 text-[9.5px] font-semibold transition-colors ${on ? "text-brand" : "text-ink/45"}`}>
+              <Link key={n.href} href={n.href} className={`relative flex flex-col items-center gap-0.5 rounded-2xl py-1.5 text-[0.59375rem] font-semibold transition-colors ${on ? "text-brand" : "text-ink/45"}`}>
                 {on && <motion.span layoutId="tab-pill" className="absolute inset-x-3 top-0 h-[3px] rounded-full bg-brand" transition={{ type: "spring", stiffness: 450, damping: 36 }} />}
                 <span className="relative">
                   <Icon size={18} />

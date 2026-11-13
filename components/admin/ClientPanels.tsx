@@ -42,7 +42,7 @@ export function ClientProgress({ row }: { row: ClientRow }) {
               <Icon size={16} className="text-brand" />
               <p className={`mt-3 text-2xl font-semibold tabular-nums tracking-[-0.04em] text-ink ${s.tone}`}>{s.value}</p>
               <p className="text-xs font-semibold text-ink">{s.label}</p>
-              <p className="text-[11px] text-stone">{s.note}</p>
+              <p className="text-[0.6875rem] text-stone">{s.note}</p>
             </Card>
           );
         })}
@@ -63,18 +63,18 @@ export function ClientProgress({ row }: { row: ClientRow }) {
               return (
                 <div key={k} title={`${fmtDay(k)} · ${n}/${slotSplit.length} meals`} className="flex flex-col items-center gap-1">
                   <span
-                    className={`flex aspect-square w-full items-center justify-center rounded-lg text-[11px] font-bold tabular-nums ${
+                    className={`flex aspect-square w-full items-center justify-center rounded-lg text-[0.6875rem] font-bold tabular-nums ${
                       !d ? "bg-ink/[0.04] text-ink/25" : n === slotSplit.length ? "bg-brand text-white" : n >= 2 ? "bg-brand/40 text-forest" : "bg-warn/40 text-forest"
                     }`}
                   >
                     {d ? n : "·"}
                   </span>
-                  <span className="text-[9px] text-ink/40">{new Date(`${k}T00:00:00`).getDate()}</span>
+                  <span className="text-[0.5625rem] text-ink/40">{new Date(`${k}T00:00:00`).getDate()}</span>
                 </div>
               );
             })}
           </div>
-          <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-stone">
+          <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.6875rem] text-stone">
             <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-brand" /> all meals</span>
             <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-brand/40" /> 2–3</span>
             <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-warn/40" /> 0–1</span>
@@ -93,7 +93,7 @@ export function ClientProgress({ row }: { row: ClientRow }) {
                 <div key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-ink/[0.04]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={p.src} alt={`Progress photo, ${fmtDay(p.date)}`} className="h-full w-full object-cover" />
-                  <span className="absolute bottom-1.5 left-1.5 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-white">{fmtDay(p.date)}</span>
+                  <span className="absolute bottom-1.5 left-1.5 rounded-full bg-black/55 px-2 py-0.5 text-[0.625rem] font-semibold text-white">{fmtDay(p.date)}</span>
                 </div>
               ))}
           </div>
@@ -202,7 +202,7 @@ export function ClientProfile({ row }: { row: ClientRow }) {
         </Card>
 
         <Card className="bg-forest text-canvas ring-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">Subscription</p>
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">Subscription</p>
           <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{planLabel(user.plan)}</p>
           <p className="text-sm text-canvas/55">
             Joined {new Date(user.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · started {fmtDay(data.startDate)}

@@ -26,7 +26,7 @@ export const statusMeta: Record<ClientStatus, { label: string; cls: string; dot:
 export function StatusPill({ status, className = "" }: { status: ClientStatus; className?: string }) {
   const m = statusMeta[status];
   return (
-    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${m.cls} ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold ${m.cls} ${className}`}>
       <span className={`h-1.5 w-1.5 rounded-full ${m.dot}`} />
       {m.label}
     </span>
@@ -65,7 +65,7 @@ export function ProfileTags({ profile, dark = false }: { profile: Profile; dark?
       {tags.map((t, i) => (
         <span
           key={t}
-          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+          className={`rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${
             i > 1 ? (dark ? "bg-warn/20 text-warn" : "bg-warn/15 text-[#8A5A00]") : dark ? "bg-canvas/10 text-canvas/70" : "bg-ink/[0.05] text-ink/60"
           }`}
         >

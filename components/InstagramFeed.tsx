@@ -48,7 +48,7 @@ export default function InstagramFeed() {
         <div className="mb-8 flex items-end justify-between gap-6 lg:mb-14">
           <div>
             <Reveal>
-              <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.24em] text-ink">
+              <span className="flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.24em] text-ink">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand" />
                 The feed
               </span>
@@ -90,7 +90,7 @@ export default function InstagramFeed() {
                   <div className="relative aspect-square overflow-hidden rounded-xl">
                     <Image src={unsplash(t.img, 400)} alt="" fill sizes="160px" className="object-cover transition-transform duration-700 group-hover:scale-110" />
                   </div>
-                  <span className={`absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.1em] shadow-lg lg:text-[11px] ${chipTone[i]}`}>
+                  <span className={`absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] shadow-lg lg:text-[0.6875rem] ${chipTone[i]}`}>
                     {t.label}
                   </span>
                 </motion.div>
@@ -128,7 +128,7 @@ export default function InstagramFeed() {
             <p className="mt-6 font-sans text-5xl font-normal tracking-[-0.05em] sm:text-6xl lg:text-7xl">
               Coming <span className="font-serif italic text-sprout">soon.</span>
             </p>
-            <p className="mt-3 max-w-xs text-[11px] uppercase leading-relaxed tracking-[0.28em] text-canvas/50">
+            <p className="mt-3 max-w-xs text-[0.6875rem] uppercase leading-relaxed tracking-[0.28em] text-canvas/50">
               Recipes, swaps & home workouts
             </p>
             <span className="mt-7 inline-flex items-center gap-2 rounded-full bg-sprout px-6 py-3 text-sm font-bold text-forest transition-transform duration-300 group-hover:-rotate-2 group-hover:scale-105">

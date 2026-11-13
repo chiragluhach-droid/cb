@@ -14,6 +14,10 @@
 
 html {
   scroll-behavior: auto;
+  /* Everything is sized in rem, so this keeps phones narrower than the iPhone 16
+     (393px) looking the same, just proportionally smaller: 16px at 393px and up,
+     ~14.25px on a 350px Moto edge, never below 13px. */
+  font-size: clamp(13px, calc(100vw * 16 / 393), 16px);
 }
 
 html.lenis,
@@ -64,10 +68,10 @@ body {
     text-wrap: pretty;
   }
   .container-x {
-    @apply mx-auto w-full max-w-[1600px] px-6 max-[380px]:px-5 sm:px-10 lg:px-16;
+    @apply mx-auto w-full max-w-[1600px] px-6 sm:px-10 lg:px-16;
   }
   .eyebrow {
-    @apply text-[11px] font-medium uppercase tracking-[0.28em] text-stone;
+    @apply text-[0.6875rem] font-medium uppercase tracking-[0.28em] text-stone;
   }
 }
 

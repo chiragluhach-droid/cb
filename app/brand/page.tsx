@@ -94,7 +94,7 @@ export default function BrandPage() {
           <div className="flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 ring-1 ring-ink/10">
             <LogoMark className="h-10 w-10" />
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink/40">Chosen · 03 Ring</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-ink/40">Chosen · 03 Ring</p>
               <p className="text-sm font-semibold text-ink">App icon & favicon</p>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function BrandPage() {
                     <span className="flex items-center justify-center rounded-full bg-forest" style={{ width: px, height: px }}>
                       <Monogram className="h-[62%] w-[62%]" color="#FAFAF8" />
                     </span>
-                    <span className="text-[10px] tabular-nums text-ink/40">{px}px</span>
+                    <span className="text-[0.625rem] tabular-nums text-ink/40">{px}px</span>
                   </span>
                 ))}
               </Panel>
@@ -197,7 +197,7 @@ export default function BrandPage() {
                           <span style={{ width: px, height: px }} className="flex">
                             {c.mark("light", "h-full w-full")}
                           </span>
-                          <span className="text-[10px] tabular-nums text-ink/40">{px}px</span>
+                          <span className="text-[0.625rem] tabular-nums text-ink/40">{px}px</span>
                         </span>
                       ))}
                     </Panel>

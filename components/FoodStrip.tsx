@@ -49,7 +49,7 @@ function Pill({ item }: { item: Item }) {
       <span className="min-w-0">
         <span className="flex items-center gap-1.5">
           <DietMark nonveg={item.nonveg} />
-          <span className="whitespace-nowrap text-sm font-semibold tracking-[-0.01em] text-ink sm:text-[15px]">{item.name}</span>
+          <span className="whitespace-nowrap text-sm font-semibold tracking-[-0.01em] text-ink sm:text-[0.9375rem]">{item.name}</span>
         </span>
         <span className="mt-0.5 block whitespace-nowrap text-xs tabular-nums text-stone">
           {item.kcal} kcal · <span className="font-semibold text-brand-deep">{item.p}g protein</span>
@@ -84,7 +84,7 @@ export default function FoodStrip() {
     <section aria-label="Dishes we plan with" className="relative bg-canvas pb-6 pt-4 sm:pb-10">
       <div className="container-x mb-5 flex items-center gap-4 sm:mb-6">
         <span className="h-px flex-1 bg-ink/10" />
-        <p className="text-center text-[11px] font-bold uppercase tracking-[0.22em] text-stone">
+        <p className="text-center text-[0.6875rem] font-bold uppercase tracking-[0.22em] text-stone">
           Everyday Indian food, <span className="text-brand-deep">planned by your coach</span>
         </p>
         <span className="h-px flex-1 bg-ink/10" />

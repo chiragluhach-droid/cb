@@ -13,7 +13,7 @@ import { ADMIN_CODE, ADMIN_EMAIL, adminSignIn, useAdmin } from "@/lib/admin";
 import { coach } from "@/lib/site";
 
 const field =
-  "w-full rounded-2xl bg-white px-4 py-3.5 text-[15px] text-ink outline-none ring-1 ring-ink/10 transition-shadow placeholder:text-ink/35 focus:ring-2 focus:ring-brand";
+  "w-full rounded-2xl bg-white px-4 py-3.5 text-[0.9375rem] text-ink outline-none ring-1 ring-ink/10 transition-shadow placeholder:text-ink/35 focus:ring-2 focus:ring-brand";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -61,7 +61,7 @@ export default function AdminLogin() {
         </div>
 
         <div className="max-w-md">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-sprout">Coach panel</p>
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-sprout">Coach panel</p>
           <h1 className="mt-3 text-5xl font-medium leading-[0.98] tracking-[-0.055em]">
             Every plan, <span className="font-serif italic text-sprout">signed off by you.</span>
           </h1>
@@ -97,7 +97,7 @@ export default function AdminLogin() {
           <div className="flex items-center gap-3">
             <CoachAvatar className="h-14 w-14" online />
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ink/40">Coach sign in</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-ink/40">Coach sign in</p>
               <p className="text-lg font-semibold tracking-[-0.02em] text-ink">Welcome back, {coach.name}</p>
             </div>
           </div>

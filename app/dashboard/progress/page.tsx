@@ -81,7 +81,7 @@ export default function ProgressPage() {
         <Card className="lg:col-span-8">
           <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/45">Weight</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/45">Weight</p>
               <p className="mt-1 text-4xl font-semibold tabular-nums tracking-[-0.05em] text-ink">
                 {current.toFixed(1)} <span className="text-lg font-medium text-ink/40">kg</span>
               </p>
@@ -164,7 +164,7 @@ export default function ProgressPage() {
                     <div key={p.id} className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-ink/5">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={p.src} alt={i ? "Latest progress photo" : "First progress photo"} className="h-full w-full object-cover" />
-                      <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white">{i ? `Now · ${fmt(p.date)}` : `Start · ${fmt(p.date)}`}</span>
+                      <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2.5 py-1 text-[0.6875rem] font-semibold text-white">{i ? `Now · ${fmt(p.date)}` : `Start · ${fmt(p.date)}`}</span>
                     </div>
                   ))}
                 </div>
@@ -176,7 +176,7 @@ export default function ProgressPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={p.src} alt="" className="h-full w-full object-cover" />
                     </button>
-                    <span className="pointer-events-none absolute bottom-1.5 left-1.5 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-white">{fmt(p.date)}</span>
+                    <span className="pointer-events-none absolute bottom-1.5 left-1.5 rounded-full bg-black/55 px-2 py-0.5 text-[0.625rem] font-semibold text-white">{fmt(p.date)}</span>
                     <button
                       onClick={() => update((d) => ({ ...d, photos: d.photos.filter((x) => x.id !== p.id) }))}
                       aria-label="Delete photo"

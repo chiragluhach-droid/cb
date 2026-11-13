@@ -41,9 +41,9 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
       }`}
     >
       {featured && (
-        <span className="absolute -top-3 right-6 -rotate-3 rounded-full bg-sprout px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-forest">Most popular</span>
+        <span className="absolute -top-3 right-6 -rotate-3 rounded-full bg-sprout px-3 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-forest">Most popular</span>
       )}
-      <p className={`text-[11px] font-bold uppercase tracking-[0.2em] ${dark ? "text-canvas/50" : "text-ink/45"}`}>{duration}-day programme</p>
+      <p className={`text-[0.6875rem] font-bold uppercase tracking-[0.2em] ${dark ? "text-canvas/50" : "text-ink/45"}`}>{duration}-day programme</p>
       <h3 className="mt-2 text-3xl font-semibold tracking-[-0.04em]">{p.name}</h3>
       <p className={`mt-2 text-sm leading-relaxed ${dark ? "text-canvas/60" : "text-stone"}`}>{p.tagline}</p>
 
@@ -71,7 +71,7 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
 
       <ul className="mb-8 mt-7 space-y-3">
         {p.features.map((f) => (
-          <li key={f} className="flex items-start gap-3 text-[15px]">
+          <li key={f} className="flex items-start gap-3 text-[0.9375rem]">
             <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${dark ? "bg-sprout text-forest" : "bg-brand text-white"}`}>
               <Check size={11} strokeWidth={3.5} />
             </span>
@@ -89,7 +89,7 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
                 transition={{ duration: 0.35, delay: i * 0.05 }}
                 className="overflow-hidden"
               >
-                <span className={`flex items-start gap-3 text-[15px] font-semibold ${dark ? "text-sprout" : "text-brand-deep"}`}>
+                <span className={`flex items-start gap-3 text-[0.9375rem] font-semibold ${dark ? "text-sprout" : "text-brand-deep"}`}>
                   <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${dark ? "bg-canvas text-forest" : "bg-ink text-canvas"}`}>
                     {i === 0 ? <Video size={11} /> : <Sparkles size={11} />}
                   </span>
@@ -150,7 +150,7 @@ export default function Pricing() {
                   {duration === d && <motion.span layoutId="dur-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
                   <span className="relative flex items-center gap-2">
                     {d} days
-                    {d === 90 && <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${duration === d ? "bg-sprout text-forest" : "bg-brand/15 text-brand-deep"}`}>1 month free</span>}
+                    {d === 90 && <span className={`rounded-full px-2 py-0.5 text-[0.625rem] font-bold ${duration === d ? "bg-sprout text-forest" : "bg-brand/15 text-brand-deep"}`}>1 month free</span>}
                   </span>
                 </button>
               ))}

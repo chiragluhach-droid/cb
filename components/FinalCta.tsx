@@ -12,7 +12,7 @@ export default function FinalCta() {
           <Image src={unsplash(photos.thali, 1800)} alt="" fill sizes="100vw" className="-z-10 object-cover" />
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-forest via-forest/85 to-forest/30" />
           <Reveal>
-            <span className="-rotate-2 inline-block rounded-full bg-sprout px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-forest">Your plan in 24 hours</span>
+            <span className="-rotate-2 inline-block rounded-full bg-sprout px-3 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-forest">Your plan in 24 hours</span>
           </Reveal>
           <AnimatedHeading
             text="Ready to start / eating better?"

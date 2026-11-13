@@ -67,7 +67,7 @@ function Num({ value }: { value: number }) {
 }
 
 function Label({ children }: { children: ReactNode }) {
-  return <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/45">{children}</p>;
+  return <p className="mb-2.5 text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/45">{children}</p>;
 }
 
 /** Single-choice pill group with a sliding highlight. */
@@ -124,7 +124,7 @@ function Slider({ label, unit, min, max, value, onChange }: { label: string; uni
   return (
     <label className="block">
       <span className="mb-2 flex items-baseline justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/45">{label}</span>
+        <span className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/45">{label}</span>
         <span className="text-sm font-semibold tabular-nums text-canvas">
           {value} <span className="text-canvas/45">{unit}</span>
         </span>
@@ -162,7 +162,7 @@ export default function SampleDay() {
           <div>
             <Reveal className="flex items-center gap-3">
               <span className="eyebrow text-canvas/50">02 — Live preview</span>
-              <span className="-rotate-3 rounded-full bg-sprout px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-forest">Try it</span>
+              <span className="-rotate-3 rounded-full bg-sprout px-3 py-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-forest">Try it</span>
             </Reveal>
             <AnimatedHeading
               text="See a sample day / in seconds."
@@ -244,7 +244,7 @@ export default function SampleDay() {
               {/* Targets */}
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <div className="col-span-2 rounded-2xl bg-forest p-4 text-canvas sm:col-span-1">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-canvas/50">Daily target</p>
+                  <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-canvas/50">Daily target</p>
                   <p className="mt-1 text-3xl font-semibold tabular-nums tracking-[-0.04em] text-sprout">
                     <Num value={t.kcal} />
                   </p>
@@ -256,7 +256,7 @@ export default function SampleDay() {
                   { l: "Fat", v: t.fat, c: "bg-ink/30" },
                 ].map((m) => (
                   <div key={m.l} className="rounded-2xl bg-ink/[0.04] p-4">
-                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink/45">
+                    <p className="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-[0.18em] text-ink/45">
                       <span className={`h-2 w-2 rounded-full ${m.c}`} />
                       {m.l}
                     </p>
@@ -309,7 +309,7 @@ export default function SampleDay() {
                           )}
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">
+                          <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink/40">
                             {m.label} · {m.time}
                           </p>
                           <p className="truncate text-sm font-semibold sm:text-base">{m.dish ? m.dish.name : "Your coach plans this one"}</p>
@@ -322,7 +322,7 @@ export default function SampleDay() {
                         {m.dish && (
                           <div className="shrink-0 text-right">
                             <p className="text-sm font-semibold tabular-nums">{m.kcal}</p>
-                            <p className="text-[11px] font-semibold tabular-nums text-brand">{m.protein}g P</p>
+                            <p className="text-[0.6875rem] font-semibold tabular-nums text-brand">{m.protein}g P</p>
                           </div>
                         )}
                       </motion.div>
@@ -333,7 +333,7 @@ export default function SampleDay() {
 
               {/* Coach checks */}
               <div className="mt-4 rounded-2xl bg-mint p-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-deep">What your coach checks next</p>
+                <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-brand-deep">What your coach checks next</p>
                 <ul className="mt-3 space-y-2 text-sm">
                   <li className="flex items-start gap-2">
                     <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${kcalOff <= 0.08 ? "bg-brand text-white" : "bg-warn text-ink"}`}>

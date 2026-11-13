@@ -104,7 +104,7 @@ export default function WorkoutPage() {
                 className={`relative flex min-w-[3.75rem] shrink-0 flex-col items-center gap-1.5 rounded-2xl py-3 transition-colors ${on ? "text-canvas" : "bg-white text-ink ring-1 ring-ink/[0.06]"}`}
               >
                 {on && <motion.span layoutId="wk-pill" className="absolute inset-0 rounded-2xl bg-forest" transition={{ type: "spring", stiffness: 450, damping: 34 }} />}
-                <span className={`relative text-[11px] font-semibold ${on ? "text-canvas/60" : "text-ink/45"}`}>{n}</span>
+                <span className={`relative text-[0.6875rem] font-semibold ${on ? "text-canvas/60" : "text-ink/45"}`}>{n}</span>
                 <span
                   className={`relative flex h-7 w-7 items-center justify-center rounded-full ${
                     fin ? "bg-brand text-white" : train ? (on ? "bg-sprout text-forest" : "bg-mint text-brand") : on ? "bg-canvas/10 text-canvas/60" : "bg-ink/[0.04] text-ink/35"
@@ -127,7 +127,7 @@ export default function WorkoutPage() {
                 <Card className="bg-forest text-canvas ring-0">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">
+                      <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">
                         {dayNames[sel]} · {session.minutes} min · {session.focus}
                       </p>
                       <h2 className="mt-2 text-3xl font-medium tracking-[-0.05em]">{session.title}</h2>
@@ -157,7 +157,7 @@ export default function WorkoutPage() {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="min-w-0">
                             <p className="flex items-center gap-2 text-base font-semibold tracking-[-0.02em] text-ink">
-                              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink/[0.05] text-[11px] font-bold text-ink/50">{i + 1}</span>
+                              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink/[0.05] text-[0.6875rem] font-bold text-ink/50">{i + 1}</span>
                               {e.name}
                             </p>
                             <p className="mt-0.5 pl-8 text-sm text-stone">

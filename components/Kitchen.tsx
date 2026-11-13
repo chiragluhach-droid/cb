@@ -117,7 +117,7 @@ export default function Kitchen() {
                   initial={false}
                   animate={{ scale: fit && f !== "all" ? 1 : 0, rotate: fit && f !== "all" ? -8 : 0 }}
                   transition={{ type: "spring", stiffness: 400, damping: 16 }}
-                  className="absolute right-3 top-3 rounded-full bg-sprout px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-forest"
+                  className="absolute right-3 top-3 rounded-full bg-sprout px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-forest"
                 >
                   Fits
                 </motion.span>

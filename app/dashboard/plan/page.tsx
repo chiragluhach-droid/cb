@@ -77,7 +77,7 @@ export default function PlanPage() {
                 className={`relative flex min-w-[3.75rem] shrink-0 flex-col items-center rounded-2xl py-3 transition-colors ${on ? "text-canvas" : "bg-white text-ink ring-1 ring-ink/[0.06] hover:ring-ink/20"}`}
               >
                 {on && <motion.span layoutId="plan-day" className="absolute inset-0 rounded-2xl bg-forest" transition={{ type: "spring", stiffness: 450, damping: 34 }} />}
-                <span className={`relative text-[11px] font-semibold ${on ? "text-canvas/60" : "text-ink/45"}`}>{dayNames[i]}</span>
+                <span className={`relative text-[0.6875rem] font-semibold ${on ? "text-canvas/60" : "text-ink/45"}`}>{dayNames[i]}</span>
                 <span className="relative mt-0.5 text-xl font-semibold tabular-nums tracking-[-0.03em]">{d.getDate()}</span>
                 {isToday && <span className={`relative mt-1 h-1 w-1 rounded-full ${on ? "bg-sprout" : "bg-brand"}`} />}
               </button>
@@ -107,7 +107,7 @@ export default function PlanPage() {
                 <div key={s.name} className="flex items-center gap-3 rounded-2xl bg-[#F7F8F5] p-2 pr-3">
                   <DishThumb dish={s.dish} size="h-11 w-11" />
                   <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">{s.name}</span>
-                  <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold tabular-nums text-ink/60">×{s.count}</span>
+                  <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-ink/60">×{s.count}</span>
                 </div>
               ))}
             </div>
@@ -116,7 +116,7 @@ export default function PlanPage() {
 
         <div className="space-y-4 lg:col-span-4 lg:space-y-6">
           <Card className="bg-forest text-canvas ring-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">Daily targets</p>
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">Daily targets</p>
             <p className="mt-2 text-4xl font-semibold tabular-nums tracking-[-0.05em] text-sprout">{t.kcal.toLocaleString("en-IN")}</p>
             <p className="text-sm text-canvas/55">kcal per day</p>
             <div className="mt-5 grid grid-cols-3 gap-2 text-center">
@@ -127,7 +127,7 @@ export default function PlanPage() {
               ].map(([l, v]) => (
                 <div key={l} className="rounded-2xl bg-canvas/[0.06] py-3">
                   <p className="text-lg font-semibold tabular-nums">{v}g</p>
-                  <p className="text-[11px] text-canvas/50">{l}</p>
+                  <p className="text-[0.6875rem] text-canvas/50">{l}</p>
                 </div>
               ))}
             </div>

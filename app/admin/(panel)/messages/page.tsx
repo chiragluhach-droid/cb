@@ -43,13 +43,13 @@ export default function MessagesPage() {
                   <span className="relative">
                     <ClientAvatar name={t.user.name} />
                     {t.unread > 0 && (
-                      <span className="absolute -right-1 -top-1 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white ring-2 ring-white">{t.unread}</span>
+                      <span className="absolute -right-1 -top-1 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-brand px-1 text-[0.625rem] font-bold text-white ring-2 ring-white">{t.unread}</span>
                     )}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-2">
                       <span className={`truncate text-sm ${t.unread ? "font-bold text-ink" : "font-semibold text-ink/80"}`}>{t.user.name}</span>
-                      <span className="shrink-0 text-[11px] text-stone">{t.lastMessage ? timeAgo(t.lastMessage.at) : ""}</span>
+                      <span className="shrink-0 text-[0.6875rem] text-stone">{t.lastMessage ? timeAgo(t.lastMessage.at) : ""}</span>
                     </span>
                     <span className={`line-clamp-1 text-xs ${t.unread ? "font-medium text-ink/75" : "text-stone"}`}>
                       {t.lastMessage ? `${t.lastMessage.from === "coach" ? "You: " : ""}${t.lastMessage.text}` : "No messages yet"}
@@ -71,7 +71,7 @@ export default function MessagesPage() {
               <ClientAvatar name={open.user.name} className="h-10 w-10 text-xs" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold text-ink">{open.user.name}</p>
-                <StatusPill status={open.status} className="!px-2 !py-0.5 !text-[10px]" />
+                <StatusPill status={open.status} className="!px-2 !py-0.5 !text-[0.625rem]" />
               </div>
               <Link href={`/admin/clients/${open.user.id}`} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-ink/[0.05] px-3 py-2 text-xs font-semibold text-ink transition-colors hover:bg-ink hover:text-canvas">
                 Client <ArrowUpRight size={13} />

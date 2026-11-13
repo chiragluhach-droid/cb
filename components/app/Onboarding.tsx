@@ -164,7 +164,7 @@ export default function Onboarding() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: i <= tick ? 1 : 0.3, x: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="flex items-center gap-3 text-[15px]"
+                  className="flex items-center gap-3 text-[0.9375rem]"
                 >
                   <span className={`flex h-6 w-6 items-center justify-center rounded-full ${done ? "bg-sprout text-forest" : "bg-canvas/10"}`}>
                     {done ? <Check size={13} strokeWidth={3.5} /> : i === tick ? <Loader2 size={13} className="animate-spin" /> : null}
@@ -176,12 +176,12 @@ export default function Onboarding() {
           </ul>
           <div className="mt-8 grid grid-cols-2 gap-3">
             <div className="rounded-2xl bg-canvas/[0.06] p-4 ring-1 ring-canvas/10">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-canvas/45">Daily target</p>
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-canvas/45">Daily target</p>
               <p className="mt-1 text-3xl font-semibold tabular-nums tracking-[-0.05em] text-sprout">{t.kcal.toLocaleString("en-IN")}</p>
               <p className="text-xs text-canvas/50">kcal</p>
             </div>
             <div className="rounded-2xl bg-canvas/[0.06] p-4 ring-1 ring-canvas/10">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-canvas/45">Protein</p>
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-canvas/45">Protein</p>
               <p className="mt-1 text-3xl font-semibold tabular-nums tracking-[-0.05em]">{t.protein}g</p>
               <p className="text-xs text-canvas/50">per day</p>
             </div>
@@ -293,7 +293,7 @@ export default function Onboarding() {
                       value={p.dislikes}
                       onChange={(e) => set("dislikes", e.target.value)}
                       placeholder="e.g. karela, mushrooms"
-                      className="h-12 w-full rounded-2xl bg-canvas px-4 text-[15px] outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-brand"
+                      className="h-12 w-full rounded-2xl bg-canvas px-4 text-[0.9375rem] outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-brand"
                     />
                   </label>
                 </div>
@@ -320,12 +320,12 @@ export default function Onboarding() {
                 <p className="mt-2 text-stone">Your coach checks all of this before your plan goes live.</p>
                 <div className="mt-8 grid grid-cols-2 gap-3">
                   <div className="col-span-2 rounded-[1.5rem] bg-forest p-5 text-canvas sm:col-span-1">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-canvas/50">Daily target</p>
+                    <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-canvas/50">Daily target</p>
                     <p className="mt-1 text-4xl font-semibold tabular-nums tracking-[-0.05em] text-sprout">{t.kcal.toLocaleString("en-IN")}</p>
                     <p className="text-xs text-canvas/55">kcal · {t.protein}g protein · {t.carbs}g carbs · {t.fat}g fat</p>
                   </div>
                   <div className="col-span-2 rounded-[1.5rem] bg-white p-5 ring-1 ring-ink/10 sm:col-span-1">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/45">Plan</p>
+                    <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-ink/45">Plan</p>
                     <p className="mt-1 text-lg font-semibold tracking-[-0.02em]">{withWorkout ? "Meal + Workout" : "Meal Plan"}</p>
                     <p className="text-sm text-stone">{parsePlan(user.plan).duration}-day programme</p>
                   </div>

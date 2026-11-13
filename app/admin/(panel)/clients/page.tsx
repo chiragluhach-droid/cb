@@ -56,7 +56,7 @@ export default function ClientsPage() {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-[1.75rem] bg-white ring-1 ring-ink/[0.06]">
-        <div className="hidden grid-cols-[minmax(0,2.2fr)_1.4fr_1fr_1.2fr_0.9fr_1fr_1.25rem] gap-4 border-b border-ink/[0.06] px-6 py-3 text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40 lg:grid">
+        <div className="hidden grid-cols-[minmax(0,2.2fr)_1.4fr_1fr_1.2fr_0.9fr_1fr_1.25rem] gap-4 border-b border-ink/[0.06] px-6 py-3 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink/40 lg:grid">
           <span>Client</span>
           <span>Plan</span>
           <span>Progress</span>

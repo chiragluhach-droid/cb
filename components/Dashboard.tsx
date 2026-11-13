@@ -61,7 +61,7 @@ function Today() {
           </span>
         </div>
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Calories</p>
+          <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink/40">Calories</p>
           <p className="text-lg font-bold tabular-nums">
             {kcal.toLocaleString("en-IN")} <span className="text-sm font-medium text-ink/40">/ 1,500</span>
           </p>
@@ -89,8 +89,8 @@ function Today() {
                 </AnimatePresence>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40">{m.t}</span>
-                <span className={`block truncate text-[13px] font-semibold transition-colors ${on ? "text-ink/45" : "text-ink"}`}>{m.d}</span>
+                <span className="block text-[0.625rem] font-bold uppercase tracking-[0.14em] text-ink/40">{m.t}</span>
+                <span className={`block truncate text-[0.8125rem] font-semibold transition-colors ${on ? "text-ink/45" : "text-ink"}`}>{m.d}</span>
               </span>
               <span className="text-xs tabular-nums text-ink/45">{m.k}</span>
             </button>
@@ -100,7 +100,7 @@ function Today() {
 
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white p-3 ring-1 ring-ink/5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Water</p>
+          <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink/40">Water</p>
           <p className="mt-1 text-sm font-bold tabular-nums">{water} / 8 glasses</p>
           <div className="mt-2 flex items-center gap-1.5">
             <button onClick={() => setWater((w) => Math.max(0, w - 1))} aria-label="Remove a glass" className="flex h-7 w-7 items-center justify-center rounded-full bg-ink/[0.06]">
@@ -117,7 +117,7 @@ function Today() {
           </div>
         </div>
         <div className="rounded-2xl bg-white p-3 ring-1 ring-ink/5">
-          <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">
+          <p className="flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink/40">
             <Footprints size={11} /> Steps
           </p>
           <p className="mt-1 text-sm font-bold tabular-nums">6,820 / 8,000</p>
@@ -147,7 +147,7 @@ function Workout() {
   return (
     <div className="space-y-3">
       <div className="rounded-2xl bg-forest p-4 text-canvas">
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-canvas/50">Week 6 · Day 3 · Home</p>
+        <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-canvas/50">Week 6 · Day 3 · Home</p>
         <p className="mt-1 text-lg font-bold tracking-[-0.02em]">Lower body strength</p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-canvas/10">
           <motion.span className="block h-full rounded-full bg-sprout" animate={{ width: `${(doneSets / totalSets) * 100}%` }} transition={{ type: "spring", stiffness: 120, damping: 20 }} />
@@ -160,8 +160,8 @@ function Workout() {
         <div key={e.n} className="rounded-2xl bg-white p-3 ring-1 ring-ink/5">
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="truncate text-[13px] font-semibold">{e.n}</p>
-              <p className="truncate text-[11px] text-ink/50">{e.d}</p>
+              <p className="truncate text-[0.8125rem] font-semibold">{e.n}</p>
+              <p className="truncate text-[0.6875rem] text-ink/50">{e.d}</p>
             </div>
             <div className="flex gap-1.5">
               {Array.from({ length: e.sets }).map((_, n) => {
@@ -172,7 +172,7 @@ function Workout() {
                     onClick={() => setSets((s) => s.map((v, j) => (j === i ? (on && n === v - 1 ? n : n + 1) : v)))}
                     aria-label={`${e.n} set ${n + 1}`}
                     aria-pressed={on}
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold transition-colors duration-200 ${on ? "bg-brand text-white" : "bg-ink/[0.06] text-ink/50"}`}
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-[0.6875rem] font-bold transition-colors duration-200 ${on ? "bg-brand text-white" : "bg-ink/[0.06] text-ink/50"}`}
                   >
                     {on ? <Check size={13} strokeWidth={3.5} /> : n + 1}
                   </button>
@@ -206,7 +206,7 @@ function Progress() {
       <div className="rounded-2xl bg-white p-4 ring-1 ring-ink/5">
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-ink/40">Weight · 6 weeks</p>
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink/40">Weight · 6 weeks</p>
             <p className="mt-1 text-2xl font-bold tabular-nums tracking-[-0.03em]">{today.toFixed(1)} kg</p>
           </div>
           <span className="rounded-full bg-mint px-2.5 py-1 text-xs font-bold tabular-nums text-brand-deep">{change} kg</span>
@@ -235,7 +235,7 @@ function Progress() {
           <div key={w} className={`flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-2xl ${i ? "bg-mint text-brand-deep" : "bg-ink/[0.05] text-ink/40"}`}>
             <Camera size={20} />
             <span className="text-xs font-semibold">{w}</span>
-            <span className="text-[10px] opacity-70">Private to you & coach</span>
+            <span className="text-[0.625rem] opacity-70">Private to you & coach</span>
           </div>
         ))}
       </div>
@@ -284,7 +284,7 @@ function Chat() {
         <CoachAvatar className="h-9 w-9" />
         <div>
           <p className="text-sm font-semibold">{coach.name} · your coach</p>
-          <p className="flex items-center gap-1 text-[11px] text-brand">
+          <p className="flex items-center gap-1 text-[0.6875rem] text-brand">
             <span className="h-1.5 w-1.5 rounded-full bg-brand" /> Replies within the day
           </p>
         </div>
@@ -295,7 +295,7 @@ function Chat() {
             key={i}
             initial={{ opacity: 0, y: 10, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`max-w-[85%] rounded-2xl px-3 py-2 text-[13px] leading-snug ${m.from === "me" ? "ml-auto rounded-br-md bg-ink text-canvas" : "rounded-bl-md bg-white text-ink ring-1 ring-ink/5"}`}
+            className={`max-w-[85%] rounded-2xl px-3 py-2 text-[0.8125rem] leading-snug ${m.from === "me" ? "ml-auto rounded-br-md bg-ink text-canvas" : "rounded-bl-md bg-white text-ink ring-1 ring-ink/5"}`}
           >
             {m.text}
           </motion.div>
@@ -311,13 +311,13 @@ function Chat() {
       <div className="flex flex-wrap gap-1.5 border-t border-ink/10 pt-3">
         {quick.map((q, i) =>
           used.includes(i) ? null : (
-            <button key={q.q} onClick={() => ask(i)} className="rounded-full bg-mint px-3 py-1.5 text-[11px] font-semibold text-brand-deep transition-colors hover:bg-brand hover:text-white">
+            <button key={q.q} onClick={() => ask(i)} className="rounded-full bg-mint px-3 py-1.5 text-[0.6875rem] font-semibold text-brand-deep transition-colors hover:bg-brand hover:text-white">
               {q.q}
             </button>
           )
         )}
         {used.length === quick.length && (
-          <span className="flex w-full items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] text-ink/40 ring-1 ring-ink/10">
+          <span className="flex w-full items-center gap-2 rounded-full bg-white px-3 py-2 text-[0.75rem] text-ink/40 ring-1 ring-ink/10">
             Type a message… <Send size={13} className="ml-auto" />
           </span>
         )}
@@ -386,7 +386,7 @@ export default function Dashboard() {
                       <LogoMark className="h-6 w-6" />
                       <span className="text-sm font-bold tracking-[-0.03em]">{tabLabels[tab]}</span>
                     </div>
-                    <span className="text-[11px] text-ink/45">Week 6</span>
+                    <span className="text-[0.6875rem] text-ink/45">Week 6</span>
                   </div>
                   <div className="relative flex-1 overflow-y-auto px-4 pb-3" data-lenis-prevent>
                     <>
@@ -410,7 +410,7 @@ export default function Dashboard() {
                       const Icon = tabIcons[t];
                       const on = t === tab;
                       return (
-                        <button key={t} onClick={() => setTab(t)} aria-pressed={on} className={`relative flex flex-col items-center gap-1 rounded-xl py-1.5 text-[10px] font-semibold transition-colors ${on ? "text-brand" : "text-ink/40"}`}>
+                        <button key={t} onClick={() => setTab(t)} aria-pressed={on} className={`relative flex flex-col items-center gap-1 rounded-xl py-1.5 text-[0.625rem] font-semibold transition-colors ${on ? "text-brand" : "text-ink/40"}`}>
                           {on && <motion.span layoutId="app-tab" className="absolute inset-x-3 -top-2 h-0.5 rounded-full bg-brand" />}
                           <Icon size={18} />
                           {tabLabels[t]}

@@ -46,7 +46,7 @@ function DishPicker({ row, day, slot, onClose }: { row: ClientRow; day: number; 
       >
         <div className="flex items-start justify-between gap-4 p-6 pb-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/40">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/40">
               {dayNames[day]} · {current.label}
             </p>
             <p className="mt-1 text-xl font-semibold tracking-[-0.03em]">Choose a dish</p>
@@ -80,7 +80,7 @@ function DishPicker({ row, day, slot, onClose }: { row: ClientRow; day: number; 
                     </span>
                   )}
                 </span>
-                {draftDish?.id === dish.id && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${on ? "bg-canvas/10 text-canvas/70" : "bg-ink/[0.05] text-ink/50"}`}>Draft</span>}
+                {draftDish?.id === dish.id && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[0.625rem] font-bold ${on ? "bg-canvas/10 text-canvas/70" : "bg-ink/[0.05] text-ink/50"}`}>Draft</span>}
                 {on && <Check size={16} className="shrink-0 text-sprout" />}
               </button>
             );
@@ -155,10 +155,10 @@ export default function PlanReview({ row }: { row: ClientRow }) {
                   className={`relative flex min-w-[3.75rem] shrink-0 flex-col items-center gap-1 rounded-2xl py-3 transition-colors ${on ? "text-canvas" : "bg-white text-ink ring-1 ring-ink/[0.06] hover:ring-ink/20"}`}
                 >
                   {on && <motion.span layoutId="review-day" className="absolute inset-0 rounded-2xl bg-forest" transition={{ type: "spring", stiffness: 450, damping: 34 }} />}
-                  <span className={`relative text-[11px] font-semibold ${on ? "text-canvas/60" : "text-ink/45"}`}>{n}</span>
+                  <span className={`relative text-[0.6875rem] font-semibold ${on ? "text-canvas/60" : "text-ink/45"}`}>{n}</span>
                   <span className={`relative text-xs font-semibold tabular-nums ${on ? "text-canvas" : "text-ink/70"}`}>{t.kcal}</span>
                   <span
-                    className={`relative flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
+                    className={`relative flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[0.625rem] font-bold ${
                       f ? "bg-warn text-forest" : t.kcalOk && t.proteinOk ? (on ? "bg-sprout text-forest" : "bg-mint text-brand") : on ? "bg-canvas/15 text-canvas" : "bg-ink/[0.06] text-ink/50"
                     }`}
                   >
@@ -187,16 +187,16 @@ export default function PlanReview({ row }: { row: ClientRow }) {
                 <li key={m.slot} className={`flex items-center gap-3 rounded-2xl p-2.5 sm:p-3 ${f.length ? "bg-warn/[0.08] ring-1 ring-warn/40" : "bg-[#F7F8F5]"}`}>
                   <DishThumb dish={m.dish} size="h-14 w-14" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold text-ink/45">
+                    <p className="text-[0.6875rem] font-semibold text-ink/45">
                       {m.label} · {m.time}
                       {m.edited &&
                         (row.data.aiDraft?.picks[`${sel}-${m.slot}`] === m.dish?.id ? (
-                          <span className="ml-1.5 rounded-full bg-sprout px-1.5 py-px text-[9px] font-bold uppercase tracking-[0.1em] text-forest">AI</span>
+                          <span className="ml-1.5 rounded-full bg-sprout px-1.5 py-px text-[0.5625rem] font-bold uppercase tracking-[0.1em] text-forest">AI</span>
                         ) : (
-                          <span className="ml-1.5 rounded-full bg-forest px-1.5 py-px text-[9px] font-bold uppercase tracking-[0.1em] text-sprout">Edited</span>
+                          <span className="ml-1.5 rounded-full bg-forest px-1.5 py-px text-[0.5625rem] font-bold uppercase tracking-[0.1em] text-sprout">Edited</span>
                         ))}
                     </p>
-                    <p className="truncate text-sm font-semibold text-ink sm:text-[15px]">{m.dish?.name ?? "Nothing fits — choose a dish"}</p>
+                    <p className="truncate text-sm font-semibold text-ink sm:text-[0.9375rem]">{m.dish?.name ?? "Nothing fits — choose a dish"}</p>
                     <p className="text-xs text-stone">
                       {m.dish ? `${servingsLabel(m.servings)} · ${m.kcal} kcal · ${m.protein}g protein` : ""}
                     </p>
@@ -211,7 +211,7 @@ export default function PlanReview({ row }: { row: ClientRow }) {
                       <PenLine size={12} /> {f.length ? "Fix" : "Change"}
                     </button>
                     {m.edited && (
-                      <button onClick={() => setPlanEdit(row.user.id, sel, m.slot, null)} aria-label="Back to draft dish" className="inline-flex items-center justify-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold text-ink/45 hover:text-ink">
+                      <button onClick={() => setPlanEdit(row.user.id, sel, m.slot, null)} aria-label="Back to draft dish" className="inline-flex items-center justify-center gap-1 rounded-full px-2 py-1 text-[0.6875rem] font-semibold text-ink/45 hover:text-ink">
                         <RotateCcw size={11} /> Draft
                       </button>
                     )}
@@ -228,7 +228,7 @@ export default function PlanReview({ row }: { row: ClientRow }) {
 
       <div className="space-y-4 lg:col-span-4 lg:space-y-6">
         <Card className="bg-forest text-canvas ring-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">Daily targets</p>
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">Daily targets</p>
           <p className="mt-2 text-4xl font-semibold tabular-nums tracking-[-0.05em] text-sprout">{targets.kcal.toLocaleString("en-IN")}</p>
           <p className="text-sm text-canvas/55">kcal · Mifflin–St Jeor × activity × goal</p>
           <div className="mt-5 grid grid-cols-3 gap-2 text-center">
@@ -239,7 +239,7 @@ export default function PlanReview({ row }: { row: ClientRow }) {
             ].map(([l, v]) => (
               <div key={l} className="rounded-2xl bg-canvas/[0.06] py-3">
                 <p className="text-lg font-semibold tabular-nums">{v}g</p>
-                <p className="text-[11px] text-canvas/50">{l}</p>
+                <p className="text-[0.6875rem] text-canvas/50">{l}</p>
               </div>
             ))}
           </div>

@@ -82,16 +82,16 @@ function Review({ topic }: { topic: Topic }) {
     <div className="relative rounded-[2rem] bg-white p-5 shadow-[0_40px_80px_-50px_rgba(10,10,10,0.5)] ring-1 ring-ink/10 sm:p-7">
       <div className="flex items-start justify-between gap-3 border-b border-ink/10 pb-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40">Admin · plan review</p>
+          <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-ink/40">Admin · plan review</p>
           <p className="mt-1 text-lg font-semibold tracking-[-0.02em]">{topic.client}</p>
           <p className="mt-1.5 flex items-center gap-1.5 text-xs text-stone">
             <CoachAvatar className="h-5 w-5" /> Reviewing: {coach.name}
           </p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${sent ? "bg-brand text-white" : "bg-warn/20 text-[#8A5A00]"}`}>{sent ? "Sent" : "Draft"}</span>
+        <span className={`rounded-full px-3 py-1 text-[0.6875rem] font-bold ${sent ? "bg-brand text-white" : "bg-warn/20 text-[#8A5A00]"}`}>{sent ? "Sent" : "Draft"}</span>
       </div>
 
-      <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.18em] text-ink/40">Risky foods flagged</p>
+      <p className="mt-5 text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-ink/40">Risky foods flagged</p>
       <ul className="mt-2 space-y-2">
         {topic.swaps.map((s, i) => {
           const done = fixed.includes(i);
@@ -123,7 +123,7 @@ function Review({ topic }: { topic: Topic }) {
         })}
       </ul>
 
-      <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.18em] text-ink/40">Checklist</p>
+      <p className="mt-5 text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-ink/40">Checklist</p>
       <ul className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         {checklist.map((c, i) => {
           const on = ticked.includes(i);
@@ -205,7 +205,7 @@ export default function Coach() {
               <div className="flex max-w-md items-center gap-4 rounded-[1.75rem] bg-white p-3 pr-5 shadow-[0_24px_50px_-36px_rgba(10,10,10,0.55)] ring-1 ring-ink/[0.06]">
                 <CoachAvatar className="h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]" online />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink/40">Meet your coach</p>
+                  <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-ink/40">Meet your coach</p>
                   <p className="mt-0.5 text-2xl font-medium leading-none tracking-[-0.04em] text-ink">
                     <span className="font-serif italic text-brand">{coach.name}</span>
                   </p>
@@ -215,7 +215,7 @@ export default function Coach() {
             </Reveal>
 
             <Reveal delay={0.15} className="mt-8">
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-ink/45">Plans that respect</p>
+              <p className="mb-3 text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/45">Plans that respect</p>
               <LayoutGroup id="coach-topics">
                 <div className="flex flex-wrap gap-2">
                   {topics.map((t, i) => (

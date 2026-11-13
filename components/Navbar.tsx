@@ -86,7 +86,7 @@ export default function Navbar() {
                 transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               >
                 <SealBadge
-                  className={`shadow-[0_8px_20px_-10px_rgba(14,26,19,0.7)] transition-all duration-500 ease-expo group-hover:rotate-[20deg] ${island ? "h-11 w-11 sm:h-10 sm:w-10" : "h-12 w-12 max-[380px]:h-11 max-[380px]:w-11 sm:h-[2.875rem] sm:w-[2.875rem]"}`}
+                  className={`shadow-[0_8px_20px_-10px_rgba(14,26,19,0.7)] transition-all duration-500 ease-expo group-hover:rotate-[20deg] ${island ? "h-11 w-11 sm:h-10 sm:w-10" : "h-12 w-12 sm:h-[2.875rem] sm:w-[2.875rem]"}`}
                   disc="#0E1A13"
                   color="#FAFAF8"
                 />
@@ -97,14 +97,14 @@ export default function Navbar() {
                 animate={{ width: island ? 0 : "auto", opacity: island ? 0 : 1, marginLeft: island ? 0 : 12 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Wordmark className="whitespace-nowrap text-[1.8rem] max-[380px]:text-[1.6rem] sm:text-[1.6rem]" />
+                <Wordmark className="whitespace-nowrap text-[1.8rem] sm:text-[1.6rem]" />
               </motion.span>
             </a>
 
             <ul className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-9 lg:flex xl:gap-12">
               {nav.map((item) => (
                 <li key={item.href}>
-                  <a href={resolve(item.href)} className="group relative whitespace-nowrap text-[15px] font-semibold text-ink">
+                  <a href={resolve(item.href)} className="group relative whitespace-nowrap text-[0.9375rem] font-semibold text-ink">
                     {item.label}
                     <span className="absolute -bottom-1 left-0 h-px w-0 bg-brand transition-all duration-300 ease-expo group-hover:w-full" />
                   </a>
@@ -113,13 +113,13 @@ export default function Navbar() {
             </ul>
 
             <div className="hidden items-center gap-5 md:flex">
-              <a href={account.href} className="group relative text-[15px] font-semibold text-ink">
+              <a href={account.href} className="group relative text-[0.9375rem] font-semibold text-ink">
                 {account.label}
                 <span className="absolute -bottom-1 left-0 h-px w-0 bg-brand transition-all duration-300 ease-expo group-hover:w-full" />
               </a>
               <a
                 href={resolve("#pricing")}
-                className={`group inline-flex items-center gap-2 rounded-full bg-ink text-[15px] font-semibold text-canvas transition-all duration-500 ease-expo hover:bg-brand ${
+                className={`group inline-flex items-center gap-2 rounded-full bg-ink text-[0.9375rem] font-semibold text-canvas transition-all duration-500 ease-expo hover:bg-brand ${
                   island ? "px-6 py-3" : "px-7 py-3.5"
                 }`}
               >

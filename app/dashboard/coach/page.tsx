@@ -81,7 +81,7 @@ export default function CoachPage() {
   let lastDay = "";
 
   return (
-    <div className="flex h-[calc(100svh-11.5rem)] flex-col lg:h-[calc(100svh-5rem)]">
+    <div className="flex h-[calc(100svh-11.5rem)] min-h-[24rem] flex-col lg:h-[calc(100svh-5rem)]">
       {/* Header */}
       <div className="flex items-center gap-3 rounded-t-[1.75rem] border-b border-ink/[0.06] bg-white p-4 sm:p-5">
         <CoachAvatar className="h-12 w-12" online />
@@ -94,7 +94,7 @@ export default function CoachPage() {
             <Video size={14} /> <span className="hidden sm:inline">Book a</span> video call
           </button>
         ) : (
-          <span className="hidden rounded-full bg-ink/[0.05] px-3 py-1.5 text-[11px] font-semibold text-ink/50 sm:inline">Video calls on 90-day plans</span>
+          <span className="hidden rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.6875rem] font-semibold text-ink/50 sm:inline">Video calls on 90-day plans</span>
         )}
       </div>
 
@@ -106,7 +106,7 @@ export default function CoachPage() {
           lastDay = dl;
           return (
             <div key={m.id}>
-              {showDay && <p className="my-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/35">{dl}</p>}
+              {showDay && <p className="my-3 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-ink/35">{dl}</p>}
               <motion.div
                 initial={{ opacity: 0, y: 10, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -115,12 +115,12 @@ export default function CoachPage() {
               >
                 {m.from !== "me" && <CoachAvatar className="h-7 w-7" />}
                 <div
-                  className={`max-w-[85%] rounded-[1.25rem] px-4 py-2.5 text-[15px] leading-relaxed sm:max-w-[70%] ${
+                  className={`max-w-[85%] rounded-[1.25rem] px-4 py-2.5 text-[0.9375rem] leading-relaxed sm:max-w-[70%] ${
                     m.from === "me" ? "rounded-br-md bg-forest text-canvas" : "rounded-bl-md bg-white text-ink ring-1 ring-ink/[0.06]"
                   }`}
                 >
                   {m.text}
-                  <span className={`mt-1 block text-right text-[10px] ${m.from === "me" ? "text-canvas/45" : "text-ink/35"}`}>{time(m.at)}</span>
+                  <span className={`mt-1 block text-right text-[0.625rem] ${m.from === "me" ? "text-canvas/45" : "text-ink/35"}`}>{time(m.at)}</span>
                 </div>
               </motion.div>
             </div>
@@ -155,7 +155,7 @@ export default function CoachPage() {
             onChange={(e) => setText(e.target.value)}
             placeholder="Message your coach…"
             aria-label="Message"
-            className="h-12 min-w-0 flex-1 rounded-full bg-[#F4F5F1] px-5 text-[15px] outline-none ring-1 ring-transparent placeholder:text-ink/35 focus:ring-brand"
+            className="h-12 min-w-0 flex-1 rounded-full bg-[#F4F5F1] px-5 text-[0.9375rem] outline-none ring-1 ring-transparent placeholder:text-ink/35 focus:ring-brand"
           />
           <button type="submit" disabled={!text.trim() || typing} aria-label="Send" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand text-white transition-all hover:bg-brand-deep disabled:bg-ink/10 disabled:text-ink/30">
             <Send size={18} />

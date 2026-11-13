@@ -53,7 +53,7 @@ export default function AiAssistant({ row }: { row: ClientRow }) {
   return (
     <Card className="relative overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-sprout/25 blur-2xl" />
-      <CardTitle action={status?.enabled ? <span className="rounded-full bg-mint px-2 py-0.5 text-[10px] font-bold text-brand-deep">{status.provider}</span> : null}>AI assistant</CardTitle>
+      <CardTitle action={status?.enabled ? <span className="rounded-full bg-mint px-2 py-0.5 text-[0.625rem] font-bold text-brand-deep">{status.provider}</span> : null}>AI assistant</CardTitle>
 
       {status && !status.enabled ? (
         <p className="relative text-sm text-stone">
@@ -90,11 +90,11 @@ export default function AiAssistant({ row }: { row: ClientRow }) {
           {error && <p className="mt-3 rounded-2xl bg-red-50 px-3 py-2.5 text-xs font-medium text-red-700">{error}</p>}
           {draft && !error && (
             <motion.div key={draft.at} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-2xl bg-mint/60 p-3.5">
-              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-deep">
+              <p className="flex items-center gap-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-brand-deep">
                 <Sparkles size={11} /> AI draft · {timeAgo(draft.at)}
               </p>
               {draft.note && <p className="mt-1.5 text-sm leading-relaxed text-ink/80">{draft.note}</p>}
-              <p className="mt-2 text-[11px] text-ink/45">{draft.model} · meals marked AI. Portions come from the engine.</p>
+              <p className="mt-2 text-[0.6875rem] text-ink/45">{draft.model} · meals marked AI. Portions come from the engine.</p>
             </motion.div>
           )}
         </form>

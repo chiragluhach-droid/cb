@@ -12,7 +12,7 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
 export function CardTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
-      <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-ink/45">{children}</h2>
+      <h2 className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-ink/45">{children}</h2>
       {action}
     </div>
   );
@@ -140,7 +140,7 @@ export function RangeField({ label, unit, min, max, step = 1, value, onChange }:
         style={{ "--fill": `${fill}%` } as CSSProperties}
         aria-label={label}
       />
-      <span className="mt-2 flex justify-between text-[11px] tabular-nums text-ink/35">
+      <span className="mt-2 flex justify-between text-[0.6875rem] tabular-nums text-ink/35">
         <span>
           {min} {unit}
         </span>
@@ -166,7 +166,8 @@ export function Ring({ value, size = 96, stroke = 10, color = "#16A34A", track =
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    // Sized in rem so it scales with the fluid base size on small phones.
+    <div className="relative shrink-0" style={{ width: `${size / 16}rem`, height: `${size / 16}rem` }}>
       <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} stroke={track} strokeWidth={stroke} fill="none" />
         <motion.circle

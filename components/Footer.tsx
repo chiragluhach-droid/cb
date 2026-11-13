@@ -47,8 +47,8 @@ export default function Footer() {
   const year = new Date().getFullYear();
   const onHome = usePathname() === "/";
   const resolve = (href: string) => (href.startsWith("#") && !onHome ? `/${href}` : href);
-  const linkCls = "text-[15px] font-semibold text-ink transition-opacity hover:opacity-60";
-  const label = "mb-4 text-[11px] font-bold uppercase tracking-[0.22em] text-ink/45";
+  const linkCls = "text-[0.9375rem] font-semibold text-ink transition-opacity hover:opacity-60";
+  const label = "mb-4 text-[0.6875rem] font-bold uppercase tracking-[0.22em] text-ink/45";
 
   return (
     <footer className="relative overflow-hidden bg-canvas pt-16 lg:pt-24">
@@ -71,7 +71,7 @@ export default function Footer() {
             </motion.span>
             <a
               href={resolve("#pricing")}
-              className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-[15px] font-semibold text-canvas transition-colors duration-300 hover:bg-brand"
+              className="group inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-[0.9375rem] font-semibold text-canvas transition-colors duration-300 hover:bg-brand"
             >
               Get your plan
               <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -115,12 +115,12 @@ export default function Footer() {
           </div>
           <div>
             <p className={label}>Diets we plan</p>
-            <p className="text-[15px] font-semibold leading-relaxed text-ink">Veg · Jain · Egg · Non-veg · Vegan</p>
+            <p className="text-[0.9375rem] font-semibold leading-relaxed text-ink">Veg · Jain · Egg · Non-veg · Vegan</p>
             <p className="mt-2 text-sm leading-relaxed text-stone">PCOS, thyroid, diabetes & BP aware</p>
           </div>
           <div>
             <p className={label}>Status</p>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/70">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-3 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink/70">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
               Taking new clients
             </span>
