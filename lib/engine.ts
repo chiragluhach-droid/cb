@@ -150,6 +150,14 @@ export function clash(d: Dish, i: Inputs): string | null {
   return null;
 }
 
+/** Words from the client's "foods you dislike" answer. */
+export const dislikeWords = (p: { dislikes: string }) =>
+  p.dislikes
+    .toLowerCase()
+    .split(/[,;/\n]| and /)
+    .map((w) => w.trim())
+    .filter((w) => w.length >= 3);
+
 export type Meal = {
   slot: Slot;
   label: string;

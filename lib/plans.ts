@@ -10,7 +10,7 @@ export type PlanKind = "meal" | "meal-workout";
 export type Duration = 30 | 90;
 export type PlanId = `${PlanKind}-${Duration}`;
 
-/** "free" = early access (current setting). "paid" = dummy payment flow. */
+/** Legacy setting from the old checkout flow; plans now go straight to sign-up. */
 export const CHECKOUT_MODE: "free" | "paid" = "free";
 
 export const plans: Record<

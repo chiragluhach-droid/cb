@@ -15,7 +15,6 @@ import {
 } from "framer-motion";
 import { ArrowLeftRight, ArrowUpRight, Check, Egg, Fish, Leaf, LucideIcon } from "lucide-react";
 import { photos, unsplash } from "@/lib/site";
-import { CHECKOUT_MODE } from "@/lib/plans";
 
 /*
  * Hero: a spinning thali. Five katoris orbit a steel plate; the diet tabs
@@ -420,7 +419,7 @@ export default function Hero() {
             {[
               { v: "24 hrs", l: "to your first plan" },
               { v: "100%", l: "coach-reviewed" },
-              { v: CHECKOUT_MODE === "free" ? "₹0" : "5 diets", l: CHECKOUT_MODE === "free" ? "during early access" : "veg to vegan" },
+              { v: "5 diets", l: "veg to vegan" },
             ].map((s, i) => (
               <div key={s.l} className={i ? "pl-4 sm:pl-6" : "pr-4"}>
                 <dt className="text-2xl font-semibold tracking-[-0.04em] text-ink sm:text-3xl">{s.v}</dt>

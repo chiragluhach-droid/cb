@@ -30,13 +30,13 @@ export default function PlanPage() {
   if (!data?.profile) return null;
   const profile = data.profile;
   const date = week[sel];
-  const { targets: t, meals, skipped } = dayMeals(profile, date, data.days[dayKey(date)]);
+  const { targets: t, meals, skipped } = dayMeals(profile, date, data.days[dayKey(date)], data.planEdits);
   const dayTotal = meals.reduce((s, m) => ({ kcal: s.kcal + m.kcal, p: s.p + m.protein }), { kcal: 0, p: 0 });
 
   // What's on the menu this week, most frequent first.
   const weekDishes = new Map<string, { name: string; count: number; dish: (typeof meals)[number]["dish"] }>();
   week.forEach((d) =>
-    dayMeals(profile, d, data.days[dayKey(d)]).meals.forEach((m) => {
+    dayMeals(profile, d, data.days[dayKey(d)], data.planEdits).meals.forEach((m) => {
       if (!m.dish) return;
       const cur = weekDishes.get(m.dish.id);
       weekDishes.set(m.dish.id, { name: m.dish.name, dish: m.dish, count: (cur?.count ?? 0) + 1 });

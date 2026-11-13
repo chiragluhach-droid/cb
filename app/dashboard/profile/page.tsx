@@ -8,7 +8,8 @@ import { Bar, Card, CardTitle } from "@/components/app/ui";
 import { initials, planDay } from "@/components/app/Shell";
 import { targets } from "@/lib/engine";
 import { formatPhone, logout, useSession } from "@/lib/demo-store";
-import { inr, parsePlan, plans, priceOf } from "@/lib/plans";
+import { inr, parsePlan } from "@/lib/plans";
+import { priceFor, useSettings } from "@/lib/settings";
 
 const dietLabel = { veg: "Vegetarian", jain: "Jain", egg: "Eggetarian", nonveg: "Non-vegetarian", vegan: "Vegan" } as const;
 const goalLabel = { lose: "Lose fat", tone: "Tone up", build: "Build muscle" } as const;
@@ -16,6 +17,7 @@ const actLabel = { sedentary: "Desk job", light: "Light", moderate: "Active", ve
 
 export default function ProfilePage() {
   const router = useRouter();
+  const settings = useSettings();
   const { user, data, updateUser, resetData } = useSession();
   const [name, setName] = useState(user?.name ?? "");
   const [editing, setEditing] = useState(false);
@@ -116,9 +118,9 @@ export default function ProfilePage() {
         <div className="space-y-4 lg:col-span-5 lg:space-y-6">
           <Card className="bg-forest text-canvas ring-0">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-canvas/50">Your plan</p>
-            <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{plans[plan.kind].name}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{settings.plans[plan.kind].name}</p>
             <p className="text-sm text-canvas/55">
-              {plan.duration}-day programme · {inr(priceOf(plan.kind, plan.duration))} one-time
+              {plan.duration}-day programme · {inr(priceFor(settings, plan.kind, plan.duration))} one-time
             </p>
             <div className="mt-5">
               <Bar value={day / total} className="bg-sprout" track="bg-canvas/10" />

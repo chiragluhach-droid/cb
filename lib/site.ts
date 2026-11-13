@@ -7,11 +7,8 @@ export const site = {
     "A personal diet and workout plan built around the Indian food you already eat. Made and reviewed by your coach, updated as your body changes.",
 };
 
-/**
- * Instagram handle, e.g. "@evowellnutrition". Left empty until the real one
- * is confirmed — the feed section shows "coming soon" without a link until then.
- */
-export const instagramHandle: string = "";
+/** Instagram handle. Leave empty to show the feed section without a link. */
+export const instagramHandle: string = "@evowell.in";
 
 export const nav = [
   { label: "How it works", href: "#how" },

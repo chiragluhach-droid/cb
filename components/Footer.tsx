@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUp, ArrowUpRight } from "lucide-react";
 import { nav } from "@/lib/site";
-import { CHECKOUT_MODE } from "@/lib/plans";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
 import { Wordmark } from "@/components/Logo";
 import { RingMark } from "@/components/brand/Marks";
@@ -109,9 +108,9 @@ export default function Footer() {
           <div>
             <p className={label}>Plans</p>
             <ul className="space-y-2.5">
-              <li><a href="/checkout?plan=meal-30" className={linkCls}>Meal Plan</a></li>
-              <li><a href="/checkout?plan=meal-workout-30" className={linkCls}>Meal + Workout</a></li>
-              <li><a href="/checkout?plan=meal-workout-90" className={linkCls}>90-day programme</a></li>
+              <li><a href="/login?mode=signup&plan=meal-30" className={linkCls}>Meal Plan</a></li>
+              <li><a href="/login?mode=signup&plan=meal-workout-30" className={linkCls}>Meal + Workout</a></li>
+              <li><a href="/login?mode=signup&plan=meal-workout-90" className={linkCls}>90-day programme</a></li>
             </ul>
           </div>
           <div>
@@ -123,14 +122,19 @@ export default function Footer() {
             <p className={label}>Status</p>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/70">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
-              {CHECKOUT_MODE === "free" ? "Early access open" : "Taking new clients"}
+              Taking new clients
             </span>
           </div>
         </div>
 
         <div className="flex flex-col gap-2 border-t border-ink/10 py-6 text-sm text-ink/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} Evowell Nutrition & Training.</p>
-          <p>Not medical advice. Consult your doctor about any health condition.</p>
+          <p>
+            Not medical advice. Consult your doctor about any health condition.
+            <a href="/admin/login" className="ml-3 font-semibold text-ink/60 underline-offset-2 transition-colors hover:text-ink hover:underline">
+              Coach login
+            </a>
+          </p>
         </div>
       </div>
 

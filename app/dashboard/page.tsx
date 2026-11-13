@@ -30,7 +30,7 @@ export default function TodayPage() {
   const profile = data.profile;
   const key = dayKey(now);
   const log = data.days[key] ?? emptyDay();
-  const { targets: t, meals } = dayMeals(profile, now, log);
+  const { targets: t, meals } = dayMeals(profile, now, log, data.planEdits);
   const eaten = meals.filter((m) => log.meals.includes(m.slot));
   const kcal = eaten.reduce((s, m) => s + m.kcal, 0);
   const protein = eaten.reduce((s, m) => s + m.protein, 0);

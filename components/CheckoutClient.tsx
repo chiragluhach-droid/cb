@@ -4,10 +4,12 @@ import { ChangeEvent, FormEvent, ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { ArrowLeft, Check, CreditCard, Landmark, Loader2, Lock, Smartphone, Tag, X } from "lucide-react";
-import { Duration, PlanKind, discountCodes, inr, ninetyDayExtras, plans, priceOf } from "@/lib/plans";
+import { Duration, PlanKind, inr } from "@/lib/plans";
+import { findCode, priceFor, useSettings } from "@/lib/settings";
 
 type Mode = "free" | "paid";
-type Props = { initialKind: PlanKind; initialDuration: Duration; mode: Mode };
+/** `mode` previews a checkout mode; without it the Admin › Subscriptions setting applies. */
+type Props = { initialKind: PlanKind; initialDuration: Duration; mode?: Mode };
 
 const field =
   "w-full rounded-2xl bg-white px-4 py-3.5 text-[15px] text-ink outline-none ring-1 ring-ink/10 transition-shadow placeholder:text-ink/35 focus:ring-2 focus:ring-brand";
@@ -197,7 +199,10 @@ function Success({ name, email, phone, planId, planName, duration, orderId, free
 /* ───────────── Checkout ───────────── */
 
 export default function CheckoutClient({ initialKind, initialDuration, mode }: Props) {
-  const free = mode === "free";
+  const settings = useSettings();
+  const plans = settings.plans;
+  const ninetyDayExtras = settings.ninetyDayExtras;
+  const free = (mode ?? settings.checkout) === "free";
   const [kind, setKind] = useState<PlanKind>(initialKind);
   const [duration, setDuration] = useState<Duration>(initialDuration);
   const [form, setForm] = useState({ name: "", email: "", phone: "", country: "India" });
@@ -210,8 +215,9 @@ export default function CheckoutClient({ initialKind, initialDuration, mode }: P
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
 
-  const price = priceOf(kind, duration);
-  const discount = code ? Math.round((price * discountCodes[code].pct) / 100) : 0;
+  const price = priceFor(settings, kind, duration);
+  const codeInfo = code ? findCode(settings, code) : null;
+  const discount = codeInfo ? Math.round((price * codeInfo.pct) / 100) : 0;
   const afterDiscount = price - discount;
   const total = free ? 0 : afterDiscount;
 
@@ -225,12 +231,12 @@ export default function CheckoutClient({ initialKind, initialDuration, mode }: P
   const applyCode = () => {
     const c = codeInput.trim().toUpperCase();
     if (!c) return;
-    if (discountCodes[c]) {
+    if (findCode(settings, c)) {
       setCode(c);
       setCodeError("");
     } else {
       setCode(null);
-      setCodeError("That code isn't valid. Try EVO10 (demo).");
+      setCodeError("That code isn't valid or has expired.");
     }
   };
 
@@ -334,7 +340,7 @@ export default function CheckoutClient({ initialKind, initialDuration, mode }: P
                     </span>
                     <span className="block text-lg font-semibold tracking-[-0.02em]">{plans[k].name}</span>
                     <span className={`mt-1 block pr-8 text-sm ${on ? "text-canvas/60" : "text-stone"}`}>{plans[k].tagline}</span>
-                    <span className="mt-4 block text-2xl font-semibold tabular-nums tracking-[-0.04em]">{inr(priceOf(k, duration))}</span>
+                    <span className="mt-4 block text-2xl font-semibold tabular-nums tracking-[-0.04em]">{inr(priceFor(settings, k, duration))}</span>
                     {duration === 90 && <span className={`text-xs font-semibold ${on ? "text-sprout" : "text-brand-deep"}`}>3rd month free · video calls included</span>}
                   </button>
                 );
@@ -402,10 +408,10 @@ export default function CheckoutClient({ initialKind, initialDuration, mode }: P
 
             {/* Discount code */}
             <div className="border-b border-ink/10 py-5">
-              {code ? (
+              {codeInfo ? (
                 <div className="flex items-center justify-between rounded-2xl bg-mint px-4 py-3">
                   <span className="flex items-center gap-2 text-sm font-semibold text-brand-deep">
-                    <Tag size={14} /> {code} · {discountCodes[code].label}
+                    <Tag size={14} /> {codeInfo.code} · {codeInfo.pct}% off
                   </span>
                   <button type="button" onClick={() => setCode(null)} className="text-xs font-semibold text-ink/50 hover:text-ink">
                     Remove

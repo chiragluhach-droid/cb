@@ -6,7 +6,8 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { ArrowUpRight, Check, Sparkles, Video } from "lucide-react";
 import Reveal from "@/components/ui/Reveal";
 import AnimatedHeading from "@/components/ui/AnimatedHeading";
-import { CHECKOUT_MODE, Duration, PlanKind, inr, ninetyDayExtras, plans, priceOf } from "@/lib/plans";
+import { Duration, PlanKind, inr } from "@/lib/plans";
+import { priceFor, useSettings } from "@/lib/settings";
 
 function Price({ value }: { value: number }) {
   return (
@@ -28,9 +29,9 @@ function Price({ value }: { value: number }) {
 }
 
 function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Duration; featured?: boolean }) {
-  const p = plans[kind];
-  const price = priceOf(kind, duration);
-  const free = CHECKOUT_MODE === "free";
+  const s = useSettings();
+  const p = s.plans[kind];
+  const price = priceFor(s, kind, duration);
   const dark = featured;
 
   return (
@@ -79,7 +80,7 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
         ))}
         <AnimatePresence initial={false}>
           {duration === 90 &&
-            ninetyDayExtras.map((f, i) => (
+            s.ninetyDayExtras.map((f, i) => (
               <motion.li
                 key={f}
                 initial={{ opacity: 0, height: 0 }}
@@ -100,12 +101,12 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
       </ul>
 
       <Link
-        href={`/checkout?plan=${kind}-${duration}`}
+        href={`/login?mode=signup&plan=${kind}-${duration}`}
         className={`group inline-flex items-center justify-center gap-2 rounded-full py-4 text-sm font-semibold transition-colors duration-300 ${
           dark ? "bg-sprout text-forest hover:bg-canvas" : "bg-ink text-canvas hover:bg-brand"
         } mt-auto`}
       >
-        {free ? "Claim early access" : `Get ${p.name}`}
+        Get {p.name}
         <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:rotate-45" />
       </Link>
     </div>
@@ -114,7 +115,6 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
 
 export default function Pricing() {
   const [duration, setDuration] = useState<Duration>(90);
-  const free = CHECKOUT_MODE === "free";
 
   return (
     <section id="pricing" className="relative bg-canvas py-20 lg:py-32">
@@ -156,12 +156,6 @@ export default function Pricing() {
               ))}
             </div>
           </LayoutGroup>
-          {free && (
-            <p className="flex items-center gap-2 rounded-full bg-mint px-4 py-2 text-sm font-medium text-brand-deep">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
-              Early access: checkout is free right now
-            </p>
-          )}
         </Reveal>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:gap-6">

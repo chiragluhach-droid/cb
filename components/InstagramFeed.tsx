@@ -39,7 +39,7 @@ function Card({ url, children, className }: { url: string | null; children: Reac
 
 export default function InstagramFeed() {
   const reduce = useReducedMotion();
-  const url = instagramHandle ? `https://instagram.com/${instagramHandle.replace("@", "")}` : null;
+  const url = instagramHandle ? `https://www.instagram.com/${instagramHandle.replace("@", "")}` : null;
 
 
   return (

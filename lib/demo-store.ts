@@ -21,6 +21,8 @@ export type User = {
   phone: string;
   plan: PlanId;
   createdAt: number;
+  /** Sample client created for the admin demo. */
+  seeded?: boolean;
 };
 
 export type Profile = Inputs & { workoutPlace: "home" | "gym"; dislikes: string };
@@ -44,9 +46,27 @@ export type UserData = {
   weights: { date: string; kg: number }[];
   photos: { id: string; date: string; src: string }[];
   messages: Message[];
+  /** Coach's edits to the draft: `${weekday}-${slot}` → dish id. Applied before the client's own swaps. */
+  planEdits?: Record<string, string>;
+  /** When the coach approved the current plan. */
+  approvedAt?: number;
+  /** Private coach notes about this client. */
+  coachNotes?: string;
+  /** Last time the coach read this client's messages. */
+  coachReadAt?: number;
+  /** Latest AI-drafted week (coach panel). `picks` uses the same keys as planEdits. */
+  aiDraft?: { at: number; model: string; note: string; instruction?: string; picks: Record<string, string>; prevEdits?: Record<string, string> };
 };
 
-export type DemoState = { users: User[]; session: string | null; data: Record<string, UserData> };
+export type DemoState = {
+  users: User[];
+  session: string | null;
+  data: Record<string, UserData>;
+  /** Coach panel sign-in (demo). */
+  admin?: { signedIn: boolean };
+  /** Sample clients have been added for the admin demo. */
+  seeded?: boolean;
+};
 
 const KEY = "evowell.demo.v1";
 const EMPTY: DemoState = { users: [], session: null, data: {} };
@@ -119,7 +139,7 @@ export const weekday = (d = new Date()) => (d.getDay() + 6) % 7;
 
 export const emptyDay = (): DayLog => ({ meals: [], swaps: {}, water: 0, steps: 0, sets: {} });
 
-const newData = (): UserData => ({
+export const newData = (): UserData => ({
   profile: null,
   planStatus: "none",
   startDate: dayKey(),
@@ -219,3 +239,7 @@ export function useSession() {
 }
 
 export const newId = uid;
+
+/** Low-level access for the admin panel (lib/admin.ts). Screens should use the hooks. */
+export const readState = read;
+export const writeState = write;
