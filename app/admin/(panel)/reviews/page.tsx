@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { AlertTriangle, ArrowRight, Hourglass, Send, ShieldCheck } from "lucide-react";
 import { Card, CardTitle } from "@/components/app/ui";
 import { ClientAvatar, Empty, PageTitle, ProfileTags, planLabel, timeAgo } from "@/components/admin/bits";
+import { DeleteClientButton } from "@/components/admin/DeleteClient";
 import { coachSend, reviewPlan, useAdmin } from "@/lib/admin";
 import { dayNames } from "@/lib/workouts";
 
@@ -92,6 +93,7 @@ export default function ReviewsPage() {
                   >
                     <Send size={12} /> {nudged ? "Reminder sent" : "Send reminder"}
                   </button>
+                  <DeleteClientButton user={c.user} compact />
                 </li>
               );
             })}

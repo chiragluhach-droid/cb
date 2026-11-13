@@ -30,6 +30,8 @@ export type OrderDoc = {
   /** How the payment was confirmed: the browser handler or the webhook. */
   via?: "checkout" | "webhook";
   lastError?: string;
+  /** The client's account was deleted; the payment record is kept for tax. */
+  userDeleted?: boolean;
 };
 export type ClientDataDoc = Omit<UserData, "photos"> & { _id: string };
 export type PhotoDoc = { _id: string; userId: string; date: string; mime: string; data: Buffer; createdAt: number };

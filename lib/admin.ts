@@ -103,6 +103,23 @@ export async function adminSignOut() {
 
 /* ───────────── Coach actions ───────────── */
 
+/** Permanently delete a client and all their data. */
+export async function deleteClient(id: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(`/api/admin/clients/${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (res.status === 401) {
+      emit({ status: "signedOut", clients: [] });
+      return { ok: false, error: "Sign in again." };
+    }
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    if (!res.ok && res.status !== 404) return { ok: false, error: j.error ?? "Couldn't delete. Try again." };
+    emit({ ...st, clients: st.clients.filter((c) => c.user.id !== id) });
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
 /** Coach edit for one meal of the weekly plan. `dishId: null` restores the draft. */
 export function setPlanEdit(id: string, day: number, slot: Slot, dishId: string | null) {
   act(

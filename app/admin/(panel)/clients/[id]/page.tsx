@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, ClipboardList, Hourglass, LineChart, MessageCircle, Send, UserRound } from "lucide-react";
 import { Card, Segmented } from "@/components/app/ui";
 import { ClientAvatar, ProfileTags, StatusPill, planLabel } from "@/components/admin/bits";
 import PlanReview from "@/components/admin/PlanReview";
 import { ClientProfile, ClientProgress } from "@/components/admin/ClientPanels";
 import { ChatThread } from "@/components/admin/ChatThread";
+import { DeleteClientButton } from "@/components/admin/DeleteClient";
 import { coachSend, useAdmin } from "@/lib/admin";
 
 type Tab = "plan" | "progress" | "messages" | "profile";
@@ -17,6 +18,7 @@ const tabs: Tab[] = ["plan", "progress", "messages", "profile"];
 export default function ClientPage() {
   const { id } = useParams<{ id: string }>();
   const { clients } = useAdmin();
+  const router = useRouter();
   const row = clients.find((c) => c.user.id === id);
   const [tab, setTab] = useState<Tab>("plan");
 
@@ -129,7 +131,18 @@ export default function ClientPage() {
           </div>
         )}
 
-        {tab === "profile" && <ClientProfile row={row} />}
+        {tab === "profile" && (
+          <>
+            <ClientProfile row={row} />
+            <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-[1.75rem] bg-white p-5 ring-1 ring-red-100 sm:flex-row sm:items-center sm:p-6">
+              <div>
+                <p className="font-semibold text-ink">Delete this client</p>
+                <p className="text-sm text-stone">Removes their account and all their data for good.</p>
+              </div>
+              <DeleteClientButton user={user} onDeleted={() => router.replace("/admin/clients")} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

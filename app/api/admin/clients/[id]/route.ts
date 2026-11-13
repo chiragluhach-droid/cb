@@ -93,3 +93,31 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     return NextResponse.json({ error: "Couldn't save. Try again." }, { status: 503 });
   }
 }
+
+/**
+ * DELETE /api/admin/clients/:id — permanently removes a client: account,
+ * dashboard data, photos, messages, pending sign-in code and unpaid orders.
+ * Paid orders stay (tax records) but hold no personal details — only the
+ * old account id, plan and amount — and are marked `userDeleted`.
+ */
+export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Coach sign-in required." }, { status: 401 });
+  const { id } = await ctx.params;
+  try {
+    const { users, clientdata, photos, otps, orders } = await cols();
+    const user = await users.findOne({ _id: id });
+    if (!user) return NextResponse.json({ error: "Client not found." }, { status: 404 });
+    const [, , ph, , unpaid, paid] = await Promise.all([
+      users.deleteOne({ _id: id }),
+      clientdata.deleteOne({ _id: id }),
+      photos.deleteMany({ userId: id }),
+      otps.deleteOne({ _id: user.email }),
+      orders.deleteMany({ userId: id, status: { $ne: "paid" } }),
+      orders.updateMany({ userId: id, status: "paid" }, { $set: { userDeleted: true } }),
+    ]);
+    return NextResponse.json({ ok: true, photos: ph.deletedCount, unpaidOrders: unpaid.deletedCount, paidOrdersKept: paid.matchedCount });
+  } catch (e) {
+    console.error("admin delete client failed", e);
+    return NextResponse.json({ error: "Couldn't delete. Try again." }, { status: 503 });
+  }
+}
