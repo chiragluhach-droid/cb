@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasAccess } from "@/lib/server/billing";
 import { cols } from "@/lib/server/mongo";
 import { newId } from "@/lib/server/repo";
 import { clientId } from "@/lib/server/session";
@@ -26,7 +27,9 @@ export async function POST(req: Request) {
   if (data.length > MAX_BYTES) return NextResponse.json({ error: "That photo is too large." }, { status: 413 });
 
   try {
-    const { photos } = await cols();
+    const { photos, users } = await cols();
+    const user = await users.findOne({ _id: id }, { projection: { subscription: 1 } });
+    if (!user || !hasAccess(user)) return NextResponse.json({ error: "Your plan isn't active.", needsPayment: true }, { status: 402 });
     const pid = typeof b.id === "string" && /^[\w-]{4,40}$/.test(b.id) ? b.id : newId();
     await photos.insertOne({ _id: pid, userId: id, date: b.date, mime: m[1], data, createdAt: Date.now() });
     const extra = await photos.find({ userId: id }, { projection: { _id: 1 } }).sort({ date: -1, createdAt: -1 }).skip(KEEP).toArray();

@@ -127,6 +127,20 @@ export default function Footer() {
           </div>
         </div>
 
+        <nav aria-label="Policies" className="flex flex-wrap gap-x-5 gap-y-2 border-t border-ink/10 py-5 text-sm">
+          {[
+            ["Contact", "/contact"],
+            ["Terms", "/terms"],
+            ["Privacy", "/privacy"],
+            ["Refunds & cancellation", "/refunds"],
+            ["Shipping & delivery", "/shipping"],
+          ].map(([l, h]) => (
+            <a key={h} href={h} className="font-medium text-ink/60 underline-offset-2 transition-colors hover:text-ink hover:underline">
+              {l}
+            </a>
+          ))}
+        </nav>
+
         <div className="flex flex-col gap-2 border-t border-ink/10 py-6 text-sm text-ink/50 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} Evowell Nutrition & Training.</p>
           <p>

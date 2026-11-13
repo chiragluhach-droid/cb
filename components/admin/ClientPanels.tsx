@@ -5,6 +5,7 @@ import { Check, Droplet, Footprints, Mail, Phone, Scale, Utensils } from "lucide
 import { Card, CardTitle } from "@/components/app/ui";
 import { WeightChart, fmtDay } from "@/components/app/WeightChart";
 import { stepGoal } from "@/components/app/meals";
+import { inr } from "@/lib/plans";
 import { activityLabel, condLabel, dietLabel, goalLabel, planLabel } from "@/components/admin/bits";
 import { ClientRow, saveCoachNotes } from "@/lib/admin";
 import { dayKey, formatPhone } from "@/lib/demo-store";
@@ -199,6 +200,18 @@ export function ClientProfile({ row }: { row: ClientRow }) {
           <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{planLabel(user.plan)}</p>
           <p className="text-sm text-canvas/55">
             Joined {new Date(user.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · started {fmtDay(data.startDate)}
+          </p>
+          <p className="mt-3 text-sm text-canvas/70">
+            {user.access === "open" && "Online payments not switched on"}
+            {user.access === "unpaid" && <span className="font-semibold text-warn">Not paid yet</span>}
+            {user.subscription && (
+              <>
+                Paid {inr(user.subscription.amount)} on {new Date(user.subscription.paidAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} ·{" "}
+                <span className={user.access === "expired" ? "font-semibold text-warn" : ""}>
+                  {user.access === "expired" ? "ended" : "until"} {new Date(user.subscription.expiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+              </>
+            )}
           </p>
           {data.planStatus === "approved" && (
             <p className="mt-4 text-sm tabular-nums text-canvas/70">

@@ -12,7 +12,7 @@ import { RingMark } from "@/components/brand/Marks";
 import { Seal } from "@/components/brand/Seal";
 import { photos, unsplash } from "@/lib/site";
 import { PlanId, parsePlan, plans } from "@/lib/plans";
-import { startAuth, useSession, verifyAuth } from "@/lib/demo-store";
+import { canUseApp, startAuth, useSession, verifyAuth } from "@/lib/demo-store";
 
 type Mode = "login" | "signup";
 type Props = { initialMode: Mode; plan: string | null; name: string; email: string; phone: string; next: string | null };
@@ -302,7 +302,14 @@ export default function AuthScreen(props: Props) {
       setTimeout(() => setOtpError(false), 500);
       return;
     }
-    const dest = res.isNew ? "/onboarding" : props.next && props.next.startsWith("/") ? props.next : "/dashboard";
+    // No paid plan yet (or it ran out) → checkout first, then the questionnaire.
+    const dest = !canUseApp(res.user)
+      ? `/checkout?plan=${res.user.plan}`
+      : res.isNew
+        ? "/onboarding"
+        : props.next && props.next.startsWith("/") && !props.next.startsWith("//")
+          ? props.next
+          : "/dashboard";
     setStep("done");
     setTimeout(() => router.push(dest), 900);
   };
@@ -363,7 +370,7 @@ export default function AuthScreen(props: Props) {
                 As <b className="text-ink">{user!.name}</b> · {user!.email}
               </p>
               <button
-                onClick={() => router.push(data?.profile ? "/dashboard" : "/onboarding")}
+                onClick={() => router.push(user && !canUseApp(user) ? `/checkout?plan=${user.plan}` : data?.profile ? "/dashboard" : "/onboarding")}
                 className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-brand py-4 text-sm font-semibold text-white transition-colors hover:bg-brand-deep"
               >
                 {data?.profile ? "Go to your dashboard" : "Finish your questionnaire"} <ArrowRight size={16} />

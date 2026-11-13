@@ -8,7 +8,7 @@ import { CalendarDays, Dumbbell, Home, LineChart, Loader2, LogOut, MessageCircle
 import { Wordmark } from "@/components/Logo";
 import { SealLogo } from "@/components/brand/SealLogo";
 import { Bar } from "@/components/app/ui";
-import { logout, useSession } from "@/lib/demo-store";
+import { canUseApp, logout, useSession } from "@/lib/demo-store";
 import { parsePlan, plans } from "@/lib/plans";
 
 export const appNav = [
@@ -43,10 +43,11 @@ export default function Shell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     if (!user) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+    else if (!canUseApp(user)) router.replace(`/checkout?plan=${user.plan}`);
     else if (!data?.profile) router.replace("/onboarding");
   }, [hydrated, user, data?.profile, router, pathname]);
 
-  if (!hydrated || !user || !data?.profile) {
+  if (!hydrated || !user || !canUseApp(user) || !data?.profile) {
     return (
       <div className="flex min-h-[100svh] items-center justify-center bg-canvas">
         <Loader2 className="animate-spin text-brand" />

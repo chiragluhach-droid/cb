@@ -120,8 +120,14 @@ export default function ProfilePage() {
             <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">Your plan</p>
             <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{settings.plans[plan.kind].name}</p>
             <p className="text-sm text-canvas/55">
-              {plan.duration}-day programme · {inr(priceFor(settings, plan.kind, plan.duration))} one-time
+              {plan.duration}-day programme ·{" "}
+              {user.subscription ? `paid ${inr(user.subscription.amount)}` : `${inr(priceFor(settings, plan.kind, plan.duration))} one-time`}
             </p>
+            {user.subscription && (
+              <p className="mt-1 text-sm text-canvas/55">
+                Active until <b className="font-semibold text-canvas">{new Date(user.subscription.expiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</b>
+              </p>
+            )}
             <div className="mt-5">
               <Bar value={day / total} className="bg-sprout" track="bg-canvas/10" />
             </div>
@@ -138,10 +144,16 @@ export default function ProfilePage() {
                 <p className="text-[0.6875rem] text-canvas/50">protein / day</p>
               </div>
             </div>
-            {(plan.kind === "meal" || plan.duration === 30) && (
-              <Link href="/#pricing" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
-                {plan.kind === "meal" ? "Add workouts" : "Go 90 days — 3rd month free"} <ArrowUpRight size={14} />
+            {user.access === "active" ? (
+              <Link href={`/checkout?plan=${plan.kind === "meal" ? "meal-workout" : plan.kind}-${plan.kind === "meal" ? plan.duration : 90}`} className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
+                {plan.kind === "meal" ? "Add workouts" : plan.duration === 30 ? "Go 90 days — 3rd month free" : "Extend your plan"} <ArrowUpRight size={14} />
               </Link>
+            ) : (
+              (plan.kind === "meal" || plan.duration === 30) && (
+                <Link href="/#pricing" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
+                  {plan.kind === "meal" ? "Add workouts" : "Go 90 days — 3rd month free"} <ArrowUpRight size={14} />
+                </Link>
+              )
             )}
           </Card>
 

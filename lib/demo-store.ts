@@ -21,7 +21,17 @@ export type User = {
   phone: string;
   plan: PlanId;
   createdAt: number;
+  /**
+   * Whether the dashboard is unlocked. "open" means online payments aren't
+   * switched on yet, so everyone gets in; "unpaid"/"expired" go to checkout.
+   */
+  access: "open" | "active" | "unpaid" | "expired";
+  /** The latest paid period, when there is one. */
+  subscription?: { plan: PlanId; paidAt: number; expiresAt: number; amount: number };
 };
+
+/** True when the client can use the dashboard. */
+export const canUseApp = (u: Pick<User, "access">) => u.access === "open" || u.access === "active";
 
 export type Profile = Inputs & { workoutPlace: "home" | "gym"; dislikes: string };
 
@@ -209,7 +219,7 @@ export async function startAuth(input: { mode: "signup" | "login"; name?: string
   }
 }
 
-export type VerifyResult = { ok: true; isNew: boolean } | { ok: false; error: string; wrong?: boolean };
+export type VerifyResult = { ok: true; isNew: boolean; user: User } | { ok: false; error: string; wrong?: boolean };
 
 export async function verifyAuth(email: string, code: string): Promise<VerifyResult> {
   try {
@@ -224,6 +234,9 @@ export async function verifyAuth(email: string, code: string): Promise<VerifyRes
     return { ok: false, error: "Couldn't reach the server. Check your connection." };
   }
 }
+
+/** Re-read the account from the server (e.g. right after a payment). */
+export const reloadSession = () => refresh();
 
 export async function logout() {
   emit({ status: "anon", user: null, data: null });

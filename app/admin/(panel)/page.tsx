@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { AlertTriangle, ArrowRight, ArrowUpRight, ClipboardCheck, MessageCircle, ShieldCheck, TrendingDown, TrendingUp, Users } from "lucide-react";
@@ -10,11 +11,41 @@ import { inr, parsePlan, plans } from "@/lib/plans";
 import { priceFor, useSettings } from "@/lib/settings";
 import { coach } from "@/lib/site";
 
+type PaymentsSummary = {
+  on: boolean;
+  testMode: boolean;
+  total: number;
+  thisMonth: number;
+  count: number;
+  recent: { id: string; userId: string; plan: string; amount: number; paidAt: number }[];
+};
+
+/** Real takings from Razorpay orders (refreshes each minute). */
+function usePayments() {
+  const [p, setP] = useState<PaymentsSummary | null>(null);
+  useEffect(() => {
+    let live = true;
+    const load = () =>
+      fetch("/api/admin/payments", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => live && j && setP(j))
+        .catch(() => {});
+    load();
+    const t = setInterval(load, 60000);
+    return () => {
+      live = false;
+      clearInterval(t);
+    };
+  }, []);
+  return p;
+}
+
 const greeting = (h: number) => (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening");
 
 export default function AdminOverview() {
   const { clients } = useAdmin();
   const settings = useSettings();
+  const payments = usePayments();
   const now = new Date();
 
   const review = clients.filter((c) => c.status === "review");
@@ -224,9 +255,38 @@ export default function AdminOverview() {
 
           {/* Plans */}
           <Card>
-            <CardTitle action={<Link href="/admin/subscriptions" className="text-xs font-semibold text-brand-deep">Manage</Link>}>Plans sold</CardTitle>
-            <p className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-ink">{inr(booked)}</p>
-            <p className="text-xs text-stone">Plan value at current prices · no online payments yet</p>
+            <CardTitle action={<Link href="/admin/subscriptions" className="text-xs font-semibold text-brand-deep">Manage</Link>}>
+              {payments?.on ? "Payments" : "Plans sold"}
+              {payments?.testMode && <span className="ml-2 rounded-full bg-warn/20 px-2 py-0.5 align-middle text-[0.625rem] font-bold uppercase tracking-[0.12em] text-[#8A5A00]">Test mode</span>}
+            </CardTitle>
+            {payments?.on ? (
+              <>
+                <p className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-ink">{inr(payments.total)}</p>
+                <p className="text-xs text-stone">
+                  Collected · {payments.count} payment{payments.count === 1 ? "" : "s"} · {inr(payments.thisMonth)} this month
+                </p>
+                {payments.recent.length > 0 && (
+                  <ul className="mt-4 space-y-1.5 border-t border-ink/[0.06] pt-3">
+                    {payments.recent.slice(0, 4).map((o) => {
+                      const who = clients.find((c) => c.user.id === o.userId)?.user.name ?? "Deleted client";
+                      return (
+                        <li key={o.id} className="flex items-center justify-between gap-3 text-xs">
+                          <span className="min-w-0 truncate text-ink/70">
+                            <b className="font-semibold text-ink">{who}</b> · {timeAgo(o.paidAt)}
+                          </span>
+                          <b className="shrink-0 tabular-nums text-ink">{inr(o.amount)}</b>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-semibold tabular-nums tracking-[-0.05em] text-ink">{inr(booked)}</p>
+                <p className="text-xs text-stone">Plan value at current prices · online payments not switched on</p>
+              </>
+            )}
             <ul className="mt-5 space-y-2.5">
               {mix.map((m) => (
                 <li key={m.label} className="text-xs">

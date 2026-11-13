@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { UpdateFilter } from "mongodb";
+import { accessOf, hasAccess } from "@/lib/server/billing";
 import { ClientDataDoc, cols } from "@/lib/server/mongo";
 import { coachMessage, freshData, loadClient, newId, today, welcomeMessage } from "@/lib/server/repo";
 import { clientId } from "@/lib/server/session";
@@ -53,12 +54,17 @@ export async function PATCH(req: Request) {
       return NextResponse.json(await loadClient(id));
     }
 
-    // Account fields
+    // Account fields. Once payments are on, the plan only changes by paying for it.
     const userSet: Record<string, unknown> = {};
     const u = b.user as Record<string, unknown> | undefined;
     if (u && validName(u.name)) userSet.name = (u.name as string).trim();
-    if (u && validPlan(u.plan)) userSet.plan = u.plan;
+    if (u && validPlan(u.plan) && (accessOf(user) === "open" || !user.subscription)) userSet.plan = u.plan;
     if (Object.keys(userSet).length) await users.updateOne({ _id: id }, { $set: userSet });
+
+    // Without a paid plan, only the account fields above can change.
+    if (!hasAccess(user) && (b.profile !== undefined || b.days !== undefined || b.weights !== undefined || b.messages !== undefined)) {
+      return NextResponse.json({ error: "Your plan isn't active. Complete payment to continue.", needsPayment: true }, { status: 402 });
+    }
 
     const cur = (await clientdata.findOne({ _id: id })) ?? freshData(id);
     const set: Record<string, unknown> = {};

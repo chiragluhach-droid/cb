@@ -24,7 +24,7 @@ import { Wordmark } from "@/components/Logo";
 import { SealLogo } from "@/components/brand/SealLogo";
 import { ChoiceCard, Chips, RangeField, Segmented } from "@/components/app/ui";
 import { Activity, Allergen, Condition, Diet, Goal, defaultInputs, targets } from "@/lib/engine";
-import { Profile, dayKey, newId, useSession } from "@/lib/demo-store";
+import { Profile, canUseApp, dayKey, newId, useSession } from "@/lib/demo-store";
 import { parsePlan } from "@/lib/plans";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -81,6 +81,10 @@ export default function Onboarding() {
       router.replace("/login?mode=signup");
       return;
     }
+    if (!canUseApp(user)) {
+      router.replace(`/checkout?plan=${user.plan}`);
+      return;
+    }
     if (!loaded) {
       if (data?.profile) setP(data.profile);
       setLoaded(true);
@@ -131,7 +135,7 @@ export default function Onboarding() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, tick]);
 
-  if (!hydrated || !user) {
+  if (!hydrated || !user || !canUseApp(user)) {
     return (
       <div className="flex min-h-[100svh] items-center justify-center bg-canvas">
         <Loader2 className="animate-spin text-brand" />

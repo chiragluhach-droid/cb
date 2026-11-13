@@ -6,6 +6,7 @@
 import { randomBytes } from "crypto";
 import type { Message, User, UserData } from "@/lib/demo-store";
 import { Settings, defaultSettings } from "@/lib/settings-core";
+import { accessOf } from "@/lib/server/billing";
 import { ClientDataDoc, UserDoc, cols } from "@/lib/server/mongo";
 
 export const newId = () => randomBytes(9).toString("base64url");
@@ -16,7 +17,16 @@ export const today = () => {
   return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`;
 };
 
-export const toUser = (u: UserDoc): User => ({ id: u._id, name: u.name, email: u.email, phone: u.phone, plan: u.plan, createdAt: u.createdAt });
+export const toUser = (u: UserDoc): User => ({
+  id: u._id,
+  name: u.name,
+  email: u.email,
+  phone: u.phone,
+  plan: u.plan,
+  createdAt: u.createdAt,
+  access: accessOf(u),
+  ...(u.subscription ? { subscription: { plan: u.subscription.plan, paidAt: u.subscription.paidAt, expiresAt: u.subscription.expiresAt, amount: u.subscription.amount } } : {}),
+});
 
 export const freshData = (id: string): ClientDataDoc => ({
   _id: id,

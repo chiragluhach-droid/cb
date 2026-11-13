@@ -92,7 +92,12 @@ export default function ClientsPage() {
                     </span>
 
                     <span className="col-span-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-stone lg:col-span-1 lg:block">
-                      <span className="block font-medium text-ink/75">{planLabel(c.user.plan)}</span>
+                      <span className="block font-medium text-ink/75">
+                        {planLabel(c.user.plan)}
+                        {(c.user.access === "unpaid" || c.user.access === "expired") && (
+                          <span className="ml-1.5 rounded-full bg-warn/20 px-1.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-[#8A5A00]">{c.user.access === "unpaid" ? "Unpaid" : "Ended"}</span>
+                        )}
+                      </span>
                       <span className="hidden lg:mt-1 lg:block">
                         <StatusPill status={c.status} />
                       </span>

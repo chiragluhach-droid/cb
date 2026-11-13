@@ -9,7 +9,28 @@ import type { DayLog, Message, Profile, UserData } from "@/lib/demo-store";
 import type { PlanId } from "@/lib/plans";
 import type { Settings } from "@/lib/settings-core";
 
-export type UserDoc = { _id: string; name: string; email: string; phone: string; plan: PlanId; createdAt: number; role: "client" };
+export type Subscription = { plan: PlanId; paidAt: number; expiresAt: number; amount: number; orderId: string };
+export type UserDoc = { _id: string; name: string; email: string; phone: string; plan: PlanId; createdAt: number; role: "client"; subscription?: Subscription };
+/** One Razorpay order. Kept in "orders" because another app writes to "payments" in this database. */
+export type OrderDoc = {
+  _id: string; // Razorpay order id, e.g. "order_Nx…"
+  userId: string;
+  plan: PlanId;
+  /** Rupees. */
+  listPrice: number;
+  discount: number;
+  amount: number;
+  code: string | null;
+  currency: "INR";
+  status: "created" | "paid";
+  createdAt: number;
+  paymentId?: string;
+  method?: string;
+  paidAt?: number;
+  /** How the payment was confirmed: the browser handler or the webhook. */
+  via?: "checkout" | "webhook";
+  lastError?: string;
+};
 export type ClientDataDoc = Omit<UserData, "photos"> & { _id: string };
 export type PhotoDoc = { _id: string; userId: string; date: string; mime: string; data: Buffer; createdAt: number };
 export type OtpDoc = {
@@ -35,6 +56,7 @@ async function connect(): Promise<Db> {
     db.collection<UserDoc>("users").createIndex({ email: 1 }, { unique: true }),
     db.collection<UserDoc>("users").createIndex({ phone: 1 }, { unique: true }),
     db.collection<PhotoDoc>("photos").createIndex({ userId: 1, date: -1 }),
+    db.collection<OrderDoc>("orders").createIndex({ userId: 1, createdAt: -1 }),
     // Sign-in codes delete themselves when they expire.
     db.collection<OtpDoc>("otps").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
   ]);
@@ -59,6 +81,7 @@ export async function cols() {
     photos: db.collection<PhotoDoc>("photos"),
     otps: db.collection<OtpDoc>("otps"),
     settings: db.collection<SettingsDoc>("settings"),
+    orders: db.collection<OrderDoc>("orders"),
   };
 }
 
