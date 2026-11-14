@@ -1,40 +1,33 @@
 import type { Metadata } from "next";
 import LegalPage, { ContactLine, Section } from "@/components/LegalPage";
-import { business } from "@/lib/business";
 
 export const metadata: Metadata = { title: "Refund & cancellation policy" };
 
 export default function RefundsPage() {
-  const days = business.refundWindowDays;
   return (
-    <LegalPage title="Refunds & cancellation" intro="Plans are paid for once, up front. Nothing renews automatically, so there is never a subscription to cancel.">
-      <Section title="Full refund within the first days">
+    <LegalPage title="Refunds & cancellation" intro="All payments are final. Plans are paid for once, up front, and nothing renews automatically, so there is never a subscription to cancel.">
+      <Section title="No refunds">
         <p>
-          If you change your mind, ask within <b className="text-ink">{days} days of paying</b> and we will refund the full amount. No questions asked.
+          Your plan is built for you as soon as you pay, so <b className="text-ink">we don&apos;t offer refunds</b>, whether for a change of mind, for unused days, or for stopping a plan
+          early. Please read the plan details and pricing carefully before you pay.
         </p>
       </Section>
-      <Section title="After that">
+      <Section title="Cancelling">
         <p>
-          After {days} days, your plan, coaching and check-ins have already been prepared for you, so the payment is non-refundable. If something has gone wrong with your coaching,
-          write to us anyway — we&apos;ll do our best to make it right, for example by extending your plan.
+          There&apos;s nothing to cancel: each plan runs for its fixed 30 or 90 days and then simply ends. You won&apos;t be charged again unless you choose to buy another plan. You can
+          stop using your plan at any time, but the remaining days aren&apos;t refunded or carried over.
         </p>
       </Section>
-      <Section title="Charged twice, or charged for a failed payment">
+      <Section title="Payment errors">
         <p>
-          Duplicate charges, and payments that left your account but didn&apos;t activate your plan, are always refunded in full. Payments that your bank authorised but didn&apos;t
-          complete are reversed automatically by Razorpay, usually within 5–7 working days.
+          This doesn&apos;t cover mistakes in the payment itself. If you were charged twice for the same plan, or money left your account but your plan didn&apos;t activate, contact us
+          and we&apos;ll return the extra or failed payment in full to the original payment method. Payments your bank authorised but didn&apos;t complete are reversed automatically
+          by Razorpay, usually within 5–7 working days.
         </p>
       </Section>
-      <Section title="How refunds are paid">
-        <ul>
-          <li>Refunds go back to the original payment method (UPI, card, netbanking or wallet).</li>
-          <li>We approve refunds within 2 working days of your request.</li>
-          <li>Your bank then takes 5–7 working days to show the money in your account.</li>
-        </ul>
-      </Section>
-      <Section title="Ask for a refund">
+      <Section title="Questions">
         <p>
-          Contact <ContactLine /> with the email you signed up with. Your payment ID (from your Razorpay receipt email) helps us find it faster.
+          If something isn&apos;t right with your plan or coaching, contact <ContactLine /> and we&apos;ll do our best to fix it.
         </p>
       </Section>
     </LegalPage>

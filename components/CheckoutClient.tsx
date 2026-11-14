@@ -453,7 +453,7 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
               </Link>{" "}
               and{" "}
               <Link href="/refunds" className="underline underline-offset-2 hover:text-ink">
-                refund policy
+                no-refund policy
               </Link>
               .
             </p>

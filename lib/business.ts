@@ -20,8 +20,6 @@ export const business = {
   phone: "+91 97117 11059",
   /** When you answer, e.g. "Mon–Sat, 10am–7pm IST". */
   hours: "Mon–Sat, 10am–7pm IST",
-  /** Days after payment within which a full refund can be asked for. */
-  refundWindowDays: 7,
   /** Last time the policies changed. */
-  updated: "13 November 2026",
+  updated: "15 November 2026",
 };

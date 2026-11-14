@@ -35,6 +35,7 @@ export default function TermsPage() {
         <ul>
           <li>Prices are in Indian rupees and shown before you pay. Payment is taken once, up front, through Razorpay.</li>
           <li>Nothing renews automatically. When your period ends you can choose to renew.</li>
+          <li>All payments are final and non-refundable, except for payment errors such as duplicate charges.</li>
           <li>We may change prices for future purchases; it never affects a plan you have already paid for.</li>
           <li>Discount codes can&apos;t be exchanged for cash and only one can be used per payment.</li>
         </ul>
@@ -50,8 +51,7 @@ export default function TermsPage() {
       </Section>
       <Section title="Fair use">
         <p>
-          Your plan is for you. Please don&apos;t share your account, resell the plans, copy the site, or be abusive to your coach. We may suspend accounts that do, and refund any unused
-          time.
+          Your plan is for you. Please don&apos;t share your account, resell the plans, copy the site, or be abusive to your coach. We may suspend accounts that do, without a refund.
         </p>
       </Section>
       <Section title="Our content">

@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         <ul>
           <li>To build, review and adjust your plan, and for your coach to support you.</li>
           <li>To sign you in (we email you one-time codes) and to send receipts and important account messages.</li>
-          <li>To take payment and handle refunds.</li>
+          <li>To take payment and correct any payment errors.</li>
         </ul>
       </Section>
       <Section title="Who else handles it">
