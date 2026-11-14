@@ -12,17 +12,17 @@ import { Seal } from "@/components/brand/Seal";
 // Post previews floating around the "coming soon" card (tablet/desktop).
 // `spread` is the hover nudge outward — full class strings so Tailwind keeps them.
 const tiles = [
-  { img: photos.idliLeaf, label: "Recipes", pos: "left-[5%] top-[10%]", rot: -9, spread: "group-hover:-translate-x-3 group-hover:-translate-y-2" },
+  { img: photos.buddhaBowl, label: "Recipes", pos: "left-[5%] top-[10%]", rot: -9, spread: "group-hover:-translate-x-3 group-hover:-translate-y-2" },
   { img: photos.palakPaneer, label: "Dish swaps", pos: "right-[5%] top-[12%]", rot: 7, spread: "group-hover:translate-x-3 group-hover:-translate-y-2" },
   { img: photos.run, label: "Home workouts", pos: "left-[9%] bottom-[10%]", rot: 6, spread: "group-hover:-translate-x-3 group-hover:translate-y-2" },
-  { img: photos.khichdi, label: "Coach tips", pos: "right-[8%] bottom-[9%]", rot: -6, spread: "group-hover:translate-x-3 group-hover:translate-y-2" },
+  { img: photos.avoToast, label: "Coach tips", pos: "right-[8%] bottom-[9%]", rot: -6, spread: "group-hover:translate-x-3 group-hover:translate-y-2" },
 ];
 const chipTone = ["bg-sprout text-forest", "bg-canvas text-ink", "bg-brand text-white", "bg-mint text-forest"];
 
 // Phones get a small fanned stack inside the card instead.
 const fan = [
   { img: photos.idliLeaf, rot: -10, x: -46 },
-  { img: photos.rotiSabzi, rot: 0, x: 0 },
+  { img: photos.chickenBowl, rot: 0, x: 0 },
   { img: photos.palakPaneer, rot: 10, x: 46 },
 ];
 

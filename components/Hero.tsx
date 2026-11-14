@@ -13,7 +13,7 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { ArrowLeftRight, ArrowUpRight, Check, Egg, Fish, Leaf, LucideIcon } from "lucide-react";
+import { ArrowLeftRight, ArrowUpRight, Check, Egg, Leaf, LucideIcon } from "lucide-react";
 import { photos, unsplash } from "@/lib/site";
 
 /*
@@ -38,7 +38,7 @@ const diets: { key: DietKey; label: string; note: string; dishes: Dish[] }[] = [
       { name: "Roti, sabzi & dal", kcal: 520, p: 20, img: photos.rotiSabzi },
       { name: "Palak paneer", kcal: 540, p: 26, img: photos.palakPaneer },
       { name: "Moong dal khichdi", kcal: 470, p: 19, img: photos.khichdi },
-      { name: "Paneer tikka", kcal: 270, p: 18, img: photos.paneerTikka },
+      { name: "Buddha bowl", kcal: 480, p: 18, img: photos.buddhaBowl },
     ],
   },
   {
@@ -61,7 +61,7 @@ const diets: { key: DietKey; label: string; note: string; dishes: Dish[] }[] = [
       { name: "Egg bhurji + roti", kcal: 360, p: 22, icon: Egg, tone: "bg-[#FCE7B2] text-[#8A5A00]" },
       { name: "Idli + sambar", kcal: 300, p: 11, img: photos.idliCoffee },
       { name: "Roti, sabzi & dal", kcal: 520, p: 20, img: photos.rotiSabzi },
-      { name: "Boiled eggs", kcal: 160, p: 12, icon: Egg, tone: "bg-[#FFF3D6] text-[#8A5A00]" },
+      { name: "Avocado toast & egg", kcal: 350, p: 15, img: photos.avoToast },
       { name: "Paneer tikka", kcal: 270, p: 18, img: photos.paneerTikka },
     ],
   },
@@ -72,7 +72,7 @@ const diets: { key: DietKey; label: string; note: string; dishes: Dish[] }[] = [
     dishes: [
       { name: "Chicken curry + rice", kcal: 560, p: 38, img: photos.chickenCurry },
       { name: "Masala dosa", kcal: 380, p: 9, img: photos.masalaDosa },
-      { name: "Fish tikka + salad", kcal: 380, p: 36, icon: Fish, tone: "bg-[#D7ECF7] text-[#1B5E80]" },
+      { name: "Chicken salad bowl", kcal: 420, p: 35, img: photos.chickenBowl },
       { name: "Home thali", kcal: 560, p: 21, img: photos.thali },
       { name: "Egg bhurji", kcal: 300, p: 20, icon: Egg, tone: "bg-[#FCE7B2] text-[#8A5A00]" },
     ],
@@ -161,9 +161,9 @@ function Katori({
 }
 
 const mobileBowls = [
-  { img: photos.idliLeaf, cls: "right-0 top-[2%] w-[68%]", float: 3.2, spin: 26, delay: 0.45 },
+  { img: photos.buddhaBowl, cls: "right-0 top-[2%] w-[68%]", float: 3.2, spin: 26, delay: 0.45 },
   { img: photos.palakPaneer, cls: "left-[2%] top-[44%] w-[50%]", float: 3.8, spin: -32, delay: 0.55 },
-  { img: photos.paneerTikka, cls: "right-[9%] top-[60%] w-[34%]", float: 2.9, spin: 22, delay: 0.65 },
+  { img: photos.idliLeaf, cls: "right-[9%] top-[60%] w-[34%]", float: 2.9, spin: 22, delay: 0.65 },
 ];
 
 /** Types "Coach-approved" letter by letter, holds, erases, and loops. */

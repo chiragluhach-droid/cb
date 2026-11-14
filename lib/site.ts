@@ -37,6 +37,12 @@ export const photos = {
   palakPaneer: "1589647363585-f4a7d3877b10",
   chanaDal: "1705845580041-f04ad853617f",
   run: "1758922769578-68c5ba000d87",
+  // Global dishes, for clients outside India
+  buddhaBowl: "1512621776951-a57141f2eefd",
+  chickenBowl: "1546069901-ba9599a7e63c",
+  avoToast: "1541519227354-08fa5d50c44d",
+  salmon: "1467003909585-2f8a72700288",
+  berryOats: "1494390248081-4e521a5940db",
   // How it works
   phoneSofa: "1758876023053-3aa541a0935b",
   mealPrep: "1543352632-5a4b24e4d2a6",

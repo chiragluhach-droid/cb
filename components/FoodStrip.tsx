@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 import Image from "next/image";
-import { Coffee, CookingPot, Egg, Fish, LucideIcon, Milk, Salad, Soup, Wheat } from "lucide-react";
+import { Coffee, CookingPot, Egg, LucideIcon, Salad, Soup, Wheat } from "lucide-react";
 import { photos, unsplash } from "@/lib/site";
 
 type Item = { name: string; kcal: number; p: number; nonveg?: boolean; img?: string; icon?: LucideIcon; tone?: string };
@@ -11,8 +11,8 @@ const rowA: Item[] = [
   { name: "Palak paneer", kcal: 540, p: 26, img: photos.palakPaneer },
   { name: "Moong dal khichdi", kcal: 470, p: 19, img: photos.khichdi },
   { name: "Paneer tikka", kcal: 270, p: 18, img: photos.paneerTikka },
-  { name: "Ragi dosa", kcal: 300, p: 8, img: photos.dosa },
-  { name: "Masala dosa", kcal: 380, p: 9, img: photos.masalaDosa },
+  { name: "Buddha bowl", kcal: 480, p: 18, img: photos.buddhaBowl },
+  { name: "Avocado toast & egg", kcal: 350, p: 15, img: photos.avoToast },
   { name: "Home thali", kcal: 560, p: 21, img: photos.thali },
 ];
 
@@ -22,10 +22,11 @@ const rowB: Item[] = [
   { name: "Egg bhurji", kcal: 360, p: 22, nonveg: true, icon: Egg, tone: "bg-[#FFF3D6] text-[#8A5A00]" },
   { name: "Chana dal", kcal: 450, p: 18, img: photos.chanaDal },
   { name: "Vegetable poha", kcal: 310, p: 8, icon: Wheat, tone: "bg-[#FFF0C2] text-[#7A5B00]" },
-  { name: "Fish tikka", kcal: 380, p: 36, nonveg: true, icon: Fish, tone: "bg-[#D7ECF7] text-[#1B5E80]" },
+  { name: "Salmon & greens", kcal: 450, p: 36, nonveg: true, img: photos.salmon },
   { name: "Sprouts chaat", kcal: 230, p: 13, icon: Salad, tone: "bg-mint text-brand-deep" },
   { name: "Rajma chawal", kcal: 540, p: 20, icon: Soup, tone: "bg-[#F6DCD3] text-[#8A3A1F]" },
-  { name: "Hung curd bowl", kcal: 240, p: 17, icon: Milk, tone: "bg-[#EEF1F6] text-[#3B4A6B]" },
+  { name: "Berry oat bowl", kcal: 330, p: 14, img: photos.berryOats },
+  { name: "Chicken salad bowl", kcal: 420, p: 35, nonveg: true, img: photos.chickenBowl },
   { name: "Masala chai", kcal: 90, p: 3, icon: Coffee, tone: "bg-[#EADBC8] text-[#6B4423]" },
 ];
 
