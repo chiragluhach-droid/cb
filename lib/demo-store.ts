@@ -58,6 +58,11 @@ export type UserData = {
   planEdits?: Record<string, string>;
   /** When the coach approved the current plan. */
   approvedAt?: number;
+  /**
+   * The plan the client can see: a snapshot taken when the coach approves or
+   * sends an update. Drafts and later coach edits stay hidden until sent.
+   */
+  published?: { profile: Profile; edits: Record<string, string>; at: number };
   /** Private coach notes about this client. */
   coachNotes?: string;
   /** Last time the coach read this client's messages. */

@@ -1,13 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { LayoutGroup, motion } from "framer-motion";
-import { Check, Clock, ShieldCheck } from "lucide-react";
+import { Check, Clock, MessageCircle, ShieldCheck } from "lucide-react";
 import { Card, CardTitle } from "@/components/app/ui";
 import { DishThumb, MealRow } from "@/components/app/MealRow";
 import { dayMeals } from "@/components/app/meals";
 import { dayKey, useSession } from "@/lib/demo-store";
 import { dayNames } from "@/lib/workouts";
+import { coach } from "@/lib/site";
+import { CoachAvatar } from "@/components/app/CoachAvatar";
 
 const dietLabel = { veg: "Vegetarian", jain: "Jain", egg: "Eggetarian", nonveg: "Non-vegetarian", vegan: "Vegan" } as const;
 const condLabel = { pcos: "PCOS", thyroid: "Thyroid", diabetes: "Diabetes", bp: "Blood pressure" } as const;
@@ -28,15 +31,19 @@ export default function PlanPage() {
   const [sel, setSel] = useState((today.getDay() + 6) % 7);
 
   if (!data?.profile) return null;
-  const profile = data.profile;
+  // Clients only see the plan their coach has approved and sent.
+  if (!data.published) return <PlanOnTheWay />;
+  const pub = data.published;
+  const profile = pub.profile;
+  const inReview = data.planStatus !== "approved";
   const date = week[sel];
-  const { targets: t, meals, skipped } = dayMeals(profile, date, data.days[dayKey(date)], data.planEdits);
+  const { targets: t, meals, skipped } = dayMeals(profile, date, data.days[dayKey(date)], pub.edits);
   const dayTotal = meals.reduce((s, m) => ({ kcal: s.kcal + m.kcal, p: s.p + m.protein }), { kcal: 0, p: 0 });
 
   // What's on the menu this week, most frequent first.
   const weekDishes = new Map<string, { name: string; count: number; dish: (typeof meals)[number]["dish"] }>();
   week.forEach((d) =>
-    dayMeals(profile, d, data.days[dayKey(d)], data.planEdits).meals.forEach((m) => {
+    dayMeals(profile, d, data.days[dayKey(d)], pub.edits).meals.forEach((m) => {
       if (!m.dish) return;
       const cur = weekDishes.get(m.dish.id);
       weekDishes.set(m.dish.id, { name: m.dish.name, dish: m.dish, count: (cur?.count ?? 0) + 1 });
@@ -55,11 +62,11 @@ export default function PlanPage() {
         </div>
         <span
           className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold ${
-            data.planStatus === "approved" ? "bg-mint text-brand-deep" : "bg-warn/15 text-[#8A5A00]"
+            !inReview ? "bg-mint text-brand-deep" : "bg-warn/15 text-[#8A5A00]"
           }`}
         >
-          {data.planStatus === "approved" ? <ShieldCheck size={14} /> : <Clock size={14} />}
-          {data.planStatus === "approved" ? "Coach-approved" : "Draft · in review"}
+          {!inReview ? <ShieldCheck size={14} /> : <Clock size={14} />}
+          {!inReview ? "Coach-approved" : "Update coming · current plan"}
         </span>
       </div>
 
@@ -154,6 +161,33 @@ export default function PlanPage() {
           </Card>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Shown until the coach approves and sends the first plan. */
+function PlanOnTheWay() {
+  return (
+    <div>
+      <p className="text-sm font-medium text-stone">This week</p>
+      <h1 className="mt-1 text-[2.25rem] font-medium leading-[1] tracking-[-0.055em] text-ink sm:text-5xl">
+        My <span className="font-serif italic text-brand">plan.</span>
+      </h1>
+      <Card className="mt-6 flex flex-col items-center px-6 py-12 text-center sm:py-16">
+        <span className="relative">
+          <CoachAvatar className="h-20 w-20" online ring="ring-white" />
+          <span className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-warn text-forest ring-4 ring-white">
+            <Clock size={14} />
+          </span>
+        </span>
+        <p className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-ink">{coach.name} is preparing your plan</p>
+        <p className="mt-2 max-w-md text-sm leading-relaxed text-stone">
+          Your week of meals is being built and checked by hand from your answers. It shows up here once it&apos;s approved — usually within 24 hours — and we&apos;ll message you.
+        </p>
+        <Link href="/dashboard/coach" className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-canvas transition-colors hover:bg-brand">
+          <MessageCircle size={15} /> Message {coach.name}
+        </Link>
+      </Card>
     </div>
   );
 }

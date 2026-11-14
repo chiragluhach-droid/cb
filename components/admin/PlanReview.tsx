@@ -96,6 +96,10 @@ export default function PlanReview({ row }: { row: ClientRow }) {
   const first = row.user.name.split(" ")[0];
   const { days, flags, totals, targets } = reviewPlan(profile, row.data.planEdits);
   const approved = row.data.planStatus === "approved";
+  // Edits made after approval stay a draft until the coach sends them.
+  const sameEdits = (a: Record<string, string> = {}, b: Record<string, string> = {}) =>
+    Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([k, v]) => b[k] === v);
+  const unsent = approved && !!row.data.published && !sameEdits(row.data.planEdits, row.data.published.edits);
 
   const [sel, setSel] = useState(() => (flags.length ? flags[0].day : 0));
   const [picker, setPicker] = useState<Slot | null>(null);
@@ -123,7 +127,8 @@ export default function PlanReview({ row }: { row: ClientRow }) {
     setTicked([]);
   };
   const sendUpdate = () => {
-    coachSend(row.user.id, note.trim() || `I've updated your plan, ${first} — have a look in My plan.`);
+    if (unsent) approvePlan(row.user.id, note.trim() || `I've updated your plan, ${first} — have a look in My plan.`);
+    else coachSend(row.user.id, note.trim() || `I've updated your plan, ${first} — have a look in My plan.`);
     setSent(true);
     setTimeout(() => setSent(false), 2500);
   };
@@ -135,7 +140,14 @@ export default function PlanReview({ row }: { row: ClientRow }) {
           <div className="flex items-start gap-3 rounded-[1.5rem] bg-mint p-4 text-brand-deep sm:items-center">
             <ShieldCheck size={20} className="shrink-0" />
             <p className="text-sm">
-              <b>Approved{row.data.approvedAt ? ` on ${new Date(row.data.approvedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : ""}.</b> Changes you make here go straight to {first}&apos;s plan — send a note so they know.
+              <b>Approved{row.data.approvedAt ? ` on ${new Date(row.data.approvedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}` : ""}.</b>{" "}
+              {unsent ? (
+                <>
+                  You have <b>unsent changes</b> — {first} still sees the last plan you sent until you send the update below.
+                </>
+              ) : (
+                <>Changes you make here stay a draft until you send them to {first}.</>
+              )}
             </p>
           </div>
         )}
@@ -315,7 +327,7 @@ export default function PlanReview({ row }: { row: ClientRow }) {
           </label>
           {approved ? (
             <button onClick={sendUpdate} className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-ink py-3.5 text-sm font-semibold text-canvas transition-colors hover:bg-brand">
-              {sent ? <Check size={15} /> : <Send size={14} />} {sent ? "Sent to " + first : "Send note"}
+              {sent ? <Check size={15} /> : <Send size={14} />} {sent ? "Sent to " + first : unsent ? `Send updated plan to ${first}` : "Send note"}
             </button>
           ) : (
             <button

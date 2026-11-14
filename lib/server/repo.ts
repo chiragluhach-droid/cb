@@ -70,6 +70,24 @@ export async function loadClient(id: string): Promise<{ user: User; data: UserDa
   return { user: toUser(u), data: toData(d, id, photos.get(id)) };
 }
 
+/**
+ * What the client's own browser gets: no coach notes, AI drafts or unsent
+ * plan edits. Plans approved before snapshots existed are shown as they were.
+ */
+export function clientView(d: UserData): UserData {
+  const { coachNotes, aiDraft, planEdits, coachReadAt, ...rest } = d;
+  void coachNotes, void aiDraft, void coachReadAt;
+  if (!rest.published && rest.planStatus === "approved" && rest.profile) {
+    rest.published = { profile: rest.profile, edits: planEdits ?? {}, at: rest.approvedAt ?? 0 };
+  }
+  return rest;
+}
+
+export async function loadClientView(id: string) {
+  const me = await loadClient(id);
+  return me ? { user: me.user, data: clientView(me.data) } : null;
+}
+
 export async function loadAllClients() {
   const { users, clientdata } = await cols();
   const us = await users.find({ role: "client" }).sort({ createdAt: -1 }).toArray();

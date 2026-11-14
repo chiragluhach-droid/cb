@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { UpdateFilter } from "mongodb";
 import { accessOf, hasAccess } from "@/lib/server/billing";
 import { ClientDataDoc, cols } from "@/lib/server/mongo";
-import { coachMessage, freshData, loadClient, newId, today, welcomeMessage } from "@/lib/server/repo";
+import { coachMessage, freshData, loadClientView, newId, today, welcomeMessage } from "@/lib/server/repo";
 import { clientId } from "@/lib/server/session";
 import { isDayKey, readDayLog, readProfile, readText, readWeights, validName, validPlan } from "@/lib/server/validate";
 
@@ -21,7 +21,7 @@ export async function GET() {
   const id = await clientId();
   if (!id) return unauth();
   try {
-    const me = await loadClient(id);
+    const me = await loadClientView(id);
     return me ? NextResponse.json(me) : unauth();
   } catch (e) {
     console.error("me GET failed", e);
@@ -51,7 +51,7 @@ export async function PATCH(req: Request) {
 
     if (b.reset === true) {
       await Promise.all([clientdata.replaceOne({ _id: id }, freshData(id), { upsert: true }), photos.deleteMany({ userId: id })]);
-      return NextResponse.json(await loadClient(id));
+      return NextResponse.json(await loadClientView(id));
     }
 
     // Account fields. Once payments are on, the plan only changes by paying for it.
@@ -114,7 +114,7 @@ export async function PATCH(req: Request) {
       await clientdata.updateOne({ _id: id }, { $setOnInsert: init }, { upsert: true });
       await clientdata.updateOne({ _id: id }, update);
     }
-    return NextResponse.json(await loadClient(id));
+    return NextResponse.json(await loadClientView(id));
   } catch (e) {
     console.error("me PATCH failed", e);
     return NextResponse.json({ error: "Couldn't save. Check your connection." }, { status: 503 });

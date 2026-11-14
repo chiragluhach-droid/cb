@@ -1,33 +1,32 @@
 import { CSSProperties } from "react";
 import Image from "next/image";
-import { Coffee, CookingPot, Egg, LucideIcon, Salad, Soup, Wheat } from "lucide-react";
+import { Coffee, Egg, LucideIcon, Salad, Soup } from "lucide-react";
 import { photos, unsplash } from "@/lib/site";
 
 type Item = { name: string; kcal: number; p: number; nonveg?: boolean; img?: string; icon?: LucideIcon; tone?: string };
 
 const rowA: Item[] = [
-  { name: "Idli + sambar", kcal: 300, p: 11, img: photos.idliLeaf },
-  { name: "Roti, sabzi & dal", kcal: 520, p: 20, img: photos.rotiSabzi },
-  { name: "Palak paneer", kcal: 540, p: 26, img: photos.palakPaneer },
-  { name: "Moong dal khichdi", kcal: 470, p: 19, img: photos.khichdi },
-  { name: "Paneer tikka", kcal: 270, p: 18, img: photos.paneerTikka },
+  { name: "Quinoa chickpea bowl", kcal: 460, p: 19, img: photos.quinoaBowl },
+  { name: "Avocado toast & egg", kcal: 350, p: 15, nonveg: true, img: photos.avoToast },
+  { name: "Salmon & quinoa", kcal: 520, p: 38, nonveg: true, img: photos.salmonQuinoa },
+  { name: "Berry spinach salad", kcal: 320, p: 12, img: photos.berrySalad },
   { name: "Buddha bowl", kcal: 480, p: 18, img: photos.buddhaBowl },
-  { name: "Avocado toast & egg", kcal: 350, p: 15, img: photos.avoToast },
-  { name: "Home thali", kcal: 560, p: 21, img: photos.thali },
+  { name: "Steak & greens", kcal: 540, p: 42, nonveg: true, img: photos.steak },
+  { name: "Palak paneer", kcal: 540, p: 26, img: photos.palakPaneer },
+  { name: "Greek salad", kcal: 340, p: 13, img: photos.greekSalad },
 ];
 
 const rowB: Item[] = [
-  { name: "Chicken curry", kcal: 560, p: 38, nonveg: true, img: photos.chickenCurry },
-  { name: "Besan chilla", kcal: 290, p: 14, icon: CookingPot, tone: "bg-[#FCE7B2] text-[#8A5A00]" },
-  { name: "Egg bhurji", kcal: 360, p: 22, nonveg: true, icon: Egg, tone: "bg-[#FFF3D6] text-[#8A5A00]" },
-  { name: "Chana dal", kcal: 450, p: 18, img: photos.chanaDal },
-  { name: "Vegetable poha", kcal: 310, p: 8, icon: Wheat, tone: "bg-[#FFF0C2] text-[#7A5B00]" },
-  { name: "Salmon & greens", kcal: 450, p: 36, nonveg: true, img: photos.salmon },
-  { name: "Sprouts chaat", kcal: 230, p: 13, icon: Salad, tone: "bg-mint text-brand-deep" },
-  { name: "Rajma chawal", kcal: 540, p: 20, icon: Soup, tone: "bg-[#F6DCD3] text-[#8A3A1F]" },
-  { name: "Berry oat bowl", kcal: 330, p: 14, img: photos.berryOats },
   { name: "Chicken salad bowl", kcal: 420, p: 35, nonveg: true, img: photos.chickenBowl },
-  { name: "Masala chai", kcal: 90, p: 3, icon: Coffee, tone: "bg-[#EADBC8] text-[#6B4423]" },
+  { name: "Berry oat bowl", kcal: 330, p: 14, img: photos.berryOats },
+  { name: "Egg & veggie bowl", kcal: 420, p: 24, nonveg: true, icon: Egg, tone: "bg-[#FFF3D6] text-[#8A5A00]" },
+  { name: "Salmon & greens", kcal: 450, p: 36, nonveg: true, img: photos.salmon },
+  { name: "Avocado salad", kcal: 380, p: 12, img: photos.avocadoSalad },
+  { name: "Roti, sabzi & dal", kcal: 520, p: 20, img: photos.rotiSabzi },
+  { name: "Greek yogurt parfait", kcal: 260, p: 18, icon: Salad, tone: "bg-mint text-brand-deep" },
+  { name: "Chicken curry", kcal: 560, p: 38, nonveg: true, img: photos.chickenCurry },
+  { name: "Lentil soup", kcal: 330, p: 18, icon: Soup, tone: "bg-[#F6DCD3] text-[#8A3A1F]" },
+  { name: "Black coffee + oats", kcal: 220, p: 8, icon: Coffee, tone: "bg-[#EADBC8] text-[#6B4423]" },
 ];
 
 /** India's food mark: green square-dot for veg, brown-red for non-veg (incl. egg). */
@@ -86,7 +85,7 @@ export default function FoodStrip() {
       <div className="container-x mb-5 flex items-center gap-4 sm:mb-6">
         <span className="h-px flex-1 bg-ink/10" />
         <p className="text-center text-[0.6875rem] font-bold uppercase tracking-[0.22em] text-stone">
-          Everyday Indian food, <span className="text-brand-deep">planned by your coach</span>
+          Everyday food, <span className="text-brand-deep">planned by your coach</span>
         </p>
         <span className="h-px flex-1 bg-ink/10" />
       </div>

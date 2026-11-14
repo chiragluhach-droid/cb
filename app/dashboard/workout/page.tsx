@@ -6,6 +6,7 @@ import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { ArrowUpRight, Check, Dumbbell, Footprints, Home, TrendingUp, Trophy } from "lucide-react";
 import { Bar, Card, CardTitle } from "@/components/app/ui";
 import { dayKey, emptyDay, useSession } from "@/lib/demo-store";
+import { coach } from "@/lib/site";
 import { parsePlan } from "@/lib/plans";
 import { dayNames, sessionFor, weekSince, workoutDays } from "@/lib/workouts";
 
@@ -44,6 +45,26 @@ export default function WorkoutPage() {
           <Link href="/#pricing" className="mt-8 inline-flex items-center gap-2 rounded-full bg-sprout px-6 py-3.5 text-sm font-bold text-forest">
             See Meal + Workout <ArrowUpRight size={15} />
           </Link>
+        </Card>
+      </div>
+    );
+  }
+
+  // Workouts appear together with the meal plan, once the coach has sent it.
+  if (!data.published) {
+    return (
+      <div>
+        <h1 className="text-[2.25rem] font-medium leading-[1] tracking-[-0.055em] text-ink sm:text-5xl">
+          <span className="font-serif italic text-brand">Workouts.</span>
+        </h1>
+        <Card className="mt-6 flex flex-col items-center px-6 py-12 text-center sm:py-16">
+          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-mint text-brand-deep">
+            <Dumbbell size={28} />
+          </span>
+          <p className="mt-6 text-2xl font-semibold tracking-[-0.03em] text-ink">Your training plan is on its way</p>
+          <p className="mt-2 max-w-md text-sm leading-relaxed text-stone">
+            {coach.name} sends your workouts together with your meal plan, usually within 24 hours of your questionnaire.
+          </p>
         </Card>
       </div>
     );

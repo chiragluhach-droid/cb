@@ -30,7 +30,11 @@ export default function TodayPage() {
   const profile = data.profile;
   const key = dayKey(now);
   const log = data.days[key] ?? emptyDay();
-  const { targets: t, meals } = dayMeals(profile, now, log, data.planEdits);
+  // Only the plan the coach has approved and sent is shown — never the draft.
+  const pub = data.published ?? null;
+  const view = pub ? dayMeals(pub.profile, now, log, pub.edits) : null;
+  const t = view?.targets ?? { kcal: 1, protein: 1 };
+  const meals = view?.meals ?? [];
   const eaten = meals.filter((m) => log.meals.includes(m.slot));
   const kcal = eaten.reduce((s, m) => s + m.kcal, 0);
   const protein = eaten.reduce((s, m) => s + m.protein, 0);
@@ -79,7 +83,7 @@ export default function TodayPage() {
 
       {/* Plan status */}
       <AnimatePresence mode="wait">
-        {data.planStatus !== "approved" ? (
+        {!pub || data.planStatus !== "approved" ? (
           <motion.div
             key="review"
             initial={{ opacity: 0, y: 10 }}
@@ -92,8 +96,12 @@ export default function TodayPage() {
               <span className="absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full bg-warn ring-2 ring-forest" />
             </span>
             <div className="flex-1">
-              <p className="font-semibold">{coach.name} is reviewing your plan</p>
-              <p className="mt-0.5 text-sm text-canvas/60">You&apos;re seeing the draft below. Most plans are approved within 24 hours.</p>
+              <p className="font-semibold">{pub ? `${coach.name} is updating your plan` : `${coach.name} is preparing your plan`}</p>
+              <p className="mt-0.5 text-sm text-canvas/60">
+                {pub
+                  ? "You've changed your answers, so your coach is reworking your plan. Keep following your current plan until the new one arrives."
+                  : "Your coach is building your plan from your answers. It appears here as soon as it's approved — usually within 24 hours."}
+              </p>
             </div>
           </motion.div>
         ) : null}
@@ -102,6 +110,8 @@ export default function TodayPage() {
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
         {/* Left: nutrition + meals */}
         <div className="space-y-4 lg:col-span-8 lg:space-y-6">
+          {view ? (
+          <>
           <Card>
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
               <Ring value={kcal / t.kcal} size={140} stroke={14}>
@@ -163,6 +173,22 @@ export default function TodayPage() {
               )}
             </AnimatePresence>
           </Card>
+          </>
+          ) : (
+            <Card className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:p-8">
+              <CoachAvatar className="h-16 w-16 shrink-0" online ring="ring-white" />
+              <div className="flex-1">
+                <p className="text-xl font-semibold tracking-[-0.03em] text-ink">Your plan is on its way</p>
+                <p className="mt-1 text-sm leading-relaxed text-stone">
+                  {coach.name} is building your meals{plan.kind === "meal-workout" ? " and workouts" : ""} around your answers. You&apos;ll get a message here when it&apos;s ready. Meanwhile,
+                  log your water, steps and weight — it all helps.
+                </p>
+              </div>
+              <Link href="/dashboard/coach" className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-canvas transition-colors hover:bg-brand">
+                <MessageCircle size={15} /> Message {coach.name}
+              </Link>
+            </Card>
+          )}
         </div>
 
         {/* Right: trackers */}
@@ -238,7 +264,7 @@ export default function TodayPage() {
             )}
           </Card>
 
-          {plan.kind === "meal-workout" && (
+          {pub && plan.kind === "meal-workout" && (
             <Link href="/dashboard/workout" className="group block">
               <Card className="transition-shadow group-hover:shadow-[0_20px_40px_-28px_rgba(14,26,19,0.5)]">
                 <CardTitle action={<Dumbbell size={16} className="text-brand" />}>Workout</CardTitle>
@@ -286,7 +312,7 @@ export default function TodayPage() {
       <SwapSheet
         open={!!swapMeal}
         title={swapMeal ? `${swapMeal.label} · now ${swapMeal.dish?.name ?? "—"}` : ""}
-        options={swapMeal ? swapOptions(profile, swapMeal.slot, swapMeal.dish, t.kcal * slotShare(swapMeal.slot)) : []}
+        options={swapMeal && pub ? swapOptions(pub.profile, swapMeal.slot, swapMeal.dish, t.kcal * slotShare(swapMeal.slot)) : []}
         canReset={!!swapMeal?.swapped}
         onClose={() => setSwapSlot(null)}
         onPick={(id) => {

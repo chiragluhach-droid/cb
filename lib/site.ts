@@ -43,6 +43,12 @@ export const photos = {
   avoToast: "1541519227354-08fa5d50c44d",
   salmon: "1467003909585-2f8a72700288",
   berryOats: "1494390248081-4e521a5940db",
+  quinoaBowl: "1623428187969-5da2dcea5ebf",
+  salmonQuinoa: "1547592180-85f173990554",
+  berrySalad: "1505253716362-afaea1d3d1af",
+  greekSalad: "1540189549336-e6e99c3679fe",
+  avocadoSalad: "1543339308-43e59d6b73a6",
+  steak: "1504674900247-0877df9cc836",
   // How it works
   phoneSofa: "1758876023053-3aa541a0935b",
   mealPrep: "1543352632-5a4b24e4d2a6",

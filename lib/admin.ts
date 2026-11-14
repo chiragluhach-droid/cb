@@ -136,7 +136,17 @@ export function setPlanEdit(id: string, day: number, slot: Slot, dishId: string 
 
 export function approvePlan(id: string, note: string) {
   const text = note.trim() || "Your plan is approved ✓ Tick meals off as you go and message me anytime.";
-  act(id, (d) => ({ ...d, planStatus: "approved", approvedAt: Date.now(), messages: [...d.messages, coachMsg(text)] }), { op: "approve", note: text });
+  act(
+    id,
+    (d) => ({
+      ...d,
+      planStatus: "approved",
+      approvedAt: Date.now(),
+      published: d.profile ? { profile: d.profile, edits: { ...(d.planEdits ?? {}) }, at: Date.now() } : d.published,
+      messages: [...d.messages, coachMsg(text)],
+    }),
+    { op: "approve", note: text }
+  );
 }
 
 export function coachSend(id: string, text: string) {

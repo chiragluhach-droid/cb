@@ -47,7 +47,8 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       case "approve":
         if (!cur.profile) return NextResponse.json({ error: "This client hasn't finished the questionnaire." }, { status: 400 });
         update = {
-          $set: { planStatus: "approved", approvedAt: Date.now() },
+          // Snapshot what the client will see; later edits stay drafts until sent again.
+          $set: { planStatus: "approved", approvedAt: Date.now(), published: { profile: cur.profile, edits: cur.planEdits ?? {}, at: Date.now() } },
           $push: { messages: coachMessage(readText(b.note) ?? "Your plan is approved ✓ Tick meals off as you go and message me anytime.") },
         };
         break;

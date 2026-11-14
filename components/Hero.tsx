@@ -32,13 +32,13 @@ const diets: { key: DietKey; label: string; note: string; dishes: Dish[] }[] = [
   {
     key: "veg",
     label: "Veg",
-    note: "Paneer, dal and curd carry the protein",
+    note: "Beans, grains and dairy carry the protein",
     dishes: [
-      { name: "Idli + sambar", kcal: 300, p: 11, img: photos.idliLeaf },
-      { name: "Roti, sabzi & dal", kcal: 520, p: 20, img: photos.rotiSabzi },
-      { name: "Palak paneer", kcal: 540, p: 26, img: photos.palakPaneer },
-      { name: "Moong dal khichdi", kcal: 470, p: 19, img: photos.khichdi },
+      { name: "Quinoa chickpea bowl", kcal: 460, p: 19, img: photos.quinoaBowl },
+      { name: "Berry spinach salad", kcal: 320, p: 12, img: photos.berrySalad },
       { name: "Buddha bowl", kcal: 480, p: 18, img: photos.buddhaBowl },
+      { name: "Greek salad", kcal: 340, p: 13, img: photos.greekSalad },
+      { name: "Palak paneer", kcal: 540, p: 26, img: photos.palakPaneer },
     ],
   },
   {
@@ -46,11 +46,11 @@ const diets: { key: DietKey; label: string; note: string; dishes: Dish[] }[] = [
     label: "Jain",
     note: "No onion, garlic or root veg — swapped automatically",
     dishes: [
-      { name: "Ragi dosa", kcal: 300, p: 8, img: photos.dosa },
-      { name: "Moong dal khichdi", kcal: 470, p: 19, img: photos.khichdi },
+      { name: "Quinoa chickpea bowl", kcal: 460, p: 19, img: photos.quinoaBowl },
+      { name: "Berry spinach salad", kcal: 320, p: 12, img: photos.berrySalad },
       { name: "Lauki chana dal", kcal: 470, p: 19, img: photos.chanaDal },
       { name: "Jain-style palak paneer", kcal: 520, p: 25, img: photos.palakPaneer },
-      { name: "Jain-style paneer tikka", kcal: 270, p: 18, img: photos.paneerTikka },
+      { name: "Ragi dosa", kcal: 300, p: 8, img: photos.dosa },
     ],
   },
   {
@@ -58,33 +58,33 @@ const diets: { key: DietKey; label: string; note: string; dishes: Dish[] }[] = [
     label: "Egg",
     note: "Eggs added for easy, cheap protein",
     dishes: [
-      { name: "Egg bhurji + roti", kcal: 360, p: 22, icon: Egg, tone: "bg-[#FCE7B2] text-[#8A5A00]" },
-      { name: "Idli + sambar", kcal: 300, p: 11, img: photos.idliCoffee },
-      { name: "Roti, sabzi & dal", kcal: 520, p: 20, img: photos.rotiSabzi },
       { name: "Avocado toast & egg", kcal: 350, p: 15, img: photos.avoToast },
-      { name: "Paneer tikka", kcal: 270, p: 18, img: photos.paneerTikka },
+      { name: "Berry oat bowl", kcal: 330, p: 14, img: photos.berryOats },
+      { name: "Avocado salad", kcal: 380, p: 12, img: photos.avocadoSalad },
+      { name: "Egg & veggie bowl", kcal: 420, p: 24, icon: Egg, tone: "bg-[#FCE7B2] text-[#8A5A00]" },
+      { name: "Buddha bowl", kcal: 480, p: 18, img: photos.buddhaBowl },
     ],
   },
   {
     key: "nonveg",
     label: "Non-veg",
-    note: "Home-style chicken and fish, not bland breasts",
+    note: "Salmon, steak and chicken cooked properly, not bland breasts",
     dishes: [
-      { name: "Chicken curry + rice", kcal: 560, p: 38, img: photos.chickenCurry },
-      { name: "Masala dosa", kcal: 380, p: 9, img: photos.masalaDosa },
+      { name: "Salmon & quinoa", kcal: 520, p: 38, img: photos.salmonQuinoa },
       { name: "Chicken salad bowl", kcal: 420, p: 35, img: photos.chickenBowl },
-      { name: "Home thali", kcal: 560, p: 21, img: photos.thali },
-      { name: "Egg bhurji", kcal: 300, p: 20, icon: Egg, tone: "bg-[#FCE7B2] text-[#8A5A00]" },
+      { name: "Steak & greens", kcal: 540, p: 42, img: photos.steak },
+      { name: "Salmon & greens", kcal: 450, p: 36, img: photos.salmon },
+      { name: "Chicken curry + rice", kcal: 560, p: 38, img: photos.chickenCurry },
     ],
   },
   {
     key: "vegan",
     label: "Vegan",
-    note: "No dairy — tofu, dals and millets instead",
+    note: "No dairy — tofu, beans and whole grains instead",
     dishes: [
-      { name: "Masala dosa", kcal: 380, p: 9, img: photos.masalaDosa },
-      { name: "Idli + sambar", kcal: 300, p: 11, img: photos.idliLeaf },
-      { name: "Roti, sabzi & dal", kcal: 520, p: 20, img: photos.rotiSabzi },
+      { name: "Quinoa chickpea bowl", kcal: 460, p: 19, img: photos.quinoaBowl },
+      { name: "Buddha bowl", kcal: 480, p: 18, img: photos.buddhaBowl },
+      { name: "Avocado salad", kcal: 380, p: 12, img: photos.avocadoSalad },
       { name: "Tofu stir-fry + quinoa", kcal: 430, p: 26, icon: Leaf, tone: "bg-mint text-brand-deep" },
       { name: "Chana dal", kcal: 450, p: 18, img: photos.chanaDal },
     ],
@@ -161,9 +161,9 @@ function Katori({
 }
 
 const mobileBowls = [
-  { img: photos.buddhaBowl, cls: "right-0 top-[2%] w-[68%]", float: 3.2, spin: 26, delay: 0.45 },
-  { img: photos.palakPaneer, cls: "left-[2%] top-[44%] w-[50%]", float: 3.8, spin: -32, delay: 0.55 },
-  { img: photos.idliLeaf, cls: "right-[9%] top-[60%] w-[34%]", float: 2.9, spin: 22, delay: 0.65 },
+  { img: photos.quinoaBowl, cls: "right-0 top-[2%] w-[68%]", float: 3.2, spin: 26, delay: 0.45 },
+  { img: photos.salmonQuinoa, cls: "left-[2%] top-[44%] w-[50%]", float: 3.8, spin: -32, delay: 0.55 },
+  { img: photos.chickenBowl, cls: "right-[9%] top-[60%] w-[34%]", float: 2.9, spin: 22, delay: 0.65 },
 ];
 
 /** Types "Coach-approved" letter by letter, holds, erases, and loops. */
@@ -383,7 +383,7 @@ export default function Hero() {
             transition={{ duration: 0.6, ease: EASE, delay: 0.35 }}
             className="mt-6 max-w-lg text-pretty text-base leading-relaxed text-stone sm:text-lg"
           >
-            A personal diet — and workout — plan made from dal, roti, sabzi, paneer and idli. Drafted in seconds, checked by a real coach, and adjusted as your body changes.
+            A personal diet and workout plan built around the food you already eat, from salads and grain bowls to your favourite home cooking. Drafted in seconds, checked by a real coach, and adjusted as your body changes.
           </motion.p>
 
           <motion.div
