@@ -21,6 +21,7 @@ export const statusMeta: Record<ClientStatus, { label: string; cls: string; dot:
   active: { label: "On track", cls: "bg-mint text-brand-deep", dot: "bg-brand" },
   attention: { label: "Needs attention", cls: "bg-red-50 text-red-700", dot: "bg-red-500" },
   onboarding: { label: "Questionnaire pending", cls: "bg-ink/[0.05] text-ink/55", dot: "bg-ink/30" },
+  unpaid: { label: "Awaiting payment", cls: "bg-ink/[0.05] text-ink/55", dot: "bg-warn" },
 };
 
 export function StatusPill({ status, className = "" }: { status: ClientStatus; className?: string }) {

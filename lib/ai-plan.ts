@@ -60,6 +60,11 @@ export async function draftWeekWithAI(profile: Profile, opts: { previous?: Recor
   const client = [
     `Goal: ${label[profile.goal]}. Diet: ${profile.diet}. ${profile.sex}, ${profile.age} years, ${profile.height} cm, ${profile.weight} kg, ${profile.activity} activity.`,
     `Health conditions: ${profile.conditions.join(", ") || "none"}. Allergies: ${profile.allergies.join(", ") || "none"}. Dislikes: ${profile.dislikes.trim() || "none"}.`,
+    ...(profile.life
+      ? [
+          `Lifestyle: likes ${profile.life.cuisines.join(", ") || "any"} cuisine; cooking: ${profile.life.cooking}, time ${profile.life.cookTime}; eats out ${profile.life.eatingOut}x/week. Prefer dishes that suit this.`,
+        ]
+      : []),
     `Daily targets: ${t.kcal} kcal, ${t.protein} g protein. Portions are scaled automatically, so pick dishes for fit and variety.`,
   ].join("\n");
 

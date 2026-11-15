@@ -82,6 +82,8 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
     if (!hydrated || phase === "done") return;
     if (!user) router.replace(`/login?mode=signup&plan=${plan}`);
     else if (user.access === "open") router.replace(data?.profile ? "/dashboard" : "/onboarding");
+    // The questionnaire comes before payment.
+    else if (!data?.profile && user.access === "unpaid") router.replace("/onboarding");
   }, [hydrated, user, data?.profile, phase, plan, router]);
 
   // Server price for this plan + code.
@@ -177,7 +179,7 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
     rzp.open();
   };
 
-  if (!hydrated || !user || user.access === "open") {
+  if (!hydrated || !user || user.access === "open" || (!data?.profile && user.access === "unpaid" && phase !== "done")) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="animate-spin text-brand" />
@@ -261,7 +263,7 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
           ? "Your last programme has ended. Renew to unlock your dashboard and coach again — your history is all still here."
           : active
             ? `Your plan runs until ${expiry(user.subscription!.expiresAt)}. Paying now adds ${duration} days after that.`
-            : "One payment, then a 3-minute questionnaire. Your coach reviews your plan within 24 hours."}
+            : `Your answers are in. Pay once and your coach builds and checks your first week by hand, usually within 24 hours.`}
       </p>
 
       <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12">

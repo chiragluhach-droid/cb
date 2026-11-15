@@ -46,6 +46,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       }
       case "approve":
         if (!cur.profile) return NextResponse.json({ error: "This client hasn't finished the questionnaire." }, { status: 400 });
+        if (cur.planStatus === "none") return NextResponse.json({ error: "This client hasn't paid yet." }, { status: 400 });
         update = {
           // Snapshot what the client will see; later edits stay drafts until sent again.
           $set: { planStatus: "approved", approvedAt: Date.now(), published: { profile: cur.profile, edits: cur.planEdits ?? {}, at: Date.now() } },

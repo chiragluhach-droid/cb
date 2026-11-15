@@ -43,8 +43,8 @@ export default function Shell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     if (!user) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
-    else if (!canUseApp(user)) router.replace(`/checkout?plan=${user.plan}`);
     else if (!data?.profile) router.replace("/onboarding");
+    else if (!canUseApp(user)) router.replace(`/checkout?plan=${user.plan}`);
   }, [hydrated, user, data?.profile, router, pathname]);
 
   if (!hydrated || !user || !canUseApp(user) || !data?.profile) {

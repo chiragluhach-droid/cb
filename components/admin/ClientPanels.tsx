@@ -6,6 +6,37 @@ import { Card, CardTitle } from "@/components/app/ui";
 import { WeightChart, fmtDay } from "@/components/app/WeightChart";
 import { stepGoal } from "@/components/app/meals";
 import { inr } from "@/lib/plans";
+import {
+  Lifestyle,
+  cookTimeOptions,
+  cookingOptions,
+  cuisineOptions,
+  experienceOptions,
+  fmtClock,
+  motivationOptions,
+  sleepHours,
+  workDays,
+} from "@/lib/lifestyle";
+
+const lvl = { low: "Low", medium: "Medium", high: "High" } as const;
+const sleepQ = { low: "Poor", medium: "Okay", high: "Great" } as const;
+const labels = (vals: string[], opts: { v: string; l: string }[]) => vals.map((v) => opts.find((o) => o.v === v)?.l ?? v).join(", ");
+
+/** The questionnaire's lifestyle answers as label/value rows (none for older answers). */
+function lifeAnswers(l?: Lifestyle): [string, string][] {
+  if (!l) return [];
+  return [
+    ["Routine", `Up ${fmtClock(l.wake)} · bed ${fmtClock(l.sleep)} (${sleepHours(l.wake, l.sleep)}h)`],
+    ["Sleep · stress", `${sleepQ[l.sleepQuality]} sleep · ${lvl[l.stress].toLowerCase()} stress`],
+    ["Typical day", workDays.find((w) => w.v === l.work)?.l ?? l.work],
+    ["Goal weight", l.targetWeight ? `${l.targetWeight} kg` : "Not set"],
+    ["Motivation", l.motivation.length ? labels(l.motivation, motivationOptions) : "—"],
+    ["Cuisines", l.cuisines.length ? labels(l.cuisines, cuisineOptions) : "Open to anything"],
+    ["Cooking", `${cookingOptions.find((c) => c.v === l.cooking)?.l ?? l.cooking}${l.cooking !== "out" ? ` · ${cookTimeOptions.find((c) => c.v === l.cookTime)?.l ?? ""}` : ""}`],
+    ["Eating out · water", `${l.eatingOut}× a week · ${l.water} glasses a day`],
+    ["Training", `${experienceOptions.find((e) => e.v === l.experience)?.l ?? l.experience} · prefers ${l.trainTime}`],
+  ];
+}
 import { activityLabel, condLabel, dietLabel, goalLabel, planLabel } from "@/components/admin/bits";
 import { ClientRow, saveCoachNotes } from "@/lib/admin";
 import { dayKey, formatPhone } from "@/lib/demo-store";
@@ -134,6 +165,7 @@ export function ClientProfile({ row }: { row: ClientRow }) {
         ["Allergies", p.allergies.length ? p.allergies.join(", ") : "None"],
         ["Dislikes", p.dislikes.trim() || "None"],
         ["Training", p.workoutPlace === "gym" ? "Gym" : "Home"],
+        ...lifeAnswers(p.life),
       ]
     : [];
 
@@ -147,13 +179,18 @@ export function ClientProfile({ row }: { row: ClientRow }) {
               {answers.map(([k, v]) => (
                 <div key={k} className="flex justify-between gap-4 border-b border-ink/[0.06] py-3 text-sm sm:block">
                   <dt className="text-stone">{k}</dt>
-                  <dd className="text-right font-semibold capitalize text-ink sm:mt-0.5 sm:text-left">{v}</dd>
+                  <dd className="text-right font-semibold text-ink first-letter:uppercase sm:mt-0.5 sm:text-left">{v}</dd>
                 </div>
               ))}
             </dl>
-          ) : (
-            <p className="rounded-2xl bg-[#F7F8F5] px-4 py-6 text-center text-sm text-stone">Not filled in yet.</p>
-          )}
+          ) : null}
+          {p?.life?.notes.trim() ? (
+            <div className="mt-4 rounded-2xl bg-mint/60 px-4 py-3 text-sm">
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-brand-deep">Note from {user.name.split(" ")[0]}</p>
+              <p className="mt-1 whitespace-pre-wrap leading-relaxed text-ink">{p.life.notes.trim()}</p>
+            </div>
+          ) : null}
+          {!p && <p className="rounded-2xl bg-[#F7F8F5] px-4 py-6 text-center text-sm text-stone">Not filled in yet.</p>}
           {t && (
             <p className="mt-4 text-xs text-stone">
               Targets: <b className="text-ink">{t.kcal} kcal</b> · {t.protein}g protein · {t.carbs}g carbs · {t.fat}g fat

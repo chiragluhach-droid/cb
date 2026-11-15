@@ -303,8 +303,12 @@ export default function AuthScreen(props: Props) {
       return;
     }
     // No paid plan yet (or it ran out) → checkout first, then the questionnaire.
+    // New clients answer the questionnaire first, then pay (checkout sends
+    // anyone without answers back to the questionnaire).
     const dest = !canUseApp(res.user)
-      ? `/checkout?plan=${res.user.plan}`
+      ? res.isNew
+        ? "/onboarding"
+        : `/checkout?plan=${res.user.plan}`
       : res.isNew
         ? "/onboarding"
         : props.next && props.next.startsWith("/") && !props.next.startsWith("//")
@@ -370,10 +374,10 @@ export default function AuthScreen(props: Props) {
                 As <b className="text-ink">{user!.name}</b> · {user!.email}
               </p>
               <button
-                onClick={() => router.push(user && !canUseApp(user) ? `/checkout?plan=${user.plan}` : data?.profile ? "/dashboard" : "/onboarding")}
+                onClick={() => router.push(!data?.profile ? "/onboarding" : user && !canUseApp(user) ? `/checkout?plan=${user.plan}` : "/dashboard")}
                 className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-brand py-4 text-sm font-semibold text-white transition-colors hover:bg-brand-deep"
               >
-                {user && !canUseApp(user) ? "Continue to payment" : data?.profile ? "Go to your dashboard" : "Finish your questionnaire"} <ArrowRight size={16} />
+                {!data?.profile ? "Start your questionnaire" : user && !canUseApp(user) ? "Continue to payment" : "Go to your dashboard"} <ArrowRight size={16} />
               </button>
               <button onClick={() => logout()} className="mt-4 w-full text-center text-sm font-semibold text-ink/50 underline-offset-2 transition-colors hover:text-ink hover:underline">
                 Not you? Log out

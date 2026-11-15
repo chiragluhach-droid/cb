@@ -49,6 +49,7 @@ export default function ClientsPage() {
                 { v: "active", l: `On track ${count("active")}` },
                 { v: "attention", l: `Attention ${count("attention")}` },
                 { v: "onboarding", l: `Pending ${count("onboarding")}` },
+                { v: "unpaid", l: `Unpaid ${count("unpaid")}` },
               ]}
             />
           </div>

@@ -219,7 +219,7 @@ export function dishChoices(profile: Profile, slot: Slot) {
 
 /* ───────────── Derived client view ───────────── */
 
-export type ClientStatus = "onboarding" | "review" | "active" | "attention";
+export type ClientStatus = "onboarding" | "unpaid" | "review" | "active" | "attention";
 
 export type ClientRow = {
   user: User;
@@ -279,7 +279,15 @@ function toRow(user: User, data: UserData): ClientRow {
     if (day > 3 && adherence < 0.6) reasons.push(`Only ${Math.round(adherence * 100)}% of meals ticked this week`);
   }
 
-  const status: ClientStatus = !data.profile ? "onboarding" : data.planStatus !== "approved" ? "review" : reasons.length ? "attention" : "active";
+  const status: ClientStatus = !data.profile
+    ? "onboarding"
+    : data.planStatus === "none"
+      ? "unpaid" // questionnaire done, payment not yet
+      : data.planStatus !== "approved"
+        ? "review"
+        : reasons.length
+          ? "attention"
+          : "active";
 
   return {
     user,

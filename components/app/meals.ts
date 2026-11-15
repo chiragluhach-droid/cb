@@ -1,6 +1,7 @@
 import { Dish, Slot, dishes, draftDay, optionsFor, portion, slotSplit } from "@/lib/engine";
 import type { DayLog, Profile } from "@/lib/demo-store";
 import { weekday } from "@/lib/demo-store";
+import { mealTimes } from "@/lib/lifestyle";
 
 export type PlannedMeal = {
   slot: Slot;
@@ -18,7 +19,10 @@ export const editKey = (day: number, slot: Slot) => `${day}-${slot}`;
 /** One weekday (0 = Monday) of the plan: the engine's draft with the coach's edits applied. */
 export function planWeekday(profile: Profile, day: number, edits?: Record<string, string>) {
   const draft = draftDay(profile, day);
-  const meals = draft.meals.map((m) => {
+  // Meals are timed around the client's own wake-up and bed times when we have them.
+  const times = profile.life ? mealTimes(profile.life) : null;
+  const meals = draft.meals.map((m0) => {
+    const m = times ? { ...m0, time: times[m0.slot] } : m0;
     const id = edits?.[editKey(day, m.slot)];
     const dish = id ? dishes.find((d) => d.id === id) : undefined;
     if (!dish) return { ...m, edited: false };

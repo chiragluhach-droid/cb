@@ -11,6 +11,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import type { Inputs, Slot } from "@/lib/engine";
+import type { Lifestyle } from "@/lib/lifestyle";
 import type { PlanId } from "@/lib/plans";
 
 export type User = {
@@ -33,7 +34,12 @@ export type User = {
 /** True when the client can use the dashboard. */
 export const canUseApp = (u: Pick<User, "access">) => u.access === "open" || u.access === "active";
 
-export type Profile = Inputs & { workoutPlace: "home" | "gym"; dislikes: string };
+export type Profile = Inputs & {
+  workoutPlace: "home" | "gym";
+  dislikes: string;
+  /** Routine, habits and preferences. Missing on answers given before it existed. */
+  life?: Lifestyle;
+};
 
 export type DayLog = {
   meals: Slot[];

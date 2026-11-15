@@ -93,7 +93,17 @@ export default function ClientPage() {
 
       <div className="mt-6">
         {tab === "plan" &&
-          (data.profile ? (
+          (data.profile && data.planStatus === "none" ? (
+            <Card className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:p-8">
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-warn/15 text-[#8A5A00]">
+                <Hourglass size={24} />
+              </span>
+              <div className="flex-1">
+                <p className="text-xl font-semibold tracking-[-0.03em] text-ink">{first} hasn&apos;t paid yet</p>
+                <p className="mt-1 text-sm text-stone">Their questionnaire is in (see Profile). The plan moves to your review queue as soon as they pay.</p>
+              </div>
+            </Card>
+          ) : data.profile ? (
             <PlanReview key={user.id} row={row} />
           ) : (
             <Card className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:p-8">

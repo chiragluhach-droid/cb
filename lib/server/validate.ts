@@ -3,6 +3,7 @@
  * stored without passing through one of these.
  */
 
+import { Lifestyle, cuisineOptions, defaultLifestyle, isTime, motivationOptions } from "@/lib/lifestyle";
 import type { DayLog, Profile } from "@/lib/demo-store";
 import { dishes, slotSplit } from "@/lib/engine";
 import { PlanId, planIds } from "@/lib/plans";
@@ -51,6 +52,33 @@ export function readProfile(p: unknown): Profile | null {
     allergies,
     dislikes: str(x.dislikes, 200),
     workoutPlace: x.workoutPlace === "gym" ? "gym" : "home",
+    ...(x.life && typeof x.life === "object" ? { life: readLife(x.life as Record<string, unknown>) } : {}),
+  };
+}
+
+/** Lifestyle answers; anything missing or invalid falls back to a sensible default. */
+function readLife(l: Record<string, unknown>): Lifestyle {
+  const d = defaultLifestyle;
+  const pick = <T extends string>(v: unknown, opts: readonly T[], fb: T): T => (oneOf(v, opts) ? v : fb);
+  const list = (v: unknown, opts: { v: string }[]) =>
+    Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === "string" && opts.some((o) => o.v === x)))] : [];
+  const n = (v: unknown, lo: number, hi: number, fb: number) => (num(v, lo, hi) ? Math.round(v as number) : fb);
+  return {
+    wake: isTime(l.wake) ? l.wake : d.wake,
+    sleep: isTime(l.sleep) ? l.sleep : d.sleep,
+    work: pick(l.work, ["desk", "feet", "shift", "home"] as const, d.work),
+    sleepQuality: pick(l.sleepQuality, ["low", "medium", "high"] as const, d.sleepQuality),
+    stress: pick(l.stress, ["low", "medium", "high"] as const, d.stress),
+    water: n(l.water, 0, 20, d.water),
+    cooking: pick(l.cooking, ["self", "family", "out"] as const, d.cooking),
+    cookTime: pick(l.cookTime, ["quick", "some", "love"] as const, d.cookTime),
+    eatingOut: n(l.eatingOut, 0, 21, d.eatingOut),
+    cuisines: list(l.cuisines, cuisineOptions),
+    motivation: list(l.motivation, motivationOptions),
+    targetWeight: l.targetWeight === 0 ? 0 : n(l.targetWeight, 30, 250, 0),
+    experience: pick(l.experience, ["new", "some", "regular"] as const, d.experience),
+    trainTime: pick(l.trainTime, ["morning", "midday", "evening"] as const, d.trainTime),
+    notes: str(l.notes, 600),
   };
 }
 

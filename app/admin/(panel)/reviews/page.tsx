@@ -12,7 +12,7 @@ import { dayNames } from "@/lib/workouts";
 export default function ReviewsPage() {
   const { clients } = useAdmin();
   const review = clients.filter((c) => c.status === "review").sort((a, b) => a.user.createdAt - b.user.createdAt);
-  const pending = clients.filter((c) => c.status === "onboarding");
+  const pending = clients.filter((c) => c.status === "onboarding" || c.status === "unpaid");
 
   return (
     <div>
@@ -72,20 +72,24 @@ export default function ReviewsPage() {
       )}
 
       <Card className="mt-6">
-        <CardTitle action={<Hourglass size={15} className="text-ink/35" />}>Signed up, questionnaire not done</CardTitle>
+        <CardTitle action={<Hourglass size={15} className="text-ink/35" />}>Signed up, not started yet</CardTitle>
         {pending.length ? (
           <ul className="space-y-2">
             {pending.map((c) => {
               const nudged = c.data.messages.some((m) => m.from === "coach" && /questionnaire/i.test(m.text));
+              // Unpaid clients can't open the dashboard, so a chat reminder wouldn't reach them.
+              const unpaid = c.user.access === "unpaid" || c.user.access === "expired";
               return (
                 <li key={c.user.id} className="flex items-center gap-3 rounded-2xl bg-[#F7F8F5] p-3">
                   <ClientAvatar name={c.user.name} className="h-9 w-9 text-xs" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-ink">{c.user.name}</span>
                     <span className="block text-xs text-stone">
-                      {planLabel(c.user.plan)} · {timeAgo(c.user.createdAt)}
+                      {planLabel(c.user.plan)} · {timeAgo(c.user.createdAt)} ·{" "}
+                      {c.data.profile ? "questionnaire done, awaiting payment" : unpaid ? "questionnaire not done, not paid" : "questionnaire not done"}
                     </span>
                   </span>
+                  {!unpaid && (
                   <button
                     disabled={nudged}
                     onClick={() => coachSend(c.user.id, `Hi ${c.user.name.split(" ")[0]}! Your plan is ready to be built — finish the short questionnaire in your dashboard and I'll review your first draft within a day.`)}
@@ -93,6 +97,7 @@ export default function ReviewsPage() {
                   >
                     <Send size={12} /> {nudged ? "Reminder sent" : "Send reminder"}
                   </button>
+                  )}
                   <DeleteClientButton user={c.user} compact />
                 </li>
               );

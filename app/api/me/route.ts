@@ -61,8 +61,10 @@ export async function PATCH(req: Request) {
     if (u && validPlan(u.plan) && (accessOf(user) === "open" || !user.subscription)) userSet.plan = u.plan;
     if (Object.keys(userSet).length) await users.updateOne({ _id: id }, { $set: userSet });
 
-    // Without a paid plan, only the account fields above can change.
-    if (!hasAccess(user) && (b.profile !== undefined || b.days !== undefined || b.weights !== undefined || b.messages !== undefined)) {
+    // Without a paid plan, clients can fill in the questionnaire (it comes before
+    // payment) but can't log days or message the coach yet.
+    const paid = hasAccess(user);
+    if (!paid && (b.days !== undefined || b.messages !== undefined)) {
       return NextResponse.json({ error: "Your plan isn't active. Complete payment to continue.", needsPayment: true }, { status: 402 });
     }
 
@@ -75,12 +77,14 @@ export async function PATCH(req: Request) {
       const profile = readProfile(b.profile);
       if (!profile) return NextResponse.json({ error: "Some answers are missing." }, { status: 400 });
       set.profile = profile;
-      if (!sameAnswers(profile, cur.profile)) {
+      // Unpaid answers wait for payment; the coach only sees them once the client pays.
+      if (paid && !sameAnswers(profile, cur.profile)) {
         set.planStatus = "review";
-        if (!cur.weights.length) set.weights = [{ date: today(), kg: profile.weight }];
         push.push(cur.messages.length ? coachMessage("Thanks for updating your answers — I'm reworking your plan now.") : welcomeMessage(user.name));
       }
     }
+
+    if (set.profile && !cur.weights.length) set.weights = [{ date: today(), kg: (set.profile as { weight: number }).weight }];
 
     // Daily logs (meals ticked, swaps, water, steps, sets)
     if (b.days && typeof b.days === "object") {

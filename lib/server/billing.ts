@@ -4,6 +4,7 @@
  * never taken from the browser.
  */
 
+import { randomBytes } from "crypto";
 import { parsePlan, PlanId } from "@/lib/plans";
 import { findCode, priceFor, Settings } from "@/lib/settings-core";
 import { OrderDoc, UserDoc, cols } from "@/lib/server/mongo";
@@ -69,6 +70,16 @@ export async function fulfil(order: OrderDoc, payment: RzpPayment, via: "checkou
     );
     // A new (or lapsed) programme starts counting from today.
     if (!stillActive) await clientdata.updateOne({ _id: u._id }, { $set: { startDate: today() } });
+    // Questionnaire filled in before paying → it goes to the coach for review now.
+    const cd = await clientdata.findOne({ _id: u._id }, { projection: { profile: 1, planStatus: 1, messages: 1 } });
+    if (cd?.profile && cd.planStatus === "none") {
+      const first = u.name.split(" ")[0] || "there";
+      const text = `Hi ${first}! I'm your Evowell coach. Thanks for joining — I've got your answers and I'm building your first plan now. You'll see it in Today as soon as it's ready, usually within 24 hours. Ask me anything here.`;
+      await clientdata.updateOne(
+        { _id: u._id },
+        { $set: { planStatus: "review" }, $push: { messages: { id: randomBytes(9).toString("base64url"), from: "coach", text, at: Date.now() } } },
+      );
+    }
     return true;
   } catch (e) {
     // Put the order back so the webhook retry (or the next verify) can finish the job.
