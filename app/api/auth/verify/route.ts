@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { cols } from "@/lib/server/mongo";
-import { freshData, newId, toUser } from "@/lib/server/repo";
+import { accessOf } from "@/lib/server/billing";
+import { freshData, newId, toUser, today, welcomeMessage } from "@/lib/server/repo";
 import { CLIENT_COOKIE, hashCode, setSession } from "@/lib/server/session";
-import { normEmail, validEmail } from "@/lib/server/validate";
+import { normEmail, readProfile, validEmail } from "@/lib/server/validate";
 
 /** POST /api/auth/verify — check the 6-digit code, then create the account (sign-up) or sign in. */
 
@@ -47,7 +48,19 @@ export async function POST(req: Request) {
       } catch {
         return NextResponse.json({ ok: false, error: "That email or phone was just registered. Log in instead." }, { status: 409 });
       }
-      await clientdata.insertOne(freshData(doc._id));
+      // Sign-up from the end of the questionnaire: the answers arrive with the code.
+      const profile = b.profile !== undefined ? readProfile(b.profile) : null;
+      const data = freshData(doc._id);
+      if (profile) {
+        data.profile = profile;
+        data.weights = [{ date: today(), kg: profile.weight }];
+        // While payments are off everyone gets in, so the answers go straight to the coach.
+        if (accessOf({}) === "open") {
+          data.planStatus = "review";
+          data.messages = [welcomeMessage(doc.name)];
+        }
+      }
+      await clientdata.insertOne(data);
       user = doc;
     } else if (!user || user.phone !== otp.pending.phone) {
       return NextResponse.json({ ok: false, error: "Account not found. Sign up first?" }, { status: 404 });

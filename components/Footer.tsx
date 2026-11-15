@@ -108,9 +108,9 @@ export default function Footer() {
           <div>
             <p className={label}>Plans</p>
             <ul className="space-y-2.5">
-              <li><a href="/login?mode=signup&plan=meal-30" className={linkCls}>Meal Plan</a></li>
-              <li><a href="/login?mode=signup&plan=meal-workout-30" className={linkCls}>Meal + Workout</a></li>
-              <li><a href="/login?mode=signup&plan=meal-workout-90" className={linkCls}>90-day programme</a></li>
+              <li><a href="/onboarding?plan=meal-30" className={linkCls}>Meal Plan</a></li>
+              <li><a href="/onboarding?plan=meal-workout-30" className={linkCls}>Meal + Workout</a></li>
+              <li><a href="/onboarding?plan=meal-workout-90" className={linkCls}>90-day programme</a></li>
             </ul>
           </div>
           <div>

@@ -41,7 +41,8 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         const day = Number(b.day);
         if (!Number.isInteger(day) || day < 0 || day > 6 || typeof b.slot !== "string" || !SLOT.test(b.slot)) break;
         const key = `planEdits.${day}-${b.slot}`;
-        update = isDishId(b.dishId) ? { $set: { [key]: b.dishId } } : { $unset: { [key]: "" } };
+        const isRecipe = typeof b.dishId === "string" && /^rcp_[\w-]{6,30}$/.test(b.dishId) && !!(await (await cols()).recipes.findOne({ _id: b.dishId }, { projection: { _id: 1 } }));
+        update = isDishId(b.dishId) || isRecipe ? { $set: { [key]: b.dishId as string } } : { $unset: { [key]: "" } };
         break;
       }
       case "approve":

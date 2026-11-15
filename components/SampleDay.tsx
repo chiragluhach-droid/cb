@@ -17,7 +17,7 @@ import {
   Sex,
   defaultInputs,
   draftDay,
-  servingsLabel,
+  amounts,
 } from "@/lib/engine";
 
 const goals: { v: Goal; l: string }[] = [
@@ -314,9 +314,7 @@ export default function SampleDay() {
                           </p>
                           <p className="truncate text-sm font-semibold sm:text-base">{m.dish ? m.dish.name : "Your coach plans this one"}</p>
                           {m.dish && (
-                            <p className="truncate text-xs text-ink/50">
-                              {servingsLabel(m.servings)} · {m.dish.serving}
-                            </p>
+                            <p className="line-clamp-2 text-xs leading-snug text-ink/50">{amounts(m.dish, m.servings).join(" · ")}</p>
                           )}
                         </div>
                         {m.dish && (

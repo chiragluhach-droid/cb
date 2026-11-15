@@ -24,7 +24,7 @@ export default function FinalCta() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <a
-                href="#pricing"
+                href="/onboarding"
                 className="group inline-flex items-center gap-3 rounded-full bg-sprout py-2.5 pl-6 pr-2.5 text-sm font-bold text-forest transition-transform duration-300 ease-expo hover:-rotate-2 hover:scale-105"
               >
                 Get your plan

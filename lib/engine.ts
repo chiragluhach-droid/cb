@@ -1,7 +1,7 @@
 /*
  * The sample-day engine. A small rule-based drafter, the same idea as the
  * real first draft: work out calorie and protein targets, then fill each
- * meal with Indian dishes that fit the diet, skip allergens and avoid foods
+ * meal with dishes that fit the diet, skip allergens and avoid foods
  * that clash with health conditions. No AI service or API key involved.
  *
  * Numbers are rough per-serving estimates for a preview, not medical advice.
@@ -33,54 +33,201 @@ export type Dish = {
   allergens: Allergen[];
   highGI?: boolean;
   highSalt?: boolean;
+  /** Unsplash photo id (built-in dishes). */
   img?: string;
+  /** Full photo URL (the coach's own recipes). */
+  photo?: string;
+  /** One of the coach's own recipes (from the Recipes section). */
+  custom?: boolean;
+  /** Custom recipes are only used when picked by hand, unless this is on. */
+  auto?: boolean;
+  /** How to make it — the coach's own recipes have this. */
+  recipe?: RecipeDetails;
+  /** Exactly what to eat in one serving, with grams. */
+  items?: Item[];
+  /** Built-in Indian dishes are tagged so they're only used for clients who want them. */
+  cuisine?: "indian";
+  /** A built-in dish the coach has edited. */
+  edited?: boolean;
 };
 
-export const dishes: Dish[] = [
-  // Breakfast
-  { id: "moong-chilla", name: "Moong dal chilla + hung curd dip", serving: "2 chilla · ½ katori curd", slots: ["breakfast"], kcal: 320, protein: 20, type: "veg", jain: true, allergens: ["dairy"] },
-  { id: "besan-chilla", name: "Besan chilla + mint chutney", serving: "2 chilla", slots: ["breakfast"], kcal: 290, protein: 14, type: "veg", vegan: true, allergens: [] },
-  { id: "idli-sambar", name: "Idli + sambar + chutney", serving: "3 idli · 1 katori sambar", slots: ["breakfast", "dinner"], kcal: 300, protein: 11, type: "veg", vegan: true, allergens: [], img: photos.idliLeaf },
-  { id: "poha", name: "Vegetable poha with peanuts", serving: "1½ bowls", slots: ["breakfast"], kcal: 310, protein: 8, type: "veg", vegan: true, allergens: ["nuts"], highGI: true },
-  { id: "ragi-dosa", name: "Ragi dosa + coconut chutney", serving: "2 dosa", slots: ["breakfast"], kcal: 300, protein: 8, type: "veg", vegan: true, jain: true, allergens: [], img: photos.dosa },
-  { id: "masala-oats", name: "Masala oats upma", serving: "1 bowl", slots: ["breakfast"], kcal: 280, protein: 10, type: "veg", vegan: true, allergens: [], highSalt: true },
-  { id: "paneer-bhurji", name: "Paneer bhurji + multigrain roti", serving: "80g paneer · 1 roti", slots: ["breakfast"], kcal: 380, protein: 24, type: "veg", allergens: ["dairy", "gluten"] },
-  { id: "egg-bhurji", name: "Egg bhurji + roti", serving: "3 eggs · 1 roti", slots: ["breakfast", "dinner"], kcal: 360, protein: 22, type: "egg", allergens: ["gluten"] },
-  { id: "tofu-bhurji", name: "Tofu bhurji + roti", serving: "120g tofu · 1 roti", slots: ["breakfast"], kcal: 330, protein: 20, type: "veg", vegan: true, allergens: ["soy", "gluten"] },
-  { id: "curd-bowl", name: "Hung curd fruit bowl with seeds", serving: "1 katori curd · ½ bowl fruit", slots: ["breakfast", "snack"], kcal: 240, protein: 17, type: "veg", jain: true, allergens: ["dairy"] },
-  { id: "sprouts-chaat", name: "Sprouts chaat + chaas", serving: "1 bowl · 1 glass", slots: ["breakfast", "snack"], kcal: 230, protein: 13, type: "veg", allergens: ["dairy"] },
+export type RecipeCategory = "breakfast" | "main" | "salad" | "soup" | "snack" | "smoothie" | "dessert";
+export type RecipeDetails = {
+  category: RecipeCategory;
+  prepMins: number;
+  steps: string[];
+  notes: string;
+  /** Shown in every client's Recipes tab. */
+  shared: boolean;
+};
 
-  // Lunch
-  { id: "dal-roti", name: "Dal, roti & mixed veg sabzi", serving: "1 katori dal · 2 roti · 1 katori sabzi", slots: ["lunch", "dinner"], kcal: 520, protein: 20, type: "veg", vegan: true, allergens: ["gluten"], img: photos.rotiSabzi },
-  { id: "rajma-rice", name: "Rajma + brown rice + salad", serving: "1 katori rajma · 1 bowl rice", slots: ["lunch"], kcal: 540, protein: 20, type: "veg", vegan: true, allergens: [] },
-  { id: "chole-roti", name: "Chole + roti + kachumber", serving: "1 katori chole · 2 roti", slots: ["lunch"], kcal: 540, protein: 19, type: "veg", vegan: true, allergens: ["gluten"] },
-  { id: "palak-paneer", name: "Palak paneer + roti", serving: "1 katori · 2 roti", slots: ["lunch", "dinner"], kcal: 540, protein: 26, type: "veg", allergens: ["dairy", "gluten"], img: photos.palakPaneer },
-  { id: "khichdi", name: "Moong dal khichdi + curd", serving: "1½ bowls · 1 katori curd", slots: ["lunch", "dinner"], kcal: 470, protein: 19, type: "veg", jain: true, allergens: ["dairy"], img: photos.khichdi },
-  { id: "lauki-chana", name: "Lauki chana dal + bajra roti", serving: "1 katori · 2 bajra roti", slots: ["lunch", "dinner"], kcal: 470, protein: 19, type: "veg", vegan: true, jain: true, allergens: [] },
-  { id: "thali", name: "Home thali: dal, sabzi, roti, salad", serving: "1 plate", slots: ["lunch"], kcal: 560, protein: 21, type: "veg", allergens: ["dairy", "gluten"], img: photos.thali },
-  { id: "chicken-curry", name: "Chicken curry + jeera rice + salad", serving: "150g chicken · 1 bowl rice", slots: ["lunch", "dinner"], kcal: 560, protein: 38, type: "nonveg", allergens: [], highGI: true, img: photos.chickenCurry },
-  { id: "fish-curry", name: "Fish curry + rice", serving: "150g fish · 1 bowl rice", slots: ["lunch"], kcal: 520, protein: 34, type: "nonveg", allergens: [], highGI: true },
-  { id: "egg-curry", name: "Egg curry + roti", serving: "2 eggs · 2 roti", slots: ["lunch", "dinner"], kcal: 500, protein: 24, type: "egg", allergens: ["gluten"] },
-  { id: "soya-pulao", name: "Soya chunk pulao + raita", serving: "1½ bowls · 1 katori raita", slots: ["lunch"], kcal: 520, protein: 32, type: "veg", allergens: ["soy", "dairy"] },
-  { id: "curd-rice", name: "Curd rice + kachumber", serving: "1½ bowls", slots: ["lunch"], kcal: 430, protein: 12, type: "veg", jain: true, allergens: ["dairy"], highGI: true },
+/* ───────────── Amounts ───────────── */
+
+export type Unit = "g" | "ml" | "piece" | "slice" | "tbsp" | "tsp" | "cup";
+/** One thing on the plate: e.g. { food: "wholegrain toast", qty: 2, unit: "slice", g: 70 }. */
+export type Item = { food: string; qty: number; unit: Unit; g: number };
+
+const frac = (n: number) => {
+  const w = Math.floor(n);
+  const f = Math.round((n - w) * 4) / 4;
+  const sym = f === 0.25 ? "¼" : f === 0.5 ? "½" : f === 0.75 ? "¾" : "";
+  return `${w || (sym ? "" : "0")}${sym}`;
+};
+const r5 = (n: number) => Math.max(5, Math.round(n / 5) * 5);
+const rHalf = (n: number) => Math.max(0.5, Math.round(n * 2) / 2);
+const rQuarter = (n: number) => Math.max(0.25, Math.round(n * 4) / 4);
+
+/** "2 slices wholegrain toast (70 g)", "150 g chicken breast", "½ avocado (70 g)" — scaled to the servings eaten. */
+export function amountText(it: Item, servings = 1) {
+  const g = r5(it.g * servings);
+  if (it.unit === "g" || it.unit === "ml") return `${r5(it.qty * servings)} ${it.unit} ${it.food}`;
+  const q = it.unit === "piece" || it.unit === "slice" ? rHalf(it.qty * servings) : rQuarter(it.qty * servings);
+  const unit = it.unit === "piece" ? "" : it.unit === "slice" ? (q > 1 ? " slices" : " slice") : it.unit === "cup" ? (q > 1 ? " cups" : " cup") : ` ${it.unit}`;
+  return `${frac(q)}${unit} ${it.food} (${g} g)`;
+}
+
+/** What to eat, one line per item. Falls back to the dish's serving note. */
+export const amounts = (d: Dish, servings = 1) => (d.items?.length ? d.items.map((it) => amountText(it, servings)) : [d.serving]);
+
+/* ───────────── Dish library ───────────── */
+
+const I = (food: string, qty: number, unit: Unit, g?: number): Item => ({ food, qty, unit, g: g ?? qty });
+
+/** Built-in dishes. The coach can edit any of them (Coach › Recipes › Dish library). */
+const baseDishes: Dish[] = [
+  // Breakfast
+  { id: "avo-toast-eggs", name: "Avocado toast + 2 poached eggs", serving: "2 slices · ½ avocado · 2 eggs", slots: ["breakfast"], kcal: 430, protein: 21, type: "egg", allergens: ["gluten"], img: photos.avoToast,
+    items: [I("wholegrain toast", 2, "slice", 70), I("avocado", 0.5, "piece", 70), I("eggs", 2, "piece", 100)] },
+  { id: "greek-yogurt-bowl", name: "Greek yogurt, berries & granola", serving: "1 bowl", slots: ["breakfast", "snack"], kcal: 330, protein: 24, type: "veg", jain: true, allergens: ["dairy", "gluten"],
+    items: [I("Greek yogurt (2% fat)", 200, "g"), I("mixed berries", 80, "g"), I("granola", 30, "g"), I("honey", 1, "tsp", 7)] },
+  { id: "porridge-berries", name: "Porridge with berries & almond butter", serving: "1 bowl", slots: ["breakfast"], kcal: 420, protein: 17, type: "veg", jain: true, allergens: ["dairy", "nuts", "gluten"], img: photos.berryOats,
+    items: [I("rolled oats", 50, "g"), I("semi-skimmed milk", 250, "ml"), I("mixed berries", 80, "g"), I("almond butter", 1, "tbsp", 15)] },
+  { id: "spinach-omelette", name: "Spinach & feta omelette + toast", serving: "3 eggs · 1 slice", slots: ["breakfast", "dinner"], kcal: 410, protein: 29, type: "egg", allergens: ["dairy", "gluten"],
+    items: [I("eggs", 3, "piece", 150), I("feta", 30, "g"), I("spinach", 1, "cup", 30), I("wholegrain toast", 1, "slice", 35)] },
+  { id: "english-breakfast", name: "Lighter English breakfast", serving: "1 plate", slots: ["breakfast"], kcal: 480, protein: 33, type: "nonveg", allergens: ["gluten"], highSalt: true,
+    items: [I("scrambled eggs", 2, "piece", 100), I("lean back bacon", 2, "slice", 50), I("baked beans", 100, "g"), I("grilled tomatoes", 100, "g"), I("wholegrain toast", 1, "slice", 35)] },
+  { id: "overnight-oats", name: "Overnight oats with chia & banana", serving: "1 jar", slots: ["breakfast"], kcal: 400, protein: 22, type: "veg", jain: true, allergens: ["dairy", "gluten"],
+    items: [I("rolled oats", 50, "g"), I("Greek yogurt", 150, "g"), I("chia seeds", 1, "tbsp", 12), I("banana", 0.5, "piece", 60), I("milk", 100, "ml")] },
+  { id: "green-smoothie", name: "Green protein smoothie", serving: "1 large glass", slots: ["breakfast", "snack"], kcal: 360, protein: 30, type: "veg", jain: true, allergens: ["dairy", "nuts"],
+    items: [I("banana", 1, "piece", 120), I("spinach", 1, "cup", 30), I("whey protein", 30, "g"), I("unsweetened almond milk", 250, "ml"), I("peanut butter", 1, "tbsp", 15)] },
+  { id: "tofu-scramble", name: "Tofu scramble on sourdough", serving: "150g tofu · 1 slice", slots: ["breakfast"], kcal: 370, protein: 24, type: "veg", vegan: true, allergens: ["soy", "gluten"],
+    items: [I("firm tofu", 150, "g"), I("sourdough", 1, "slice", 50), I("spinach", 1, "cup", 30), I("olive oil", 1, "tsp", 5)] },
+  { id: "cottage-toast", name: "Cottage cheese & tomato on rye", serving: "2 slices", slots: ["breakfast", "snack"], kcal: 340, protein: 24, type: "veg", jain: true, allergens: ["dairy", "gluten"],
+    items: [I("rye bread", 2, "slice", 60), I("cottage cheese", 150, "g"), I("tomato", 1, "piece", 100)] },
+  { id: "salmon-bagel", name: "Smoked salmon & cream cheese bagel", serving: "1 bagel", slots: ["breakfast"], kcal: 420, protein: 26, type: "nonveg", allergens: ["dairy", "gluten"], highSalt: true,
+    items: [I("wholegrain bagel", 1, "piece", 85), I("smoked salmon", 60, "g"), I("light cream cheese", 30, "g"), I("cucumber", 50, "g")] },
+  { id: "pb-banana-toast", name: "Peanut butter & banana toast", serving: "2 slices", slots: ["breakfast"], kcal: 430, protein: 16, type: "veg", vegan: true, jain: true, allergens: ["nuts", "gluten"],
+    items: [I("wholegrain toast", 2, "slice", 70), I("peanut butter", 1.5, "tbsp", 24), I("banana", 1, "piece", 100)] },
+
+  // Lunch & dinner
+  { id: "chicken-caesar", name: "Chicken Caesar salad (lighter)", serving: "1 big bowl", slots: ["lunch", "dinner"], kcal: 450, protein: 45, type: "nonveg", allergens: ["dairy", "gluten"],
+    items: [I("grilled chicken breast", 150, "g"), I("romaine lettuce", 2, "cup", 100), I("parmesan", 15, "g"), I("croutons", 20, "g"), I("light Caesar dressing", 2, "tbsp", 30)] },
+  { id: "greek-chicken-salad", name: "Greek salad with chicken", serving: "1 big bowl", slots: ["lunch", "dinner"], kcal: 470, protein: 44, type: "nonveg", allergens: ["dairy"], img: photos.greekSalad,
+    items: [I("grilled chicken breast", 150, "g"), I("cucumber", 100, "g"), I("tomatoes", 100, "g"), I("feta", 40, "g"), I("olives", 30, "g"), I("olive oil", 1, "tbsp", 10)] },
+  { id: "quinoa-chickpea", name: "Quinoa & chickpea power bowl", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 560, protein: 20, type: "veg", vegan: true, allergens: [], img: photos.quinoaBowl,
+    items: [I("quinoa (dry weight)", 60, "g"), I("chickpeas (cooked)", 120, "g"), I("avocado", 0.5, "piece", 70), I("roasted vegetables", 100, "g"), I("tahini", 1, "tbsp", 15)] },
+  { id: "caprese-quinoa", name: "Caprese quinoa salad", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 470, protein: 22, type: "veg", jain: true, allergens: ["dairy"], img: photos.berrySalad,
+    items: [I("quinoa (dry weight)", 60, "g"), I("mozzarella", 60, "g"), I("cherry tomatoes", 100, "g"), I("rocket", 1, "cup", 25), I("olive oil", 1, "tbsp", 10)] },
+  { id: "halloumi-salad", name: "Grilled halloumi & chickpea salad", serving: "1 big bowl", slots: ["lunch", "dinner"], kcal: 520, protein: 26, type: "veg", jain: true, allergens: ["dairy"],
+    items: [I("halloumi", 60, "g"), I("chickpeas (cooked)", 120, "g"), I("cucumber", 100, "g"), I("cherry tomatoes", 100, "g"), I("lemon & olive oil dressing", 1, "tbsp", 15)] },
+  { id: "cottage-quinoa-bowl", name: "Cottage cheese, quinoa & greens bowl", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 460, protein: 32, type: "veg", jain: true, allergens: ["dairy"],
+    items: [I("cottage cheese", 150, "g"), I("quinoa (dry weight)", 50, "g"), I("spinach & rocket", 1, "cup", 30), I("cucumber", 80, "g"), I("pumpkin seeds", 1, "tbsp", 10)] },
+  { id: "salmon-quinoa", name: "Baked salmon, quinoa & greens", serving: "150g salmon · 1 bowl", slots: ["lunch", "dinner"], kcal: 560, protein: 40, type: "nonveg", allergens: [], img: photos.salmonQuinoa,
+    items: [I("salmon fillet", 150, "g"), I("quinoa (dry weight)", 60, "g"), I("green beans", 100, "g")] },
+  { id: "turkey-wrap", name: "Turkey & hummus wholegrain wrap", serving: "1 wrap", slots: ["lunch"], kcal: 450, protein: 36, type: "nonveg", allergens: ["gluten"],
+    items: [I("wholegrain wrap", 1, "piece", 60), I("turkey breast", 100, "g"), I("hummus", 40, "g"), I("salad leaves", 1, "cup", 30), I("peppers", 50, "g")] },
+  { id: "tuna-jacket", name: "Jacket potato with tuna & sweetcorn", serving: "1 potato", slots: ["lunch", "dinner"], kcal: 480, protein: 36, type: "nonveg", allergens: ["dairy"], highGI: true,
+    items: [I("baking potato", 1, "piece", 250), I("tuna in spring water", 110, "g"), I("Greek yogurt (instead of mayo)", 2, "tbsp", 30), I("sweetcorn", 50, "g"), I("side salad", 80, "g")] },
+  { id: "chicken-rice-broccoli", name: "Chicken, rice & broccoli", serving: "150g chicken · 1 bowl", slots: ["lunch", "dinner"], kcal: 520, protein: 45, type: "nonveg", allergens: [],
+    items: [I("chicken breast", 150, "g"), I("basmati rice (dry weight)", 60, "g"), I("broccoli", 150, "g"), I("olive oil", 1, "tsp", 5)] },
+  { id: "steak-sweet-potato", name: "Lean steak, sweet potato & greens", serving: "150g steak", slots: ["dinner"], kcal: 560, protein: 42, type: "nonveg", allergens: [], img: photos.steak,
+    items: [I("sirloin steak (trimmed)", 150, "g"), I("sweet potato", 200, "g"), I("spinach or kale", 100, "g")] },
+  { id: "lentil-soup", name: "Red lentil soup + wholegrain bread", serving: "1 bowl · 1 slice", slots: ["lunch", "dinner"], kcal: 420, protein: 22, type: "veg", vegan: true, allergens: ["gluten"],
+    items: [I("lentil soup (from 60 g dry lentils)", 350, "ml"), I("wholegrain bread", 1, "slice", 40)] },
+  { id: "falafel-bowl", name: "Falafel & hummus buddha bowl", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 520, protein: 18, type: "veg", vegan: true, allergens: [], img: photos.buddhaBowl,
+    items: [I("baked falafel", 4, "piece", 100), I("hummus", 40, "g"), I("brown rice (cooked)", 100, "g"), I("mixed salad", 100, "g"), I("pickled red onion", 20, "g")] },
+  { id: "prawn-stirfry", name: "Prawn & veg stir-fry with noodles", serving: "1 plate", slots: ["dinner"], kcal: 470, protein: 36, type: "nonveg", allergens: ["soy", "gluten"], highSalt: true,
+    items: [I("prawns", 150, "g"), I("wholewheat noodles (dry weight)", 60, "g"), I("stir-fry vegetables", 150, "g"), I("light soy sauce", 1, "tbsp", 15)] },
+  { id: "fajita-bowl", name: "Chicken fajita burrito bowl", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 560, protein: 48, type: "nonveg", allergens: ["dairy"], img: photos.chickenBowl,
+    items: [I("chicken breast", 150, "g"), I("black beans", 100, "g"), I("brown rice (cooked)", 100, "g"), I("salsa", 50, "g"), I("Greek yogurt", 30, "g")] },
+  { id: "bean-chilli", name: "Three-bean chilli + brown rice", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 480, protein: 20, type: "veg", allergens: ["dairy"],
+    items: [I("three-bean chilli", 200, "g"), I("brown rice (cooked)", 120, "g"), I("Greek yogurt", 30, "g")] },
+  { id: "tofu-quinoa", name: "Tofu stir-fry + quinoa", serving: "120g tofu · 1 bowl", slots: ["dinner"], kcal: 450, protein: 27, type: "veg", vegan: true, allergens: ["soy"],
+    items: [I("firm tofu", 120, "g"), I("quinoa (dry weight)", 60, "g"), I("stir-fry vegetables", 150, "g")] },
+  { id: "egg-sandwich", name: "Egg & avocado sandwich", serving: "1 sandwich", slots: ["lunch"], kcal: 430, protein: 20, type: "egg", allergens: ["gluten"],
+    items: [I("wholegrain bread", 2, "slice", 70), I("eggs", 2, "piece", 100), I("avocado", 0.25, "piece", 35), I("salad leaves", 1, "cup", 30)] },
+  { id: "pesto-pasta", name: "Wholewheat chicken pesto pasta", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 560, protein: 42, type: "nonveg", allergens: ["dairy", "gluten", "nuts"],
+    items: [I("wholewheat pasta (dry weight)", 70, "g"), I("chicken breast", 120, "g"), I("pesto", 1, "tbsp", 15), I("cherry tomatoes", 80, "g")] },
+  { id: "shakshuka", name: "Shakshuka + sourdough", serving: "2 eggs · 1 slice", slots: ["lunch", "dinner"], kcal: 420, protein: 21, type: "egg", allergens: ["dairy", "gluten"],
+    items: [I("eggs", 2, "piece", 100), I("tomato & pepper sauce", 200, "g"), I("feta", 20, "g"), I("sourdough", 1, "slice", 50)] },
+  { id: "cod-potatoes", name: "Baked cod, new potatoes & roast veg", serving: "1 plate", slots: ["dinner"], kcal: 420, protein: 38, type: "nonveg", allergens: [], img: photos.salmon,
+    items: [I("cod fillet", 180, "g"), I("new potatoes", 150, "g"), I("roasted vegetables", 150, "g")] },
 
   // Snacks
-  { id: "makhana", name: "Roasted makhana + green tea", serving: "1 bowl", slots: ["snack"], kcal: 160, protein: 5, type: "veg", vegan: true, jain: true, allergens: [] },
-  { id: "chana-chaas", name: "Roasted chana + chaas", serving: "30g · 1 glass", slots: ["snack"], kcal: 200, protein: 11, type: "veg", jain: true, allergens: ["dairy"] },
-  { id: "fruit-almonds", name: "Seasonal fruit + almonds", serving: "1 fruit · 8 almonds", slots: ["snack"], kcal: 190, protein: 5, type: "veg", vegan: true, jain: true, allergens: ["nuts"] },
-  { id: "boiled-eggs", name: "Boiled eggs + black coffee", serving: "2 eggs", slots: ["snack"], kcal: 160, protein: 12, type: "egg", allergens: [] },
-  { id: "paneer-tikka", name: "Paneer tikka", serving: "100g", slots: ["snack", "dinner"], kcal: 270, protein: 18, type: "veg", allergens: ["dairy"], img: photos.paneerTikka },
-  { id: "chai-biscuit", name: "Masala chai + biscuits", serving: "1 cup · 2 biscuits", slots: ["snack"], kcal: 180, protein: 4, type: "veg", jain: true, allergens: ["dairy", "gluten"], highGI: true },
-  { id: "masala-papad", name: "Masala papad + chaas", serving: "2 papad · 1 glass", slots: ["snack"], kcal: 170, protein: 7, type: "veg", allergens: ["dairy"], highSalt: true },
+  { id: "apple-pb", name: "Apple + peanut butter", serving: "1 apple · 1 tbsp", slots: ["snack"], kcal: 190, protein: 5, type: "veg", vegan: true, jain: true, allergens: ["nuts"],
+    items: [I("apple", 1, "piece", 150), I("peanut butter", 1, "tbsp", 16)] },
+  { id: "yogurt-walnuts", name: "Greek yogurt with honey & walnuts", serving: "1 pot", slots: ["snack"], kcal: 200, protein: 16, type: "veg", jain: true, allergens: ["dairy", "nuts"],
+    items: [I("Greek yogurt", 150, "g"), I("honey", 1, "tsp", 7), I("walnuts", 10, "g")] },
+  { id: "boiled-eggs", name: "Boiled eggs + cherry tomatoes", serving: "2 eggs", slots: ["snack"], kcal: 170, protein: 13, type: "egg", allergens: [],
+    items: [I("boiled eggs", 2, "piece", 100), I("cherry tomatoes", 80, "g")] },
+  { id: "hummus-veg", name: "Hummus & veggie sticks", serving: "1 pot", slots: ["snack"], kcal: 190, protein: 6, type: "veg", vegan: true, allergens: [],
+    items: [I("hummus", 60, "g"), I("carrot, cucumber & pepper sticks", 150, "g")] },
+  { id: "protein-shake", name: "Protein shake + banana", serving: "1 shake", slots: ["snack"], kcal: 230, protein: 27, type: "veg", jain: true, allergens: ["dairy"],
+    items: [I("whey protein", 30, "g"), I("skimmed milk", 250, "ml"), I("small banana", 1, "piece", 90)] },
+  { id: "cottage-pineapple", name: "Cottage cheese & pineapple", serving: "1 pot", slots: ["snack"], kcal: 180, protein: 18, type: "veg", jain: true, allergens: ["dairy"],
+    items: [I("cottage cheese", 150, "g"), I("pineapple", 80, "g")] },
+  { id: "edamame", name: "Steamed edamame with sea salt", serving: "1 bowl", slots: ["snack"], kcal: 180, protein: 17, type: "veg", vegan: true, jain: true, allergens: ["soy"],
+    items: [I("edamame (in pods)", 150, "g")] },
+  { id: "almonds-choc", name: "Almonds + dark chocolate", serving: "1 small handful", slots: ["snack"], kcal: 180, protein: 5, type: "veg", vegan: true, jain: true, allergens: ["nuts"],
+    items: [I("almonds", 20, "g"), I("dark chocolate (85%)", 10, "g")] },
 
-  // Dinner
-  { id: "grilled-chicken", name: "Grilled chicken + sautéed veg + roti", serving: "150g · 1 roti", slots: ["dinner"], kcal: 450, protein: 40, type: "nonveg", allergens: ["gluten"] },
-  { id: "tofu-quinoa", name: "Tofu stir-fry + quinoa", serving: "120g tofu · 1 bowl", slots: ["dinner"], kcal: 430, protein: 26, type: "veg", vegan: true, allergens: ["soy"] },
-  { id: "thepla-curd", name: "Methi thepla + curd", serving: "2 thepla · 1 katori curd", slots: ["dinner"], kcal: 420, protein: 14, type: "veg", allergens: ["dairy", "gluten"] },
-  { id: "dal-jowar", name: "Dal + jowar roti + bhindi", serving: "1 katori · 2 roti", slots: ["dinner"], kcal: 450, protein: 18, type: "veg", vegan: true, allergens: [] },
-  { id: "daliya", name: "Vegetable daliya + curd", serving: "1½ bowls", slots: ["dinner"], kcal: 390, protein: 14, type: "veg", jain: true, allergens: ["dairy", "gluten"] },
-  { id: "fish-tikka", name: "Fish tikka + big salad", serving: "150g", slots: ["dinner"], kcal: 380, protein: 36, type: "nonveg", allergens: [] },
+  // Indian favourites — only for clients who chose Indian food
+  { id: "moong-chilla", name: "Moong dal chilla + Greek yogurt dip", serving: "2 chilla", slots: ["breakfast"], kcal: 320, protein: 20, type: "veg", jain: true, allergens: ["dairy"], cuisine: "indian",
+    items: [I("moong dal chilla", 2, "piece", 120), I("Greek yogurt", 80, "g")] },
+  { id: "idli-sambar", name: "Idli + sambar + chutney", serving: "3 idli", slots: ["breakfast", "dinner"], kcal: 300, protein: 11, type: "veg", vegan: true, allergens: [], img: photos.idliLeaf, cuisine: "indian",
+    items: [I("idli", 3, "piece", 120), I("sambar", 150, "ml"), I("coconut chutney", 2, "tbsp", 30)] },
+  { id: "paneer-bhurji", name: "Paneer bhurji + multigrain roti", serving: "80g paneer · 1 roti", slots: ["breakfast", "dinner"], kcal: 380, protein: 24, type: "veg", allergens: ["dairy", "gluten"], cuisine: "indian",
+    items: [I("paneer", 80, "g"), I("multigrain roti", 1, "piece", 30), I("onion, tomato & peppers", 80, "g")] },
+  { id: "dal-roti", name: "Dal, roti & mixed veg sabzi", serving: "1 bowl dal · 2 roti", slots: ["lunch", "dinner"], kcal: 520, protein: 20, type: "veg", vegan: true, allergens: ["gluten"], img: photos.rotiSabzi, cuisine: "indian",
+    items: [I("dal (cooked)", 150, "g"), I("wholewheat roti", 2, "piece", 60), I("mixed veg sabzi", 150, "g")] },
+  { id: "palak-paneer", name: "Palak paneer + roti", serving: "1 bowl · 2 roti", slots: ["lunch", "dinner"], kcal: 540, protein: 26, type: "veg", allergens: ["dairy", "gluten"], img: photos.palakPaneer, cuisine: "indian",
+    items: [I("palak paneer (80 g paneer)", 200, "g"), I("wholewheat roti", 2, "piece", 60)] },
+  { id: "khichdi", name: "Moong dal khichdi + Greek yogurt", serving: "1 bowl", slots: ["lunch", "dinner"], kcal: 470, protein: 19, type: "veg", jain: true, allergens: ["dairy"], img: photos.khichdi, cuisine: "indian",
+    items: [I("khichdi (cooked)", 300, "g"), I("Greek yogurt", 100, "g")] },
+  { id: "chicken-curry", name: "Chicken curry + rice + salad", serving: "150g chicken · 1 bowl rice", slots: ["lunch", "dinner"], kcal: 560, protein: 38, type: "nonveg", allergens: [], highGI: true, img: photos.chickenCurry, cuisine: "indian",
+    items: [I("chicken curry (150 g chicken)", 250, "g"), I("basmati rice (cooked)", 150, "g"), I("kachumber salad", 80, "g")] },
+  { id: "rajma-rice", name: "Rajma + brown rice + salad", serving: "1 bowl", slots: ["lunch"], kcal: 540, protein: 20, type: "veg", vegan: true, allergens: [], cuisine: "indian",
+    items: [I("rajma (cooked)", 200, "g"), I("brown rice (cooked)", 150, "g"), I("salad", 80, "g")] },
+  { id: "roasted-chana", name: "Roasted chana + buttermilk", serving: "30g · 1 glass", slots: ["snack"], kcal: 200, protein: 11, type: "veg", jain: true, allergens: ["dairy"], cuisine: "indian",
+    items: [I("roasted chana", 30, "g"), I("buttermilk", 250, "ml")] },
 ];
+
+/** The live dish list: built-ins (with any coach edits applied) plus the coach's own recipes. */
+export const dishes: Dish[] = [...baseDishes];
+export const baseDishIds = new Set(baseDishes.map((d) => d.id));
+export const originalDish = (id: string) => baseDishes.find((d) => d.id === id);
+
+/**
+ * Apply the coach's recipes and edits. A recipe whose id matches a built-in
+ * dish replaces it (an edit); the rest are added as her own recipes. Called
+ * whenever recipes load.
+ */
+export function registerRecipes(list: Dish[]) {
+  const byId = new Map(list.map((d) => [d.id, d]));
+  dishes.length = 0;
+  for (const b of baseDishes) {
+    const o = byId.get(b.id);
+    dishes.push(o ? { ...b, ...o, id: b.id, cuisine: b.cuisine, img: o.photo ? undefined : b.img, custom: false, edited: true } : b);
+  }
+  for (const d of list) if (!baseDishIds.has(d.id)) dishes.push({ ...d, custom: true });
+}
+
+/** Indian dishes are only drafted for clients who said they like Indian food. */
+const cuisineOk = (d: Dish, i: Inputs) => {
+  if (d.cuisine !== "indian") return true;
+  const life = (i as { life?: { cuisines: string[] } }).life;
+  return !life || life.cuisines.includes("indian");
+};
 
 export type Inputs = {
   goal: Goal;
@@ -179,7 +326,7 @@ const quarter = (n: number) => Math.round(n * 4) / 4;
 
 /** Dishes that fit this person for a slot (diet, allergies and conditions). */
 export function optionsFor(i: Inputs, slot: Slot) {
-  return dishes.filter((d) => d.slots.includes(slot) && dietOk(d, i.diet) && !clash(d, i));
+  return dishes.filter((d) => d.slots.includes(slot) && dietOk(d, i.diet) && cuisineOk(d, i) && !clash(d, i));
 }
 
 /** Scale a dish to a slot's calories, in quarter servings. */
@@ -191,7 +338,8 @@ export function portion(dish: Dish, slotKcal: number) {
 /** Draft one day. `day` (0–6) rotates dishes so each day differs. */
 export function draftDay(i: Inputs, day: number): Draft {
   const t = targets(i);
-  const allowedByDiet = dishes.filter((d) => dietOk(d, i.diet));
+  // The coach's recipes only go into automatic drafts when she's allowed it.
+  const allowedByDiet = dishes.filter((d) => dietOk(d, i.diet) && cuisineOk(d, i) && (!d.custom || d.auto));
   const skipped = allowedByDiet
     .map((d) => ({ name: d.name, reason: clash(d, i) }))
     .filter((x): x is { name: string; reason: string } => !!x.reason);

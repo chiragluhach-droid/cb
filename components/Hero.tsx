@@ -393,7 +393,7 @@ export default function Hero() {
             className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4"
           >
             <a
-              href="#pricing"
+              href="/onboarding"
               className="group inline-flex items-center gap-2.5 rounded-full bg-brand py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white shadow-[0_14px_30px_-12px_rgba(22,163,74,0.8)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-deep"
             >
               Get your plan

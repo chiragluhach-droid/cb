@@ -101,7 +101,7 @@ function PlanCard({ kind, duration, featured }: { kind: PlanKind; duration: Dura
       </ul>
 
       <Link
-        href={`/login?mode=signup&plan=${kind}-${duration}`}
+        href={`/onboarding?plan=${kind}-${duration}`}
         className={`group inline-flex items-center justify-center gap-2 rounded-full py-4 text-sm font-semibold transition-colors duration-300 ${
           dark ? "bg-sprout text-forest hover:bg-canvas" : "bg-ink text-canvas hover:bg-brand"
         } mt-auto`}

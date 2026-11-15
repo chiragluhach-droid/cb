@@ -80,7 +80,7 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
   // Guards: sign in first; skip checkout while payments are switched off.
   useEffect(() => {
     if (!hydrated || phase === "done") return;
-    if (!user) router.replace(`/login?mode=signup&plan=${plan}`);
+    if (!user) router.replace(`/onboarding?plan=${plan}`);
     else if (user.access === "open") router.replace(data?.profile ? "/dashboard" : "/onboarding");
     // The questionnaire comes before payment.
     else if (!data?.profile && user.access === "unpaid") router.replace("/onboarding");

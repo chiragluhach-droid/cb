@@ -4,7 +4,7 @@ import { ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { CalendarDays, Dumbbell, Home, LineChart, Loader2, LogOut, MessageCircle, UserRound } from "lucide-react";
+import { CalendarDays, ChefHat, Dumbbell, Home, LineChart, Loader2, LogOut, MessageCircle, UserRound } from "lucide-react";
 import { Wordmark } from "@/components/Logo";
 import { SealLogo } from "@/components/brand/SealLogo";
 import { Bar } from "@/components/app/ui";
@@ -17,6 +17,7 @@ export const appNav = [
   { href: "/dashboard/workout", label: "Workout", icon: Dumbbell },
   { href: "/dashboard/progress", label: "Progress", icon: LineChart },
   { href: "/dashboard/coach", label: "Coach", icon: MessageCircle },
+  { href: "/dashboard/recipes", label: "Recipes", icon: ChefHat },
   { href: "/dashboard/profile", label: "Profile", icon: UserRound },
 ];
 

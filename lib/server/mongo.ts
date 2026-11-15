@@ -8,6 +8,7 @@ import { Db, MongoClient } from "mongodb";
 import type { DayLog, Message, Profile, UserData } from "@/lib/demo-store";
 import type { PlanId } from "@/lib/plans";
 import type { Settings } from "@/lib/settings-core";
+import type { Allergen, Item, RecipeCategory, Slot } from "@/lib/engine";
 
 export type Subscription = { plan: PlanId; paidAt: number; expiresAt: number; amount: number; orderId: string };
 export type UserDoc = { _id: string; name: string; email: string; phone: string; plan: PlanId; createdAt: number; role: "client"; subscription?: Subscription };
@@ -45,6 +46,34 @@ export type OtpDoc = {
   expiresAt: Date;
 };
 export type SettingsDoc = Settings & { _id: "subscriptions" };
+/**
+ * One of the coach's own recipes (`_id` starts with "rcp_"), or her edit of a
+ * built-in dish (`_id` is that dish's id).
+ */
+export type RecipeDoc = {
+  _id: string;
+  name: string;
+  serving: string;
+  slots: Slot[];
+  kcal: number;
+  protein: number;
+  type: "veg" | "egg" | "nonveg";
+  vegan: boolean;
+  jain: boolean;
+  allergens: Allergen[];
+  category: RecipeCategory;
+  prepMins: number;
+  items: Item[];
+  steps: string[];
+  notes: string;
+  shared: boolean;
+  auto: boolean;
+  /** Bumped when the photo changes, so browsers fetch the new one. */
+  photoV: number | null;
+  createdAt: number;
+  updatedAt: number;
+};
+export type RecipePhotoDoc = { _id: string; mime: string; data: Buffer };
 
 const g = globalThis as unknown as { __evoMongo?: Promise<Db> };
 
@@ -84,6 +113,8 @@ export async function cols() {
     otps: db.collection<OtpDoc>("otps"),
     settings: db.collection<SettingsDoc>("settings"),
     orders: db.collection<OrderDoc>("orders"),
+    recipes: db.collection<RecipeDoc>("recipes"),
+    recipephotos: db.collection<RecipePhotoDoc>("recipephotos"),
   };
 }
 

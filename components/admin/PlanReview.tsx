@@ -7,7 +7,7 @@ import { Card, CardTitle } from "@/components/app/ui";
 import { DishThumb } from "@/components/app/MealRow";
 import { planWeekday, slotShare } from "@/components/app/meals";
 import { ClientRow, Flag, approvePlan, coachSend, dishChoices, reviewPlan, setPlanEdit } from "@/lib/admin";
-import { Slot, portion, servingsLabel } from "@/lib/engine";
+import { Slot, amounts, portion } from "@/lib/engine";
 import { dayNames } from "@/lib/workouts";
 import AiAssistant from "@/components/admin/AiAssistant";
 
@@ -50,7 +50,7 @@ function DishPicker({ row, day, slot, onClose }: { row: ClientRow; day: number; 
               {dayNames[day]} · {current.label}
             </p>
             <p className="mt-1 text-xl font-semibold tracking-[-0.03em]">Choose a dish</p>
-            <p className="text-sm text-stone">~{Math.round(slotKcal)} kcal for this meal. Flagged dishes don&apos;t suit {row.user.name.split(" ")[0]}.</p>
+            <p className="text-sm text-stone">~{Math.round(slotKcal)} kcal for this meal. Your recipes are at the top. Flagged dishes don&apos;t suit {row.user.name.split(" ")[0]}.</p>
           </div>
           <button onClick={onClose} aria-label="Close" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-ink/[0.06]">
             <X size={18} />
@@ -72,7 +72,7 @@ function DishPicker({ row, day, slot, onClose }: { row: ClientRow; day: number; 
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold">{dish.name}</span>
                   <span className={`block text-xs ${on ? "text-canvas/55" : "text-stone"}`}>
-                    {servingsLabel(p.servings)} · {p.kcal} kcal · {p.protein}g protein
+                    {p.kcal} kcal · {p.protein}g protein · {amounts(dish, p.servings).join(" · ")}
                   </span>
                   {warning && (
                     <span className={`mt-0.5 flex items-center gap-1 text-xs font-semibold ${on ? "text-warn" : "text-[#8A5A00]"}`}>
@@ -80,6 +80,7 @@ function DishPicker({ row, day, slot, onClose }: { row: ClientRow; day: number; 
                     </span>
                   )}
                 </span>
+                {dish.custom && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[0.625rem] font-bold ${on ? "bg-sprout text-forest" : "bg-mint text-brand-deep"}`}>Your recipe</span>}
                 {draftDish?.id === dish.id && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[0.625rem] font-bold ${on ? "bg-canvas/10 text-canvas/70" : "bg-ink/[0.05] text-ink/50"}`}>Draft</span>}
                 {on && <Check size={16} className="shrink-0 text-sprout" />}
               </button>
@@ -210,8 +211,9 @@ export default function PlanReview({ row }: { row: ClientRow }) {
                     </p>
                     <p className="truncate text-sm font-semibold text-ink sm:text-[0.9375rem]">{m.dish?.name ?? "Nothing fits — choose a dish"}</p>
                     <p className="text-xs text-stone">
-                      {m.dish ? `${servingsLabel(m.servings)} · ${m.kcal} kcal · ${m.protein}g protein` : ""}
+                      {m.dish ? `${m.kcal} kcal · ${m.protein}g protein` : ""}
                     </p>
+                    {m.dish && <p className="line-clamp-2 text-xs leading-snug text-ink/60">{amounts(m.dish, m.servings).join(" · ")}</p>}
                     {f.map((x: Flag) => (
                       <p key={x.reason} className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-[#8A5A00]">
                         <AlertTriangle size={11} /> {x.reason}

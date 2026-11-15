@@ -21,10 +21,10 @@ const features: { id: Tab; icon: typeof Home; title: string; body: string }[] = 
 /* ───────────── Today ───────────── */
 
 const meals = [
-  { t: "Breakfast", d: "Moong dal chilla + curd", k: 340, p: 22 },
-  { t: "Lunch", d: "Dal, 2 roti, sabzi, salad", k: 520, p: 20 },
-  { t: "Snack", d: "Roasted makhana + chai", k: 160, p: 5 },
-  { t: "Dinner", d: "Paneer tikka, jeera rice, raita", k: 480, p: 28 },
+  { t: "Breakfast", d: "Avocado toast + 2 poached eggs", k: 430, p: 21 },
+  { t: "Lunch", d: "Greek salad with chicken", k: 470, p: 44 },
+  { t: "Snack", d: "Greek yogurt, honey & walnuts", k: 200, p: 16 },
+  { t: "Dinner", d: "Baked salmon, quinoa & greens", k: 560, p: 40 },
 ];
 
 function Today() {

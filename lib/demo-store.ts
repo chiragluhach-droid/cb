@@ -10,7 +10,8 @@
  */
 
 import { useEffect, useSyncExternalStore } from "react";
-import type { Inputs, Slot } from "@/lib/engine";
+import { registerRecipes } from "@/lib/engine";
+import type { Dish, Inputs, Slot } from "@/lib/engine";
 import type { Lifestyle } from "@/lib/lifestyle";
 import type { PlanId } from "@/lib/plans";
 
@@ -152,8 +153,9 @@ async function refresh() {
     if (pending || started !== epoch) return;
     if (res.status === 401) return emit({ status: "anon", user: null, data: null });
     if (!res.ok) throw new Error(String(res.status));
-    const j = (await res.json()) as { user: User; data: UserData };
+    const j = (await res.json()) as { user: User; data: UserData; recipes?: Dish[] };
     if (started !== epoch) return;
+    if (j.recipes) registerRecipes(j.recipes);
     emit({ status: "ready", user: j.user, data: j.data });
   } catch {
     if (me.status !== "ready") emit({ ...me, status: "error" });
@@ -190,7 +192,9 @@ function enqueue(job: () => Promise<{ user: User; data: UserData } | null>) {
 async function patchMe(body: unknown) {
   const res = await fetch("/api/me", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   if (!res.ok) throw new Error(String(res.status));
-  return (await res.json()) as { user: User; data: UserData };
+  const j = (await res.json()) as { user: User; data: UserData; recipes?: Dish[] };
+  if (j.recipes) registerRecipes(j.recipes);
+  return j;
 }
 
 /** Work out what changed between two copies of the data and send just that. */
@@ -237,9 +241,10 @@ export async function startAuth(input: { mode: "signup" | "login"; name?: string
 
 export type VerifyResult = { ok: true; isNew: boolean; user: User } | { ok: false; error: string; wrong?: boolean };
 
-export async function verifyAuth(email: string, code: string): Promise<VerifyResult> {
+/** `profile`: questionnaire answers to save with a brand-new account. */
+export async function verifyAuth(email: string, code: string, profile?: Profile): Promise<VerifyResult> {
   try {
-    const res = await fetch("/api/auth/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code }) });
+    const res = await fetch("/api/auth/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code, profile }) });
     const j = (await res.json()) as VerifyResult;
     if (j.ok) {
       emit({ status: "loading", user: null, data: null });

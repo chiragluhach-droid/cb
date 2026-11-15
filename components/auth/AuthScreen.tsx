@@ -240,6 +240,11 @@ export default function AuthScreen(props: Props) {
   }, [resendIn]);
 
   const switchMode = (m: Mode) => {
+    // New accounts are made at the end of the questionnaire.
+    if (m === "signup") {
+      router.push(props.plan ? `/onboarding?plan=${props.plan}` : "/onboarding");
+      return;
+    }
     setMode(m);
     setStep("details");
     setErrors({});

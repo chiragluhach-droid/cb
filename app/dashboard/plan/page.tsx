@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { LayoutGroup, motion } from "framer-motion";
-import { Check, Clock, MessageCircle, ShieldCheck } from "lucide-react";
+import { Check, ChefHat, Clock, MessageCircle, ShieldCheck } from "lucide-react";
 import { Card, CardTitle } from "@/components/app/ui";
 import { DishThumb, MealRow } from "@/components/app/MealRow";
 import { dayMeals } from "@/components/app/meals";
+import { RecipeSheet } from "@/components/app/RecipeSheet";
+import type { Dish } from "@/lib/engine";
 import { dayKey, useSession } from "@/lib/demo-store";
 import { dayNames } from "@/lib/workouts";
 import { coach } from "@/lib/site";
@@ -29,6 +31,7 @@ export default function PlanPage() {
   const monday = useMemo(() => mondayOf(today), [today]);
   const week = useMemo(() => Array.from({ length: 7 }, (_, i) => new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i)), [monday]);
   const [sel, setSel] = useState((today.getDay() + 6) % 7);
+  const [recipe, setRecipe] = useState<{ dish: Dish; servings: number } | null>(null);
 
   if (!data?.profile) return null;
   // Clients only see the plan their coach has approved and sent.
@@ -69,6 +72,11 @@ export default function PlanPage() {
           {!inReview ? "Coach-approved" : "Update coming · current plan"}
         </span>
       </div>
+      <div className="mt-3 flex">
+        <Link href="/dashboard/recipes" className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-xs font-semibold text-brand-deep ring-1 ring-ink/[0.06] transition-colors hover:bg-mint">
+          <ChefHat size={14} /> {coach.name}&apos;s recipes
+        </Link>
+      </div>
 
       {/* Week strip */}
       <LayoutGroup id="plan-week">
@@ -101,7 +109,7 @@ export default function PlanPage() {
             </CardTitle>
             <motion.div key={sel} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-2">
               {meals.map((m) => (
-                <MealRow key={m.slot} meal={m} readOnly />
+                <MealRow key={m.slot} meal={m} readOnly onRecipe={() => setRecipe({ dish: m.dish!, servings: m.servings })} />
               ))}
             </motion.div>
             <p className="mt-4 text-xs text-stone">Tick off and swap meals from Today. Swaps you make show here too.</p>
@@ -161,6 +169,7 @@ export default function PlanPage() {
           </Card>
         </div>
       </div>
+      <RecipeSheet dish={recipe?.dish ?? null} servings={recipe?.servings} onClose={() => setRecipe(null)} />
     </div>
   );
 }

@@ -118,7 +118,7 @@ export default function Navbar() {
                 <span className="absolute -bottom-1 left-0 h-px w-0 bg-brand transition-all duration-300 ease-expo group-hover:w-full" />
               </a>
               <a
-                href={resolve("#pricing")}
+                href="/onboarding"
                 className={`group inline-flex items-center gap-2 rounded-full bg-ink text-[0.9375rem] font-semibold text-canvas transition-all duration-500 ease-expo hover:bg-brand ${
                   island ? "px-6 py-3" : "px-7 py-3.5"
                 }`}
@@ -192,7 +192,7 @@ export default function Navbar() {
             >
               <div className="border-t border-ink/10 pt-8">
                 <a
-                  href={resolve("#pricing")}
+                  href="/onboarding"
                   onClick={() => setOpen(false)}
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-ink py-4 text-sm font-semibold text-canvas active:bg-brand"
                 >

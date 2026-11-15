@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Message, Profile, User, UserData, dayKey, newData, newId } from "@/lib/demo-store";
-import { Slot, clash, dietOk, dishes, dislikeWords, slotSplit } from "@/lib/engine";
+import { Dish, Slot, clash, dietOk, dishes, dislikeWords, registerRecipes, slotSplit } from "@/lib/engine";
 import { parsePlan } from "@/lib/plans";
 import { editKey, planWeekday } from "@/components/app/meals";
 
@@ -39,7 +39,8 @@ export async function refreshClients() {
     if (saving) return;
     if (res.status === 401) return emit({ status: "signedOut", clients: [] });
     if (!res.ok) throw new Error(String(res.status));
-    const j = (await res.json()) as { clients: Client[] };
+    const j = (await res.json()) as { clients: Client[]; recipes?: Dish[] };
+    if (j.recipes) registerRecipes(j.recipes);
     emit({ status: "ready", clients: j.clients });
   } catch {
     if (st.status !== "ready") emit({ ...st, status: "error" });
@@ -214,7 +215,8 @@ export function dishChoices(profile: Profile, slot: Slot) {
   return dishes
     .filter((d) => d.slots.includes(slot) && dietOk(d, profile.diet))
     .map((d) => ({ dish: d, warning: clash(d, profile) ?? (words.find((w) => d.name.toLowerCase().includes(w)) ? "client dislikes this" : null) }))
-    .sort((a, b) => Number(!!a.warning) - Number(!!b.warning) || b.dish.protein / b.dish.kcal - a.dish.protein / a.dish.kcal);
+    // The coach's own recipes first, then the rest; dishes that clash go last.
+    .sort((a, b) => Number(!!a.warning) - Number(!!b.warning) || Number(!!b.dish.custom) - Number(!!a.dish.custom) || b.dish.protein / b.dish.kcal - a.dish.protein / a.dish.kcal);
 }
 
 /* ───────────── Derived client view ───────────── */

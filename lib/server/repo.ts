@@ -7,7 +7,8 @@ import { randomBytes } from "crypto";
 import type { Message, User, UserData } from "@/lib/demo-store";
 import { Settings, defaultSettings } from "@/lib/settings-core";
 import { accessOf } from "@/lib/server/billing";
-import { ClientDataDoc, UserDoc, cols } from "@/lib/server/mongo";
+import { Dish, baseDishIds } from "@/lib/engine";
+import { ClientDataDoc, RecipeDoc, UserDoc, cols } from "@/lib/server/mongo";
 
 export const newId = () => randomBytes(9).toString("base64url");
 
@@ -85,7 +86,9 @@ export function clientView(d: UserData): UserData {
 
 export async function loadClientView(id: string) {
   const me = await loadClient(id);
-  return me ? { user: me.user, data: clientView(me.data) } : null;
+  if (!me) return null;
+  const data = clientView(me.data);
+  return { user: me.user, data, recipes: await recipesForClient(data) };
 }
 
 export async function loadAllClients() {
@@ -120,4 +123,44 @@ async function readSettingsDoc(): Promise<Settings> {
   } catch {
     return defaultSettings; // site keeps working with default prices if the database is unreachable
   }
+}
+
+/* ───────────── Coach recipes ───────────── */
+
+/** A recipe in the same shape as a built-in dish, so plans can use it. */
+export const recipeDish = (r: RecipeDoc): Dish => ({
+  id: r._id,
+  name: r.name,
+  serving: r.serving,
+  slots: r.slots,
+  kcal: r.kcal,
+  protein: r.protein,
+  type: r.type,
+  vegan: r.vegan,
+  jain: r.jain,
+  allergens: r.allergens,
+  custom: true,
+  auto: r.auto,
+  ...(r.photoV ? { photo: `/api/recipe-photos/${r._id}?v=${r.photoV}` } : {}),
+  items: r.items ?? [],
+  recipe: { category: r.category, prepMins: r.prepMins, steps: r.steps, notes: r.notes, shared: r.shared },
+});
+
+export async function allRecipes(): Promise<Dish[]> {
+  const { recipes } = await cols();
+  return (await recipes.find().sort({ updatedAt: -1 }).toArray()).map(recipeDish);
+}
+
+/** What a client may see: recipes shared with everyone, plus any in their own plan or swaps. */
+export async function recipesForClient(data: UserData): Promise<Dish[]> {
+  const ids = new Set<string>();
+  for (const id of Object.values(data.published?.edits ?? {})) if (id.startsWith("rcp_")) ids.add(id);
+  for (const d of Object.values(data.days)) for (const id of Object.values(d.swaps ?? {})) if (id?.startsWith("rcp_")) ids.add(id);
+  const { recipes } = await cols();
+  // Edits to built-in dishes always apply, so everyone sees the same dish.
+  const list = await recipes
+    .find({ $or: [{ shared: true }, { auto: true }, { _id: { $in: [...ids, ...baseDishIds] } }] })
+    .sort({ updatedAt: -1 })
+    .toArray();
+  return list.map(recipeDish);
 }

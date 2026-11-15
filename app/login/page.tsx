@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import AuthScreen from "@/components/auth/AuthScreen";
 
 export const metadata: Metadata = {
@@ -16,9 +17,11 @@ const cleanPhone = (p?: string) => {
 
 export default async function LoginPage({ searchParams }: Props) {
   const sp = await searchParams;
+  // New clients start with the questionnaire; their account is made at the end of it.
+  if (sp.mode === "signup") redirect(sp.plan ? `/onboarding?plan=${encodeURIComponent(sp.plan)}` : "/onboarding");
   return (
     <AuthScreen
-      initialMode={sp.mode === "signup" ? "signup" : "login"}
+      initialMode="login"
       plan={sp.plan ?? null}
       name={sp.name ?? ""}
       email={sp.email ?? ""}

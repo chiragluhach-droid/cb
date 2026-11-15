@@ -4,7 +4,7 @@ import { ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ClipboardCheck, CreditCard, LayoutGrid, Loader2, LogOut, MessageCircle, Users } from "lucide-react";
+import { ArrowUpRight, ClipboardCheck, CreditCard, LayoutGrid, Loader2, LogOut, MessageCircle, Users, ChefHat } from "lucide-react";
 import { SealLogo } from "@/components/brand/SealLogo";
 import { CoachAvatar } from "@/components/app/CoachAvatar";
 import { adminSignOut, useAdmin } from "@/lib/admin";
@@ -35,6 +35,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     { href: "/admin/reviews", label: "Reviews", icon: ClipboardCheck, badge: reviews },
     { href: "/admin/clients", label: "Clients", icon: Users },
     { href: "/admin/messages", label: "Messages", icon: MessageCircle, badge: unread },
+    { href: "/admin/recipes", label: "Recipes", icon: ChefHat },
     { href: "/admin/subscriptions", label: "Subscriptions", short: "Plans", icon: CreditCard },
   ];
   const isActive = (href: string) => (href === "/admin" ? pathname === href : pathname.startsWith(href));
@@ -113,7 +114,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
       {/* Bottom tabs — phones/tablets */}
       <nav aria-label="Coach panel" className="fixed inset-x-0 bottom-0 z-30 border-t border-ink/[0.06] bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-lg grid-cols-5 px-2 pt-1">
+        <div className="mx-auto grid max-w-lg grid-cols-6 px-2 pt-1">
           {nav.map((n) => {
             const on = isActive(n.href);
             const Icon = n.icon;

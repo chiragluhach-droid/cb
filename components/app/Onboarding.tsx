@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -19,6 +20,7 @@ import {
   Home,
   Leaf,
   Loader2,
+  Mail,
   Moon,
   Salad,
   Sparkles,
@@ -32,7 +34,7 @@ import {
 import { SealLogo } from "@/components/brand/SealLogo";
 import { ChoiceCard, Chips, RangeField, Segmented } from "@/components/app/ui";
 import { Activity, Allergen, Condition, Diet, Goal, defaultInputs, targets } from "@/lib/engine";
-import { Profile, canUseApp, dayKey, newId, useSession } from "@/lib/demo-store";
+import { Profile, canUseApp, dayKey, newId, startAuth, useSession, verifyAuth } from "@/lib/demo-store";
 import {
   Lifestyle,
   cookTimeOptions,
@@ -49,7 +51,7 @@ import {
   trainTimeOptions,
   workDays,
 } from "@/lib/lifestyle";
-import { parsePlan } from "@/lib/plans";
+import { PlanId, parsePlan } from "@/lib/plans";
 import { coach } from "@/lib/site";
 
 /*
@@ -92,7 +94,7 @@ const allergens: { v: Allergen; l: string }[] = [
 const workIcons = { desk: Briefcase, feet: Footprints, shift: Moon, home: Home } as const;
 const cookIcons = { self: ChefHat, family: UsersRound, out: Truck } as const;
 
-type StepId = "you" | "goal" | "day" | "food" | "habits" | "training" | "review";
+type StepId = "you" | "goal" | "day" | "food" | "habits" | "training" | "review" | "details";
 const stepLabel: Record<StepId, string> = {
   you: "About you",
   goal: "Your goal",
@@ -101,7 +103,45 @@ const stepLabel: Record<StepId, string> = {
   habits: "Kitchen & habits",
   training: "Training",
   review: "Review",
+  details: "Your details",
 };
+
+/* Answers are kept on this device until the account exists, so a refresh doesn't lose them. */
+const DRAFT_KEY = "evo_questionnaire";
+type Draft = { p: Profile; hasTarget: boolean; step: number; plan: PlanId };
+const loadDraft = (): Draft | null => {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as Draft) : null;
+  } catch {
+    return null;
+  }
+};
+const saveDraft = (d: Draft) => {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+  } catch {
+    /* private mode — fine */
+  }
+};
+const clearDraft = () => {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+};
+
+const dials = [
+  { code: "+1", label: "US / CA" },
+  { code: "+44", label: "UK" },
+  { code: "+61", label: "AU" },
+  { code: "+971", label: "UAE" },
+  { code: "+65", label: "SG" },
+  { code: "+91", label: "IN" },
+];
+const okEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
+const okPhone = (dial: string, n: string) => (dial === "+91" ? /^[6-9]\d{9}$/.test(n) : /^\d{7,11}$/.test(n));
 
 const field =
   "h-12 w-full rounded-2xl bg-canvas px-4 text-[0.9375rem] outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-brand";
@@ -182,7 +222,11 @@ function WaterPicker({ value, onChange }: { value: number; onChange: (n: number)
 export default function Onboarding() {
   const router = useRouter();
   const { hydrated, user, data, update } = useSession();
-  const withWorkout = user ? parsePlan(user.plan).kind === "meal-workout" : true;
+  // The plan picked on the website (?plan=…); a signed-in client's own plan wins.
+  const [urlPlan, setUrlPlan] = useState<PlanId>("meal-workout-90");
+  const planId: PlanId = user?.plan ?? urlPlan;
+  const withWorkout = parsePlan(planId).kind === "meal-workout";
+  const anonymous = hydrated && !user;
 
   const [p, setP] = useState<Profile>({ ...defaultInputs, workoutPlace: "home", dislikes: "", life: { ...defaultLifestyle } });
   const [loaded, setLoaded] = useState(false);
@@ -191,26 +235,56 @@ export default function Onboarding() {
   const [phase, setPhase] = useState<"form" | "drafting" | "sent">("form");
   const [tick, setTick] = useState(0);
   const [hasTarget, setHasTarget] = useState(false);
+  // Contact details + email code (only when there's no account yet).
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [dial, setDial] = useState("+1");
+  const [num, setNum] = useState("");
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [devCode, setDevCode] = useState<string | null>(null);
+  const [resendIn, setResendIn] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [fieldErr, setFieldErr] = useState<{ name?: string; email?: string; phone?: string; code?: string }>({});
+  const [formErr, setFormErr] = useState<{ text: string; login?: boolean } | null>(null);
+  const savedOnServer = useRef(false);
 
-  // Guard + prefill from an earlier questionnaire.
+  // Prefill: an earlier questionnaire on the account, or answers saved on this device.
   useEffect(() => {
-    if (!hydrated) return;
-    if (!user) {
-      router.replace("/login?mode=signup");
-      return;
+    if (!hydrated || loaded) return;
+    const q = new URLSearchParams(window.location.search).get("plan");
+    const parsed = parsePlan(q);
+    const fromUrl = `${parsed.kind}-${parsed.duration}` as PlanId;
+    const draft = loadDraft();
+    if (data?.profile) {
+      const life = { ...defaultLifestyle, ...(data.profile.life ?? {}) };
+      setP({ ...data.profile, life });
+      setHasTarget(life.targetWeight > 0);
+    } else if (draft) {
+      setP({ ...draft.p, life: { ...defaultLifestyle, ...(draft.p.life ?? {}) } });
+      setHasTarget(draft.hasTarget);
+      if (!user) setStep(Math.max(0, draft.step));
     }
-    if (!loaded) {
-      if (data?.profile) {
-        const life = { ...defaultLifestyle, ...(data.profile.life ?? {}) };
-        setP({ ...data.profile, life });
-        setHasTarget(life.targetWeight > 0);
-      }
-      setLoaded(true);
-    }
-  }, [hydrated, user, data, loaded, router]);
+    setUrlPlan(q ? fromUrl : draft?.plan ?? fromUrl);
+    setLoaded(true);
+  }, [hydrated, user, data, loaded]);
+
+  // Keep a copy on this device while there's no account.
+  useEffect(() => {
+    if (loaded && !user && phase === "form") saveDraft({ p, hasTarget, step, plan: urlPlan });
+  }, [loaded, user, p, hasTarget, step, urlPlan, phase]);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
 
   const paid = user ? canUseApp(user) : false;
-  const steps = useMemo<StepId[]>(() => ["you", "goal", "day", "food", "habits", ...(withWorkout ? (["training"] as StepId[]) : []), "review"], [withWorkout]);
+  const steps = useMemo<StepId[]>(
+    () => ["you", "goal", "day", "food", "habits", ...(withWorkout ? (["training"] as StepId[]) : []), "review", ...(anonymous || savedOnServer.current ? (["details"] as StepId[]) : [])],
+    [withWorkout, anonymous],
+  );
   const last = steps.length - 1;
   const life = p.life ?? defaultLifestyle;
   const set = <K extends keyof Profile>(k: K, v: Profile[K]) => setP((x) => ({ ...x, [k]: v }));
@@ -235,9 +309,50 @@ export default function Onboarding() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const finalProfile = (): Profile => ({ ...p, life: { ...life, targetWeight: hasTarget ? life.targetWeight : 0 } });
+
   const submit = () => {
     setPhase("drafting");
     setTick(0);
+  };
+
+  /* ── Contact details → email code → account (with the answers) ── */
+  const sendCode = async () => {
+    const er: typeof fieldErr = {};
+    if (name.trim().length < 2) er.name = "Please enter your full name.";
+    if (!okEmail(email)) er.email = "Enter a valid email address.";
+    if (!okPhone(dial, num)) er.phone = "Enter a valid mobile number.";
+    setFieldErr(er);
+    setFormErr(null);
+    if (Object.keys(er).length) return;
+    setBusy(true);
+    const res = await startAuth({ mode: "signup", name: name.trim(), email: email.trim(), phone: `${dial}${num}`, plan: planId });
+    setBusy(false);
+    if (!res.ok) {
+      if (res.field) setFieldErr({ [res.field]: res.error });
+      setFormErr({ text: res.error, login: res.error.includes("Log in") });
+      if (res.wait) setResendIn(res.wait);
+      return;
+    }
+    setDevCode(res.devCode ?? null);
+    setCodeSent(true);
+    setCode("");
+    setResendIn(30);
+  };
+
+  const verify = async (c = code) => {
+    if (!/^\d{6}$/.test(c) || busy) return;
+    setBusy(true);
+    setFieldErr({});
+    const res = await verifyAuth(email.trim(), c, finalProfile());
+    if (!res.ok) {
+      setBusy(false);
+      setFieldErr({ code: res.error });
+      return;
+    }
+    savedOnServer.current = true;
+    setBusy(false);
+    submit();
   };
 
   // Drafting animation, then save.
@@ -247,7 +362,13 @@ export default function Onboarding() {
       const id = setTimeout(() => setTick((n) => n + 1), 550);
       return () => clearTimeout(id);
     }
-    const profile: Profile = { ...p, life: { ...life, targetWeight: hasTarget ? life.targetWeight : 0 } };
+    clearDraft();
+    if (savedOnServer.current) {
+      // The answers were saved together with the new account.
+      const id = setTimeout(() => setPhase("sent"), 400);
+      return () => clearTimeout(id);
+    }
+    const profile = finalProfile();
     update((d) => ({
       ...d,
       profile,
@@ -274,7 +395,7 @@ export default function Onboarding() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, tick]);
 
-  if (!hydrated || !user) {
+  if (!hydrated || !loaded) {
     return (
       <div className="flex min-h-[100svh] items-center justify-center bg-canvas">
         <Loader2 className="animate-spin text-brand" />
@@ -354,7 +475,7 @@ export default function Onboarding() {
                     : `One last step: choose your plan. ${coach.name} then builds and checks your first week by hand, usually within 24 hours.`}
                 </p>
                 <button
-                  onClick={() => router.push(paid ? "/dashboard" : `/checkout?plan=${user.plan}`)}
+                  onClick={() => router.push(paid ? "/dashboard" : `/checkout?plan=${planId}`)}
                   className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-sprout py-4 text-sm font-bold text-forest transition-colors hover:bg-canvas"
                 >
                   {paid ? "Open my dashboard" : "Continue to payment"} <ArrowRight size={16} />
@@ -369,7 +490,7 @@ export default function Onboarding() {
 
   /* ───────────── Form ───────────── */
 
-  const id = steps[step];
+  const id = steps[Math.min(step, last)];
   const goalDelta = hasTarget && life.targetWeight ? Math.round((p.weight - life.targetWeight) * 10) / 10 : 0;
   const weeks = goalDelta > 0 ? Math.ceil(goalDelta / 0.5) : goalDelta < 0 ? Math.ceil(-goalDelta / 0.25) : 0;
 
@@ -401,7 +522,8 @@ export default function Onboarding() {
           {id === "you" && (
             <>
               <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">
-                Hi {first}, <span className="font-serif italic text-brand">let&apos;s start with you.</span>
+                {first ? `Hi ${first}, ` : ""}
+                <span className={first ? "font-serif italic text-brand" : ""}>{first ? "let's start with you." : "Let's start with you."}</span>
               </h1>
               <p className="mt-2 text-stone">We use this to work out your calories and protein. Only your coach sees it.</p>
               <div className="mt-8 space-y-3">
@@ -576,7 +698,7 @@ export default function Onboarding() {
 
           {id === "review" && (
             <>
-              <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">Looks right, {first}?</h1>
+              <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">Looks right{first ? `, ${first}` : ""}?</h1>
               <p className="mt-2 text-stone">{coach.name} checks all of this before your plan goes live.</p>
               <div className="mt-8 grid grid-cols-2 gap-3">
                 <div className="col-span-2 rounded-[1.5rem] bg-forest p-5 text-canvas sm:col-span-1">
@@ -636,6 +758,113 @@ export default function Onboarding() {
               </label>
             </>
           )}
+
+          {id === "details" && (
+            <>
+              <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">
+                Last step: <span className="font-serif italic text-brand">your details.</span>
+              </h1>
+              <p className="mt-2 text-stone">So we can save your plan and {coach.name} can reach you. We&apos;ll email you a code to confirm it&apos;s you.</p>
+              <div className="mt-8 space-y-3">
+                <label className="block rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/10 sm:p-5">
+                  <span className="text-sm font-semibold text-ink">Full name</span>
+                  <input value={name} onChange={(e) => setName(e.target.value)} disabled={codeSent} autoComplete="name" placeholder="Jane Smith" className={`${field} mt-2`} />
+                  {fieldErr.name && <span className="mt-1.5 block text-xs font-medium text-red-600">{fieldErr.name}</span>}
+                </label>
+                <label className="block rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/10 sm:p-5">
+                  <span className="text-sm font-semibold text-ink">Email</span>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={codeSent} autoComplete="email" inputMode="email" placeholder="you@example.com" className={`${field} mt-2`} />
+                  {fieldErr.email && <span className="mt-1.5 block text-xs font-medium text-red-600">{fieldErr.email}</span>}
+                </label>
+                <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/10 sm:p-5">
+                  <span className="text-sm font-semibold text-ink">Mobile number</span>
+                  <div className="mt-2 flex gap-2">
+                    <select value={dial} onChange={(e) => setDial(e.target.value)} disabled={codeSent} aria-label="Country code" className={`${field} w-28 shrink-0 px-3`}>
+                      {dials.map((d) => (
+                        <option key={d.code} value={d.code}>
+                          {d.label} {d.code}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={num}
+                      onChange={(e) => setNum(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                      disabled={codeSent}
+                      inputMode="tel"
+                      autoComplete="tel-national"
+                      placeholder="Mobile number"
+                      className={field}
+                    />
+                  </div>
+                  {fieldErr.phone && <span className="mt-1.5 block text-xs font-medium text-red-600">{fieldErr.phone}</span>}
+                </div>
+
+                {formErr && (
+                  <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                    {formErr.text}{" "}
+                    {formErr.login && (
+                      <Link href="/login?next=/onboarding" className="font-semibold underline underline-offset-2">
+                        Log in — your answers are kept
+                      </Link>
+                    )}
+                  </p>
+                )}
+
+                {codeSent && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-[1.5rem] bg-forest p-4 text-canvas sm:p-5">
+                    <p className="flex items-center gap-2 text-sm font-semibold">
+                      <Mail size={16} className="text-sprout" /> Enter the 6-digit code we sent to {email.trim().toLowerCase()}
+                    </p>
+                    <input
+                      value={code}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, "").slice(0, 6);
+                        setCode(v);
+                        if (v.length === 6) verify(v);
+                      }}
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      autoFocus
+                      placeholder="••••••"
+                      className="mt-3 w-full rounded-2xl bg-canvas/10 px-4 py-3 text-center text-2xl font-semibold tracking-[0.5em] text-canvas outline-none ring-1 ring-canvas/15 placeholder:text-canvas/30 focus:ring-2 focus:ring-sprout"
+                      aria-label="6-digit code"
+                    />
+                    {fieldErr.code && <p className="mt-2 text-sm font-medium text-warn">{fieldErr.code}</p>}
+                    {devCode && (
+                      <p className="mt-2 text-xs text-canvas/60">
+                        Email isn&apos;t connected yet — your code is <b className="tracking-widest text-sprout">{devCode}</b>
+                      </p>
+                    )}
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-canvas/60">
+                      <span>Can&apos;t see it? Check spam or Promotions.</span>
+                      <span className="flex gap-3">
+                        <button type="button" onClick={() => setCodeSent(false)} className="font-semibold text-canvas/80 hover:text-canvas">
+                          Change details
+                        </button>
+                        <button type="button" disabled={resendIn > 0 || busy} onClick={sendCode} className="font-semibold text-sprout disabled:text-canvas/40">
+                          {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
+                        </button>
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+                <p className="px-1 text-xs leading-relaxed text-ink/45">
+                  By continuing you agree to our{" "}
+                  <Link href="/terms" className="underline underline-offset-2">
+                    terms
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="underline underline-offset-2">
+                    privacy policy
+                  </Link>
+                  . Already have an account?{" "}
+                  <Link href="/login?next=/onboarding" className="font-semibold text-brand-deep underline underline-offset-2">
+                    Log in
+                  </Link>
+                </p>
+              </div>
+            </>
+          )}
         </motion.div>
       </main>
 
@@ -652,11 +881,13 @@ export default function Onboarding() {
           </button>
           <button
             type="button"
-            onClick={() => (step === last ? submit() : go(step + 1))}
-            className="group inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-14px_rgba(22,163,74,0.8)] transition-colors hover:bg-brand-deep"
+            disabled={busy || (id === "details" && codeSent && code.length < 6)}
+            onClick={() => (id === "details" ? (codeSent ? verify() : sendCode()) : step === last ? submit() : go(step + 1))}
+            className="group inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-14px_rgba(22,163,74,0.8)] transition-colors hover:bg-brand-deep disabled:opacity-60"
           >
-            {step === last ? (paid ? `Send to ${coach.name}` : "Build my plan") : "Continue"}
-            <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+            {busy && <Loader2 size={15} className="animate-spin" />}
+            {id === "details" ? (codeSent ? "Confirm & build my plan" : "Email me a code") : step === last ? (paid ? `Send to ${coach.name}` : "Build my plan") : "Continue"}
+            {!busy && <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />}
           </button>
         </div>
       </div>

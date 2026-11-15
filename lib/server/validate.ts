@@ -88,7 +88,7 @@ export function readDayLog(v: unknown): DayLog | null {
   const meals = Array.isArray(x.meals) ? [...new Set(x.meals.filter((m) => oneOf(m, SLOTS)))] : [];
   const swaps: Record<string, string> = {};
   if (x.swaps && typeof x.swaps === "object")
-    for (const [k, id] of Object.entries(x.swaps as Record<string, unknown>)) if (SLOTS.includes(k) && typeof id === "string" && DISH_IDS.has(id)) swaps[k] = id;
+    for (const [k, id] of Object.entries(x.swaps as Record<string, unknown>)) if (SLOTS.includes(k) && isAnyDishId(id)) swaps[k] = id;
   const sets: Record<string, number> = {};
   if (x.sets && typeof x.sets === "object")
     for (const [k, n] of Object.entries(x.sets as Record<string, unknown>)) if (/^[a-z0-9-]{1,40}$/.test(k) && num(n, 0, 20)) sets[k] = Math.round(n as number);
@@ -122,6 +122,8 @@ export function readPicks(v: unknown): Record<string, string> {
 }
 
 export const isDishId = (v: unknown): v is string => typeof v === "string" && DISH_IDS.has(v);
+/** A built-in dish or one of the coach's recipes ("rcp_…"). Used for client swaps. */
+export const isAnyDishId = (v: unknown): v is string => isDishId(v) || (typeof v === "string" && /^rcp_[\w-]{6,30}$/.test(v));
 
 /** Admin › Subscriptions. Unknown fields dropped; plan names stay fixed. */
 export function readSettings(v: unknown): Settings | null {

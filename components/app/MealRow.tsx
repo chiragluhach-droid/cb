@@ -3,15 +3,21 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeftRight, Check, RotateCcw, Utensils, X } from "lucide-react";
-import { Dish, servingsLabel } from "@/lib/engine";
+import { ArrowLeftRight, Check, ChefHat, RotateCcw, Utensils, X } from "lucide-react";
+import { Dish, amounts } from "@/lib/engine";
 import { unsplash } from "@/lib/site";
 import type { PlannedMeal } from "@/components/app/meals";
 
 export function DishThumb({ dish, size = "h-14 w-14" }: { dish: Dish | null; size?: string }) {
   return (
     <span className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-mint text-brand ${size}`}>
-      {dish?.img ? <Image src={unsplash(dish.img, 200)} alt="" fill sizes="64px" className="object-cover" /> : <Utensils size={18} />}
+      {dish?.photo ? (
+        <Image src={dish.photo} alt="" fill sizes="64px" unoptimized className="object-cover" />
+      ) : dish?.img ? (
+        <Image src={unsplash(dish.img, 200)} alt="" fill sizes="64px" className="object-cover" />
+      ) : (
+        <Utensils size={18} />
+      )}
     </span>
   );
 }
@@ -21,14 +27,18 @@ export function MealRow({
   done,
   onToggle,
   onSwap,
+  onRecipe,
   readOnly = false,
 }: {
   meal: PlannedMeal;
   done?: boolean;
   onToggle?: () => void;
   onSwap?: () => void;
+  /** Open the coach's recipe for this meal (only when it has one). */
+  onRecipe?: () => void;
   readOnly?: boolean;
 }) {
+  const hasRecipe = !!meal.dish?.recipe && !!onRecipe;
   return (
     <div className={`flex items-center gap-3 rounded-[1.25rem] p-2.5 pr-3 transition-colors sm:gap-4 sm:p-3 ${done ? "bg-mint/60" : "bg-[#F7F8F5]"}`}>
       <DishThumb dish={meal.dish} size="h-14 w-14 sm:h-16 sm:w-16" />
@@ -41,9 +51,17 @@ export function MealRow({
           {meal.dish ? meal.dish.name : "Your coach plans this one"}
         </p>
         {meal.dish && (
-          <p className="truncate text-xs text-stone">
-            {servingsLabel(meal.servings)} · {meal.kcal} kcal · <span className="font-semibold text-brand-deep">{meal.protein}g P</span>
-          </p>
+          <>
+            <p className="text-xs text-stone">
+              {meal.kcal} kcal · <span className="font-semibold text-brand-deep">{meal.protein}g protein</span>
+            </p>
+            <p className={`mt-0.5 line-clamp-2 text-xs leading-snug ${done ? "text-ink/35" : "text-ink/65"}`}>{amounts(meal.dish, meal.servings).join(" · ")}</p>
+          </>
+        )}
+        {hasRecipe && (
+          <button onClick={onRecipe} className="mt-1 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[0.6875rem] font-bold text-brand-deep ring-1 ring-brand/20 transition-colors hover:bg-mint">
+            <ChefHat size={12} /> See recipe
+          </button>
         )}
       </div>
       {!readOnly && meal.dish && (
@@ -145,7 +163,7 @@ export function SwapSheet({
                   <DishThumb dish={o.dish} size="h-12 w-12" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[0.9375rem] font-semibold text-ink">{o.dish.name}</span>
-                    <span className="block truncate text-xs text-stone">{o.dish.serving}</span>
+                    <span className="block line-clamp-2 text-xs leading-snug text-stone">{amounts(o.dish, o.servings).join(" · ")}</span>
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block text-sm font-semibold tabular-nums">{o.kcal}</span>

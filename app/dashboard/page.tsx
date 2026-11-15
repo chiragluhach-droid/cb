@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Check, Clock, Droplet, Dumbbell, Footprints, MessageCircle, Minus, Plus, Scale, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Check, ChefHat, Clock, Droplet, Dumbbell, Footprints, MessageCircle, Minus, Plus, Scale, ShieldCheck, Sparkles } from "lucide-react";
 import { Bar, Card, CardTitle, Num, Ring } from "@/components/app/ui";
 import { MealRow, SwapSheet } from "@/components/app/MealRow";
 import { dayMeals, slotShare, stepGoal, swapOptions } from "@/components/app/meals";
 import { planDay } from "@/components/app/Shell";
-import { Slot } from "@/lib/engine";
+import { Dish, Slot } from "@/lib/engine";
+import { RecipeSheet } from "@/components/app/RecipeSheet";
 import { dayKey, emptyDay, newId, useSession, weekday } from "@/lib/demo-store";
 import { parsePlan } from "@/lib/plans";
 import { sessionFor, weekSince } from "@/lib/workouts";
@@ -20,6 +21,7 @@ const greeting = (h: number) => (h < 12 ? "Good morning" : h < 17 ? "Good aftern
 export default function TodayPage() {
   const { user, data, update, updateDay } = useSession();
   const [swapSlot, setSwapSlot] = useState<Slot | null>(null);
+  const [recipe, setRecipe] = useState<{ dish: Dish; servings: number } | null>(null);
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -157,10 +159,19 @@ export default function TodayPage() {
           </Card>
 
           <Card>
-            <CardTitle action={<span className="text-xs text-stone">Tap ✓ when eaten · ⇄ to swap</span>}>Today&apos;s meals</CardTitle>
+            <CardTitle
+              action={
+                <Link href="/dashboard/recipes" className="inline-flex items-center gap-1 text-xs font-semibold text-brand-deep hover:underline">
+                  <ChefHat size={13} /> Recipes
+                </Link>
+              }
+            >
+              Today&apos;s meals
+            </CardTitle>
+            <p className="-mt-2 mb-3 text-xs text-stone">Tap ✓ when eaten · ⇄ to swap</p>
             <div className="space-y-2">
               {meals.map((m) => (
-                <MealRow key={m.slot} meal={m} done={log.meals.includes(m.slot)} onToggle={() => toggleMeal(m.slot)} onSwap={() => setSwapSlot(m.slot)} />
+                <MealRow key={m.slot} meal={m} done={log.meals.includes(m.slot)} onToggle={() => toggleMeal(m.slot)} onSwap={() => setSwapSlot(m.slot)} onRecipe={() => setRecipe({ dish: m.dish!, servings: m.servings })} />
               ))}
             </div>
             <AnimatePresence>
@@ -309,6 +320,7 @@ export default function TodayPage() {
         </div>
       </div>
 
+      <RecipeSheet dish={recipe?.dish ?? null} servings={recipe?.servings} onClose={() => setRecipe(null)} />
       <SwapSheet
         open={!!swapMeal}
         title={swapMeal ? `${swapMeal.label} · now ${swapMeal.dish?.name ?? "—"}` : ""}
