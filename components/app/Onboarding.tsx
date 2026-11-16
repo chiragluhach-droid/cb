@@ -144,7 +144,7 @@ const okEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());
 const okPhone = (dial: string, n: string) => (dial === "+91" ? /^[6-9]\d{9}$/.test(n) : /^\d{7,11}$/.test(n));
 
 const field =
-  "h-12 w-full rounded-2xl bg-canvas px-4 text-[0.9375rem] outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-brand";
+  "h-12 w-full rounded-2xl bg-canvas px-4 text-base outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-brand";
 
 /* ───────────── Small pieces ───────────── */
 
@@ -779,7 +779,7 @@ export default function Onboarding() {
                 <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/10 sm:p-5">
                   <span className="text-sm font-semibold text-ink">Mobile number</span>
                   <div className="mt-2 flex gap-2">
-                    <select value={dial} onChange={(e) => setDial(e.target.value)} disabled={codeSent} aria-label="Country code" className={`${field} w-28 shrink-0 px-3`}>
+                    <select value={dial} onChange={(e) => setDial(e.target.value)} disabled={codeSent} aria-label="Country code" className="h-12 w-[6.75rem] shrink-0 rounded-2xl bg-canvas px-3 text-base outline-none ring-1 ring-ink/10 focus:ring-2 focus:ring-brand">
                       {dials.map((d) => (
                         <option key={d.code} value={d.code}>
                           {d.label} {d.code}
@@ -793,7 +793,7 @@ export default function Onboarding() {
                       inputMode="tel"
                       autoComplete="tel-national"
                       placeholder="Mobile number"
-                      className={field}
+                      className="h-12 min-w-0 flex-1 rounded-2xl bg-canvas px-4 text-base outline-none ring-1 ring-ink/10 placeholder:text-ink/30 focus:ring-2 focus:ring-brand"
                     />
                   </div>
                   {fieldErr.phone && <span className="mt-1.5 block text-xs font-medium text-red-600">{fieldErr.phone}</span>}
