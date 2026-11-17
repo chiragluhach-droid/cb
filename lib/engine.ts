@@ -59,6 +59,9 @@ export type RecipeDetails = {
   notes: string;
   /** Shown in every client's Recipes tab. */
   shared: boolean;
+  /** Public page at /recipes/<slug> (the coach's own recipes only). */
+  public?: boolean;
+  slug?: string;
 };
 
 /* ───────────── Amounts ───────────── */

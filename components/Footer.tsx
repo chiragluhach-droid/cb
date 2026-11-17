@@ -111,6 +111,7 @@ export default function Footer() {
               <li><a href="/onboarding?plan=meal-30" className={linkCls}>Meal Plan</a></li>
               <li><a href="/onboarding?plan=meal-workout-30" className={linkCls}>Meal + Workout</a></li>
               <li><a href="/onboarding?plan=meal-workout-90" className={linkCls}>90-day programme</a></li>
+              <li><a href="/recipes" className={linkCls}>Free recipes</a></li>
             </ul>
           </div>
           <div>

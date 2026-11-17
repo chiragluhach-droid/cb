@@ -1,4 +1,4 @@
-export const SITE_URL = "https://evowellnutrition.com";
+export const SITE_URL = "https://www.evowellnutrition.com";
 
 export const site = {
   name: "Evowell",

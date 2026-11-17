@@ -3,6 +3,8 @@ import { baseDishIds } from "@/lib/engine";
 import { readRecipe } from "@/lib/recipes-core";
 import { cols } from "@/lib/server/mongo";
 import { readPhoto } from "@/lib/server/recipe-photo";
+import { refreshRecipePages, slugFields } from "@/lib/server/recipe-pages";
+import type { RecipeDoc } from "@/lib/server/mongo";
 import { recipeDish } from "@/lib/server/repo";
 import { isAdmin } from "@/lib/server/session";
 
@@ -30,7 +32,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     const now = Date.now();
     // Editing a built-in dish saves the coach's version under the same id.
     const isBase = baseDishIds.has(id);
-    const cur = (await recipes.findOne({ _id: id })) ?? (isBase ? { _id: id, photoV: null, createdAt: now } : null);
+    const found = await recipes.findOne({ _id: id });
+    const cur: Partial<RecipeDoc> & Pick<RecipeDoc, "_id" | "photoV" | "createdAt"> | null = found ?? (isBase ? { _id: id, photoV: null, createdAt: now } : null);
     if (!cur) return NextResponse.json({ error: "Recipe not found." }, { status: 404 });
     let photoV = cur.photoV;
     if (photo) {
@@ -40,8 +43,11 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
       await recipephotos.deleteOne({ _id: id });
       photoV = null;
     }
-    const doc = { ...cur, ...r.recipe, ...(isBase ? { auto: true, shared: false } : {}), photoV, updatedAt: now };
+    // The coach's own recipes keep a public address; renaming moves it and the old link redirects.
+    const page = isBase ? { auto: true, shared: false, public: false } : await slugFields(r.recipe.name, found, id);
+    const doc = { ...cur, ...r.recipe, ...page, photoV, updatedAt: now } as RecipeDoc;
     await recipes.replaceOne({ _id: id }, doc, { upsert: true });
+    refreshRecipePages();
     return NextResponse.json({ recipe: recipeDish(doc) });
   } catch (e) {
     console.error("recipe PUT failed", e);
@@ -56,6 +62,7 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string 
     const { recipes, recipephotos } = await cols();
     const r = await recipes.deleteOne({ _id: id });
     await recipephotos.deleteOne({ _id: id });
+    refreshRecipePages();
     return r.deletedCount ? NextResponse.json({ ok: true }) : NextResponse.json({ error: "Recipe not found." }, { status: 404 });
   } catch (e) {
     console.error("recipe DELETE failed", e);

@@ -55,6 +55,8 @@ export type RecipeInput = {
   notes: string;
   shared: boolean;
   auto: boolean;
+  /** Has its own public page at /recipes/<slug>, for sharing on Instagram etc. */
+  public: boolean;
 };
 
 export const unitOptions: { v: Unit; l: string }[] = [
@@ -84,6 +86,7 @@ export const emptyRecipe: RecipeInput = {
   notes: "",
   shared: true,
   auto: false,
+  public: true,
 };
 
 const lines = (v: unknown, max: number, len: number) =>
@@ -124,6 +127,7 @@ export function readRecipe(b: unknown): { ok: true; recipe: RecipeInput } | { ok
       notes: typeof x.notes === "string" ? x.notes.trim().slice(0, 600) : "",
       shared: x.shared !== false,
       auto: x.auto === true,
+      public: x.public !== false,
     },
   };
 }
@@ -143,4 +147,19 @@ function readItems(v: unknown): Item[] {
     out.push({ food, qty, unit, g });
   }
   return out;
+}
+
+/** "Weight-loss Dahi Bhalla!" → "weight-loss-dahi-bhalla" (for /recipes/<slug>). */
+export function slugify(name: string) {
+  return (
+    name
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60)
+      .replace(/-+$/g, "") || "recipe"
+  );
 }

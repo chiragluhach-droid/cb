@@ -9,6 +9,7 @@ import { Settings, defaultSettings } from "@/lib/settings-core";
 import { accessOf } from "@/lib/server/billing";
 import { Dish, baseDishIds } from "@/lib/engine";
 import { ClientDataDoc, RecipeDoc, UserDoc, cols } from "@/lib/server/mongo";
+import { ensureSlugs } from "@/lib/server/recipe-pages";
 
 export const newId = () => randomBytes(9).toString("base64url");
 
@@ -143,10 +144,18 @@ export const recipeDish = (r: RecipeDoc): Dish => ({
   auto: r.auto,
   ...(r.photoV ? { photo: `/api/recipe-photos/${r._id}?v=${r.photoV}` } : {}),
   items: r.items ?? [],
-  recipe: { category: r.category, prepMins: r.prepMins, steps: r.steps, notes: r.notes, shared: r.shared },
+  recipe: {
+    category: r.category,
+    prepMins: r.prepMins,
+    steps: r.steps,
+    notes: r.notes,
+    shared: r.shared,
+    ...(r._id.startsWith("rcp_") ? { public: r.public !== false, slug: r.slug } : {}),
+  },
 });
 
 export async function allRecipes(): Promise<Dish[]> {
+  await ensureSlugs();
   const { recipes } = await cols();
   return (await recipes.find().sort({ updatedAt: -1 }).toArray()).map(recipeDish);
 }

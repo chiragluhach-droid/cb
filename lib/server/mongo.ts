@@ -88,6 +88,11 @@ export type RecipeDoc = {
   auto: boolean;
   /** Bumped when the photo changes, so browsers fetch the new one. */
   photoV: number | null;
+  /** Public page (missing on older recipes = on). Built-in dish edits never have one. */
+  public?: boolean;
+  /** Its address: /recipes/<slug>. Earlier names stay in oldSlugs so shared links keep working. */
+  slug?: string;
+  oldSlugs?: string[];
   createdAt: number;
   updatedAt: number;
 };
@@ -108,6 +113,8 @@ async function connect(): Promise<Db> {
     db.collection<OrderDoc>("orders").createIndex({ userId: 1, createdAt: -1 }),
     // Sign-in codes delete themselves when they expire.
     db.collection<OtpDoc>("otps").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    db.collection<RecipeDoc>("recipes").createIndex({ slug: 1 }),
+    db.collection<RecipeDoc>("recipes").createIndex({ oldSlugs: 1 }),
   ]);
   return db;
 }

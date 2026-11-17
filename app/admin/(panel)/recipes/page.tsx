@@ -3,7 +3,7 @@
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Camera, ChefHat, Clock, Eye, Flame, ImageOff, Loader2, Plus, Search, Share2, Sparkles, Trash2, X } from "lucide-react";
+import { Camera, Check, ChefHat, Clock, ExternalLink, Eye, Flame, Globe, ImageOff, Link2, Loader2, Plus, Search, Share2, Sparkles, Trash2, X } from "lucide-react";
 import { Chips, Segmented } from "@/components/app/ui";
 import { Empty, PageTitle } from "@/components/admin/bits";
 import { RecipePhoto, RecipeSheet, shrinkPhoto } from "@/components/app/RecipeSheet";
@@ -41,7 +41,30 @@ const toInput = (d: Dish): RecipeInput => ({
   notes: d.recipe?.notes ?? "",
   shared: d.recipe?.shared ?? false,
   auto: !!d.auto,
+  public: d.recipe?.public ?? true,
 });
+
+/** The recipe's public page, e.g. https://www.evowellnutrition.com/recipes/greek-yogurt-bowl */
+const pageUrl = (d: Dish) => (d.recipe?.public && d.recipe.slug ? `${typeof window === "undefined" ? "" : window.location.origin}/recipes/${d.recipe.slug}` : null);
+
+/** Copies the public link (for Instagram DMs etc.). */
+function CopyLink({ url, className, label = "Copy link" }: { url: string; className: string; label?: string }) {
+  const [done, setDone] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      window.prompt("Copy this link:", url);
+    }
+    setDone(true);
+    setTimeout(() => setDone(false), 1600);
+  };
+  return (
+    <button type="button" onClick={copy} className={className}>
+      {done ? <Check size={14} /> : <Link2 size={14} />} {done ? "Copied" : label}
+    </button>
+  );
+}
 
 type Filter = "all" | RecipeCategory;
 
@@ -180,6 +203,11 @@ export default function RecipesPage() {
                 </span>
                 <span className="absolute right-3 top-3 flex gap-1.5">
                   {r.edited && <span className="rounded-full bg-warn px-2 py-1 text-[0.625rem] font-bold text-forest">Edited</span>}
+                  {tab === "mine" && r.recipe?.public && (
+                    <span title="Has a public page" className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-brand-deep">
+                      <Globe size={13} />
+                    </span>
+                  )}
                   {tab === "mine" && r.recipe?.shared && (
                     <span title="Shared with all clients" className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white">
                       <Share2 size={13} />
@@ -211,6 +239,9 @@ export default function RecipesPage() {
               <button onClick={() => setPreview(r)} className="flex flex-1 items-center justify-center gap-1.5 py-3 text-ink/60 transition-colors hover:bg-[#F7F8F5] hover:text-ink">
                 <Eye size={14} /> Client view
               </button>
+              {tab === "mine" && pageUrl(r) && (
+                <CopyLink url={pageUrl(r)!} className="flex flex-1 items-center justify-center gap-1.5 border-l border-ink/[0.06] py-3 text-brand-deep transition-colors hover:bg-mint" />
+              )}
               <button onClick={() => setEditing(r)} className="flex flex-1 items-center justify-center gap-1.5 border-l border-ink/[0.06] py-3 text-ink/60 transition-colors hover:bg-[#F7F8F5] hover:text-ink">
                 Edit
               </button>
@@ -222,6 +253,14 @@ export default function RecipesPage() {
       <p className="mt-8 text-xs leading-relaxed text-stone">
         <b className="text-ink">How recipes reach clients:</b> shared recipes appear in every client&apos;s Recipes tab. Any recipe can also go into a client&apos;s plan — open the client,
         click a meal in their week and pick it under &ldquo;Your recipes&rdquo;. Clients can open the full recipe from that meal.
+      </p>
+      <p className="mt-3 text-xs leading-relaxed text-stone">
+        <b className="text-ink">Public pages:</b> each of your recipes also has its own page anyone can open, with no login. Tap &ldquo;Copy link&rdquo; to paste it into
+        Instagram DMs or your bio. All your public recipes are listed at{" "}
+        <a href="/recipes" target="_blank" rel="noreferrer" className="font-semibold text-brand-deep underline underline-offset-2">
+          /recipes
+        </a>
+        .
       </p>
 
       <AnimatePresence>{editing && <Editor key={editing === "new" ? "new" : editing.id} dish={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={saved} />}</AnimatePresence>
@@ -454,6 +493,22 @@ function Editor({ dish, onClose, onSaved }: { dish: Dish | null; onClose: () => 
                 <span className="block text-xs text-stone">The plan engine may pick it for clients whose diet fits. Off = only when you choose it.</span>
               </span>
             </label>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" checked={r.public} onChange={(e) => set("public", e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#16A34A]" />
+              <span>
+                <span className="block text-sm font-semibold text-ink">Public page</span>
+                <span className="block text-xs text-stone">Anyone with the link can see it, no login needed. Great for Instagram DMs. The link is ready once you save.</span>
+              </span>
+            </label>
+            {dish && r.public && pageUrl(dish) && (
+              <div className="ml-7 flex flex-wrap items-center gap-2 rounded-xl bg-mint/70 px-3 py-2 text-xs">
+                <span className="min-w-0 flex-1 truncate font-medium text-brand-deep">{pageUrl(dish)!.replace(/^https?:\/\//, "")}</span>
+                <CopyLink url={pageUrl(dish)!} className="inline-flex items-center gap-1 font-semibold text-brand-deep hover:underline" />
+                <a href={pageUrl(dish)!} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-brand-deep hover:underline">
+                  <ExternalLink size={13} /> Open
+                </a>
+              </div>
+            )}
           </div>
           )}
 

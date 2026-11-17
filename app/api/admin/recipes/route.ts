@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { readRecipe } from "@/lib/recipes-core";
 import { cols } from "@/lib/server/mongo";
 import { readPhoto } from "@/lib/server/recipe-photo";
+import { refreshRecipePages, uniqueSlug } from "@/lib/server/recipe-pages";
 import { allRecipes, recipeDish } from "@/lib/server/repo";
 import { isAdmin } from "@/lib/server/session";
 
@@ -36,9 +37,10 @@ export async function POST(req: Request) {
     const { recipes, recipephotos } = await cols();
     const _id = `rcp_${randomBytes(9).toString("base64url")}`;
     const now = Date.now();
-    const doc = { _id, ...r.recipe, photoV: photo ? now : null, createdAt: now, updatedAt: now };
+    const doc = { _id, ...r.recipe, slug: await uniqueSlug(r.recipe.name, _id), oldSlugs: [], photoV: photo ? now : null, createdAt: now, updatedAt: now };
     if (photo) await recipephotos.insertOne({ _id, ...photo });
     await recipes.insertOne(doc);
+    refreshRecipePages();
     return NextResponse.json({ recipe: recipeDish(doc) });
   } catch (e) {
     console.error("recipes POST failed", e);
