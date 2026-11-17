@@ -6,12 +6,13 @@ import { motion } from "framer-motion";
 import { ChevronRight, Search, TrendingDown, TrendingUp } from "lucide-react";
 import { Segmented } from "@/components/app/ui";
 import { ClientAvatar, Empty, PageTitle, StatusPill, dayAgo, planLabel } from "@/components/admin/bits";
+import { LeadsList } from "@/components/admin/Leads";
 import { ClientStatus, useAdmin } from "@/lib/admin";
 
 type Filter = "all" | ClientStatus;
 
 export default function ClientsPage() {
-  const { clients } = useAdmin();
+  const { clients, leads } = useAdmin();
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -22,9 +23,12 @@ export default function ClientsPage() {
     return !t || c.user.name.toLowerCase().includes(t) || c.user.email.includes(t) || c.user.phone.includes(t.replace(/\s/g, ""));
   });
 
+  const t = q.trim().toLowerCase();
+  const shownLeads = leads.filter((l) => !t || l.name.toLowerCase().includes(t) || l.email.includes(t) || l.phone.includes(t.replace(/\s/g, "")));
+
   return (
     <div>
-      <PageTitle eyebrow={`${clients.length} clients`} title="All" accent="clients." />
+      <PageTitle eyebrow={`${clients.length} clients${leads.length ? ` · ${leads.length} didn't finish sign-up` : ""}`} title="All" accent="clients." />
 
       <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center">
         <label className="relative block lg:w-72">
@@ -167,6 +171,8 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
+
+      {(filter === "all" || filter === "unpaid") && shownLeads.length > 0 && <LeadsList leads={shownLeads} />}
     </div>
   );
 }

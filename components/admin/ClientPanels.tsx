@@ -39,7 +39,7 @@ function lifeAnswers(l?: Lifestyle): [string, string][] {
 }
 import { activityLabel, condLabel, dietLabel, goalLabel, planLabel } from "@/components/admin/bits";
 import { ClientRow, saveCoachNotes } from "@/lib/admin";
-import { dayKey, formatPhone } from "@/lib/demo-store";
+import { Profile, dayKey, formatPhone } from "@/lib/demo-store";
 import { slotSplit, targets } from "@/lib/engine";
 
 const lastDays = (n: number) => Array.from({ length: n }, (_, i) => dayKey(new Date(Date.now() - (n - 1 - i) * 86400000)));
@@ -136,6 +136,44 @@ export function ClientProgress({ row }: { row: ClientRow }) {
   );
 }
 
+/** Every questionnaire answer, the client's note, and the calorie targets. */
+export function QuestionnaireAnswers({ profile: p, name }: { profile: Profile; name: string }) {
+  const t = targets(p);
+  const answers: [string, string][] = [
+    ["Goal", goalLabel[p.goal]],
+    ["Diet", dietLabel[p.diet]],
+    ["Sex · age", `${p.sex === "female" ? "Female" : "Male"} · ${p.age}`],
+    ["Height · weight", `${p.height} cm · ${p.weight} kg`],
+    ["Activity", activityLabel[p.activity]],
+    ["Health", p.conditions.length ? p.conditions.map((c) => condLabel[c]).join(", ") : "None"],
+    ["Allergies", p.allergies.length ? p.allergies.join(", ") : "None"],
+    ["Dislikes", p.dislikes.trim() || "None"],
+    ["Training", p.workoutPlace === "gym" ? "Gym" : "Home"],
+    ...lifeAnswers(p.life),
+  ];
+  return (
+    <>
+      <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
+        {answers.map(([k, v]) => (
+          <div key={k} className="flex justify-between gap-4 border-b border-ink/[0.06] py-3 text-sm sm:block">
+            <dt className="text-stone">{k}</dt>
+            <dd className="text-right font-semibold text-ink first-letter:uppercase sm:mt-0.5 sm:text-left">{v}</dd>
+          </div>
+        ))}
+      </dl>
+      {p.life?.notes.trim() ? (
+        <div className="mt-4 rounded-2xl bg-mint/60 px-4 py-3 text-sm">
+          <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-brand-deep">Note from {name.split(" ")[0]}</p>
+          <p className="mt-1 whitespace-pre-wrap leading-relaxed text-ink">{p.life.notes.trim()}</p>
+        </div>
+      ) : null}
+      <p className="mt-4 text-xs text-stone">
+        Targets: <b className="text-ink">{t.kcal} kcal</b> · {t.protein}g protein · {t.carbs}g carbs · {t.fat}g fat
+      </p>
+    </>
+  );
+}
+
 export function ClientProfile({ row }: { row: ClientRow }) {
   const { user, data } = row;
   const p = data.profile;
@@ -153,49 +191,12 @@ export function ClientProfile({ row }: { row: ClientRow }) {
     return () => clearTimeout(t);
   }, [notes, data.coachNotes, user.id]);
 
-  const t = p ? targets(p) : null;
-  const answers: [string, string][] = p
-    ? [
-        ["Goal", goalLabel[p.goal]],
-        ["Diet", dietLabel[p.diet]],
-        ["Sex · age", `${p.sex === "female" ? "Female" : "Male"} · ${p.age}`],
-        ["Height · weight", `${p.height} cm · ${p.weight} kg`],
-        ["Activity", activityLabel[p.activity]],
-        ["Health", p.conditions.length ? p.conditions.map((c) => condLabel[c]).join(", ") : "None"],
-        ["Allergies", p.allergies.length ? p.allergies.join(", ") : "None"],
-        ["Dislikes", p.dislikes.trim() || "None"],
-        ["Training", p.workoutPlace === "gym" ? "Gym" : "Home"],
-        ...lifeAnswers(p.life),
-      ]
-    : [];
-
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
       <div className="space-y-4 lg:col-span-7 lg:space-y-6">
         <Card>
           <CardTitle>Questionnaire</CardTitle>
-          {p ? (
-            <dl className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              {answers.map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-4 border-b border-ink/[0.06] py-3 text-sm sm:block">
-                  <dt className="text-stone">{k}</dt>
-                  <dd className="text-right font-semibold text-ink first-letter:uppercase sm:mt-0.5 sm:text-left">{v}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-          {p?.life?.notes.trim() ? (
-            <div className="mt-4 rounded-2xl bg-mint/60 px-4 py-3 text-sm">
-              <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-brand-deep">Note from {user.name.split(" ")[0]}</p>
-              <p className="mt-1 whitespace-pre-wrap leading-relaxed text-ink">{p.life.notes.trim()}</p>
-            </div>
-          ) : null}
-          {!p && <p className="rounded-2xl bg-[#F7F8F5] px-4 py-6 text-center text-sm text-stone">Not filled in yet.</p>}
-          {t && (
-            <p className="mt-4 text-xs text-stone">
-              Targets: <b className="text-ink">{t.kcal} kcal</b> · {t.protein}g protein · {t.carbs}g carbs · {t.fat}g fat
-            </p>
-          )}
+          {p ? <QuestionnaireAnswers profile={p} name={user.name} /> : <p className="rounded-2xl bg-[#F7F8F5] px-4 py-6 text-center text-sm text-stone">Not filled in yet.</p>}
         </Card>
 
         <Card>

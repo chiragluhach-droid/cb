@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   ArrowRight,
   Beef,
+  Eye,
+  EyeOff,
   Briefcase,
   Check,
   ChefHat,
@@ -240,12 +242,14 @@ export default function Onboarding() {
   const [email, setEmail] = useState("");
   const [dial, setDial] = useState("+1");
   const [num, setNum] = useState("");
+  const [pw, setPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [devCode, setDevCode] = useState<string | null>(null);
   const [resendIn, setResendIn] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [fieldErr, setFieldErr] = useState<{ name?: string; email?: string; phone?: string; code?: string }>({});
+  const [fieldErr, setFieldErr] = useState<{ name?: string; email?: string; phone?: string; password?: string; code?: string }>({});
   const [formErr, setFormErr] = useState<{ text: string; login?: boolean } | null>(null);
   const savedOnServer = useRef(false);
 
@@ -322,11 +326,12 @@ export default function Onboarding() {
     if (name.trim().length < 2) er.name = "Please enter your full name.";
     if (!okEmail(email)) er.email = "Enter a valid email address.";
     if (!okPhone(dial, num)) er.phone = "Enter a valid mobile number.";
+    if (pw.length < 8) er.password = "Use at least 8 characters.";
     setFieldErr(er);
     setFormErr(null);
     if (Object.keys(er).length) return;
     setBusy(true);
-    const res = await startAuth({ mode: "signup", name: name.trim(), email: email.trim(), phone: `${dial}${num}`, plan: planId });
+    const res = await startAuth({ mode: "signup", name: name.trim(), email: email.trim(), phone: `${dial}${num}`, plan: planId, profile: finalProfile() });
     setBusy(false);
     if (!res.ok) {
       if (res.field) setFieldErr({ [res.field]: res.error });
@@ -342,12 +347,13 @@ export default function Onboarding() {
 
   const verify = async (c = code) => {
     if (!/^\d{6}$/.test(c) || busy) return;
+    if (pw.length < 8) return setFieldErr({ password: "Use at least 8 characters." });
     setBusy(true);
     setFieldErr({});
-    const res = await verifyAuth(email.trim(), c, finalProfile());
+    const res = await verifyAuth(email.trim(), c, { password: pw, profile: finalProfile() });
     if (!res.ok) {
       setBusy(false);
-      setFieldErr({ code: res.error });
+      setFieldErr(res.field === "password" ? { password: res.error } : { code: res.error });
       return;
     }
     savedOnServer.current = true;
@@ -775,6 +781,32 @@ export default function Onboarding() {
                   <span className="text-sm font-semibold text-ink">Email</span>
                   <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={codeSent} autoComplete="email" inputMode="email" placeholder="you@example.com" className={`${field} mt-2`} />
                   {fieldErr.email && <span className="mt-1.5 block text-xs font-medium text-red-600">{fieldErr.email}</span>}
+                </label>
+                <label className="block rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/10 sm:p-5">
+                  <span className="text-sm font-semibold text-ink">Create a password</span>
+                  <span className="relative mt-2 block">
+                    <input
+                      type={showPw ? "text" : "password"}
+                      value={pw}
+                      onChange={(e) => setPw(e.target.value)}
+                      autoComplete="new-password"
+                      placeholder="At least 8 characters"
+                      className={`${field} pr-12`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw((v) => !v)}
+                      aria-label={showPw ? "Hide password" : "Show password"}
+                      className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-ink/40 hover:text-ink"
+                    >
+                      {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </span>
+                  {fieldErr.password ? (
+                    <span className="mt-1.5 block text-xs font-medium text-red-600">{fieldErr.password}</span>
+                  ) : (
+                    <span className="mt-1.5 block text-xs text-ink/45">You&apos;ll log in with your email and this password.</span>
+                  )}
                 </label>
                 <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/10 sm:p-5">
                   <span className="text-sm font-semibold text-ink">Mobile number</span>

@@ -58,11 +58,11 @@ async function send(to: string, subject: string, html: string, text: string) {
   });
 }
 
-export async function sendSignInCode(to: string, code: string, opts: { name?: string; signup: boolean; minutes: number }) {
+export async function sendSignInCode(to: string, code: string, opts: { name?: string; purpose: "signup" | "login" | "reset"; minutes: number }) {
   const first = opts.name?.trim().split(" ")[0];
   const hello = first ? `Hi ${esc(first)},` : "Hi,";
-  const what = opts.signup ? "finish creating your Evowell account" : "sign in to Evowell";
-  const subject = `${code} is your Evowell code`;
+  const what = opts.purpose === "signup" ? "finish creating your Evowell account" : opts.purpose === "reset" ? "reset your Evowell password" : "sign in to Evowell";
+  const subject = opts.purpose === "reset" ? `${code} is your Evowell password reset code` : `${code} is your Evowell code`;
   const text = `${first ? `Hi ${first},` : "Hi,"}\n\nYour code to ${what} is: ${code}\n\nIt expires in ${opts.minutes} minutes. If you didn't ask for it, you can ignore this email.\n\n— Evowell`;
   const html = `<!doctype html><html><body style="margin:0;background:#F4F5F1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0A0A0A">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F1;padding:32px 16px"><tr><td align="center">
@@ -72,7 +72,7 @@ export async function sendSignInCode(to: string, code: string, opts: { name?: st
 <p style="margin:0 0 12px;font-size:16px">${hello}</p>
 <p style="margin:0 0 20px;font-size:15px;line-height:1.5;color:#3d3b37">Use this code to ${what}:</p>
 <p style="margin:0 0 20px;font-size:34px;font-weight:700;letter-spacing:10px;font-family:'SF Mono',Menlo,Consolas,monospace;color:#0E7A37;background:#E6F4EA;border-radius:16px;padding:16px 0;text-align:center">${code}</p>
-<p style="margin:0;font-size:13px;line-height:1.5;color:#6B6862">It expires in ${opts.minutes} minutes. If you didn't ask for it, you can ignore this email — no one can sign in without the code.</p>
+<p style="margin:0;font-size:13px;line-height:1.5;color:#6B6862">It expires in ${opts.minutes} minutes. If you didn't ask for it, you can ignore this email — nothing changes without the code.</p>
 </td></tr>
 <tr><td style="padding:16px 28px 24px;border-top:1px solid #eeeeea;font-size:12px;color:#9a978f">${esc(business.brand)}${business.address ? ` · ${esc(business.address)}` : ""}</td></tr>
 </table></td></tr></table></body></html>`;

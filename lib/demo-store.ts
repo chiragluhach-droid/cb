@@ -229,8 +229,8 @@ function save(prev: UserData, next: UserData) {
 
 export type StartResult = { ok: true; devCode?: string } | { ok: false; error: string; field?: "email" | "phone" | "name"; wait?: number };
 
-/** Check the details and send a sign-in code. In dummy mode the code comes back as `devCode`. */
-export async function startAuth(input: { mode: "signup" | "login"; name?: string; email: string; phone: string; plan?: PlanId }): Promise<StartResult> {
+/** Email a 6-digit code: "signup" at the end of the questionnaire, "reset" for a forgotten password. */
+export async function startAuth(input: { mode: "signup" | "reset"; name?: string; email: string; phone?: string; plan?: PlanId; profile?: Profile }): Promise<StartResult> {
   try {
     const res = await fetch("/api/auth/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
     return (await res.json()) as StartResult;
@@ -239,18 +239,33 @@ export async function startAuth(input: { mode: "signup" | "login"; name?: string
   }
 }
 
-export type VerifyResult = { ok: true; isNew: boolean; user: User } | { ok: false; error: string; wrong?: boolean };
+export type VerifyResult = { ok: true; isNew: boolean; user: User } | { ok: false; error: string; wrong?: boolean; field?: "email" | "password"; noPassword?: boolean };
 
-/** `profile`: questionnaire answers to save with a brand-new account. */
-export async function verifyAuth(email: string, code: string, profile?: Profile): Promise<VerifyResult> {
+async function signedIn(res: Response): Promise<VerifyResult> {
+  const j = (await res.json()) as VerifyResult;
+  if (j.ok) {
+    emit({ status: "loading", user: null, data: null });
+    await refresh();
+  }
+  return j;
+}
+
+/**
+ * Check the emailed code. Sign-up: `password` and the questionnaire `profile`
+ * are saved with the new account. Reset: `password` becomes the new password.
+ */
+export async function verifyAuth(email: string, code: string, opts: { password: string; profile?: Profile }): Promise<VerifyResult> {
   try {
-    const res = await fetch("/api/auth/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code, profile }) });
-    const j = (await res.json()) as VerifyResult;
-    if (j.ok) {
-      emit({ status: "loading", user: null, data: null });
-      await refresh();
-    }
-    return j;
+    return await signedIn(await fetch("/api/auth/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code, ...opts }) }));
+  } catch {
+    return { ok: false, error: "Couldn't reach the server. Check your connection." };
+  }
+}
+
+/** Email + password sign-in. */
+export async function loginWithPassword(email: string, password: string): Promise<VerifyResult> {
+  try {
+    return await signedIn(await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) }));
   } catch {
     return { ok: false, error: "Couldn't reach the server. Check your connection." };
   }

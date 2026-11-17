@@ -28,7 +28,7 @@ export default function TermsPage() {
         <ul>
           <li>You must be 18 or older, or have a parent or guardian&apos;s permission.</li>
           <li>Give accurate details — your plan is only as good as your answers.</li>
-          <li>Keep access to your email; sign-in codes are sent there. One account per person.</li>
+          <li>Keep your password private and keep access to your email; verification and password reset codes are sent there. One account per person.</li>
         </ul>
       </Section>
       <Section title="Prices and payment">

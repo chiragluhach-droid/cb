@@ -11,7 +11,25 @@ import type { Settings } from "@/lib/settings-core";
 import type { Allergen, Item, RecipeCategory, Slot } from "@/lib/engine";
 
 export type Subscription = { plan: PlanId; paidAt: number; expiresAt: number; amount: number; orderId: string };
-export type UserDoc = { _id: string; name: string; email: string; phone: string; plan: PlanId; createdAt: number; role: "client"; subscription?: Subscription };
+export type UserDoc = {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  plan: PlanId;
+  createdAt: number;
+  role: "client";
+  subscription?: Subscription;
+  /** scrypt hash (lib/server/password.ts). Older accounts may not have one yet. */
+  passwordHash?: string;
+  /** Wrong-password streak, for the login lockout. */
+  loginFails?: { count: number; at: number };
+};
+/**
+ * Someone who finished the questionnaire and gave their details but hasn't
+ * confirmed their email yet (so no account exists). Removed once they sign up.
+ */
+export type LeadDoc = { _id: string /* normalised email */; name: string; phone: string; plan?: PlanId; profile?: Profile; createdAt: number; updatedAt: number };
 /** One Razorpay order. Kept in "orders" because another app writes to "payments" in this database. */
 export type OrderDoc = {
   _id: string; // Razorpay order id, e.g. "order_Nx…"
@@ -39,8 +57,8 @@ export type PhotoDoc = { _id: string; userId: string; date: string; mime: string
 export type OtpDoc = {
   _id: string; // normalised email
   codeHash: string;
-  mode: "signup" | "login";
-  pending: { name?: string; phone: string; plan?: PlanId };
+  mode: "signup" | "login" | "reset";
+  pending: { name?: string; phone?: string; plan?: PlanId };
   attempts: number;
   sentAt: number;
   expiresAt: Date;
@@ -115,6 +133,7 @@ export async function cols() {
     orders: db.collection<OrderDoc>("orders"),
     recipes: db.collection<RecipeDoc>("recipes"),
     recipephotos: db.collection<RecipePhotoDoc>("recipephotos"),
+    leads: db.collection<LeadDoc>("leads"),
   };
 }
 

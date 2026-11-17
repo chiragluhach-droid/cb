@@ -4,8 +4,14 @@ import { accessOf } from "@/lib/server/billing";
 import { freshData, newId, toUser, today, welcomeMessage } from "@/lib/server/repo";
 import { CLIENT_COOKIE, hashCode, setSession } from "@/lib/server/session";
 import { normEmail, readProfile, validEmail } from "@/lib/server/validate";
+import { hashPassword, passwordProblem } from "@/lib/server/password";
 
-/** POST /api/auth/verify — check the 6-digit code, then create the account (sign-up) or sign in. */
+/**
+ * POST /api/auth/verify — check the 6-digit code, then:
+ *   sign-up: create the account (with its password and questionnaire answers)
+ *   reset:   set the new password
+ * and sign in.
+ */
 
 export const runtime = "nodejs";
 
@@ -24,11 +30,15 @@ export async function POST(req: Request) {
   const email = normEmail(b.email);
 
   try {
-    const { users, clientdata, otps } = await cols();
+    const { users, clientdata, otps, leads } = await cols();
     const otp = await otps.findOne({ _id: email });
     if (!otp || otp.expiresAt.getTime() < Date.now()) {
       return NextResponse.json({ ok: false, error: "That code has expired. Ask for a new one." }, { status: 400 });
     }
+    // Check the new password first, so a weak one doesn't use up the code.
+    const needsPassword = otp.mode === "signup" || otp.mode === "reset";
+    const weak = needsPassword ? passwordProblem(b.password) : null;
+    if (weak) return NextResponse.json({ ok: false, error: weak, field: "password" }, { status: 400 });
     if (otp.attempts >= MAX_ATTEMPTS) {
       await otps.deleteOne({ _id: email });
       return NextResponse.json({ ok: false, error: "Too many wrong tries. Ask for a new code." }, { status: 429 });
@@ -42,7 +52,16 @@ export async function POST(req: Request) {
     let user = await users.findOne({ email });
     if (otp.mode === "signup") {
       if (user) return NextResponse.json({ ok: false, error: "An account with this email already exists. Log in instead." }, { status: 409 });
-      const doc = { _id: newId(), name: otp.pending.name ?? "", email, phone: otp.pending.phone, plan: otp.pending.plan ?? ("meal-workout-90" as const), createdAt: Date.now(), role: "client" as const };
+      const doc = {
+        _id: newId(),
+        name: otp.pending.name ?? "",
+        email,
+        phone: otp.pending.phone ?? "",
+        plan: otp.pending.plan ?? ("meal-workout-90" as const),
+        createdAt: Date.now(),
+        role: "client" as const,
+        passwordHash: await hashPassword(b.password as string),
+      };
       try {
         await users.insertOne(doc);
       } catch {
@@ -61,7 +80,11 @@ export async function POST(req: Request) {
         }
       }
       await clientdata.insertOne(data);
+      await leads.deleteOne({ _id: email }); // now a real client
       user = doc;
+    } else if (otp.mode === "reset") {
+      if (!user) return NextResponse.json({ ok: false, error: "Account not found." }, { status: 404 });
+      await users.updateOne({ _id: user._id }, { $set: { passwordHash: await hashPassword(b.password as string) }, $unset: { loginFails: "" } });
     } else if (!user || user.phone !== otp.pending.phone) {
       return NextResponse.json({ ok: false, error: "Account not found. Sign up first?" }, { status: 404 });
     }

@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Message, Profile, User, UserData, dayKey, newData, newId } from "@/lib/demo-store";
 import { Dish, Slot, clash, dietOk, dishes, dislikeWords, registerRecipes, slotSplit } from "@/lib/engine";
-import { parsePlan } from "@/lib/plans";
+import { PlanId, parsePlan } from "@/lib/plans";
 import { editKey, planWeekday } from "@/components/app/meals";
 
 export { dislikeWords };
@@ -17,7 +17,9 @@ export { dislikeWords };
 /* ───────────── Store ───────────── */
 
 type Client = { user: User; data: UserData };
-type AdminState = { status: "idle" | "loading" | "ready" | "signedOut" | "error"; clients: Client[] };
+/** Finished the questionnaire and left their details, but never confirmed their email (no account yet). */
+export type Lead = { email: string; name: string; phone: string; plan?: PlanId; profile?: Profile; createdAt: number; updatedAt: number };
+type AdminState = { status: "idle" | "loading" | "ready" | "signedOut" | "error"; clients: Client[]; leads?: Lead[] };
 const SERVER: AdminState = { status: "idle", clients: [] };
 let st: AdminState = SERVER;
 const listeners = new Set<() => void>();
@@ -39,9 +41,9 @@ export async function refreshClients() {
     if (saving) return;
     if (res.status === 401) return emit({ status: "signedOut", clients: [] });
     if (!res.ok) throw new Error(String(res.status));
-    const j = (await res.json()) as { clients: Client[]; recipes?: Dish[] };
+    const j = (await res.json()) as { clients: Client[]; recipes?: Dish[]; leads?: Lead[] };
     if (j.recipes) registerRecipes(j.recipes);
-    emit({ status: "ready", clients: j.clients });
+    emit({ status: "ready", clients: j.clients, leads: j.leads ?? [] });
   } catch {
     if (st.status !== "ready") emit({ ...st, status: "error" });
   }
@@ -115,6 +117,22 @@ export async function deleteClient(id: string): Promise<{ ok: boolean; error?: s
     const j = (await res.json().catch(() => ({}))) as { error?: string };
     if (!res.ok && res.status !== 404) return { ok: false, error: j.error ?? "Couldn't delete. Try again." };
     emit({ ...st, clients: st.clients.filter((c) => c.user.id !== id) });
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't reach the server." };
+  }
+}
+
+/** Remove someone who never finished signing up. */
+export async function deleteLead(email: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(`/api/admin/leads?email=${encodeURIComponent(email)}`, { method: "DELETE" });
+    if (res.status === 401) {
+      emit({ status: "signedOut", clients: [] });
+      return { ok: false, error: "Sign in again." };
+    }
+    if (!res.ok) return { ok: false, error: "Couldn't delete. Try again." };
+    emit({ ...st, leads: (st.leads ?? []).filter((l) => l.email !== email) });
     return { ok: true };
   } catch {
     return { ok: false, error: "Couldn't reach the server." };
@@ -314,5 +332,5 @@ export function useAdmin() {
   const s = useSyncExternalStore(subscribe, () => st, () => SERVER);
   useEffect(start, []);
   const clients = useMemo(() => s.clients.map((c) => toRow(c.user, c.data ?? newData())), [s.clients]);
-  return { hydrated: s.status === "ready" || s.status === "signedOut", signedIn: s.status === "ready", status: s.status, clients };
+  return { hydrated: s.status === "ready" || s.status === "signedOut", signedIn: s.status === "ready", status: s.status, clients, leads: s.leads ?? [] };
 }
