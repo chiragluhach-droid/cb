@@ -53,7 +53,7 @@ import {
   trainTimeOptions,
   workDays,
 } from "@/lib/lifestyle";
-import { PlanId, defaultPlanKey, findOption, inr, lengthLabel, perMonth, planInfo, planKey, validKeyOr, visiblePlans } from "@/lib/plans";
+import { PlanDef, PlanId, defaultPlanKey, findOption, inr, lengthLabel, perMonth, planInfo, planKey, validKeyOr, visiblePlans } from "@/lib/plans";
 import { useSettings } from "@/lib/settings";
 import { coach } from "@/lib/site";
 
@@ -221,6 +221,124 @@ function WaterPicker({ value, onChange }: { value: number; onChange: (n: number)
   );
 }
 
+/* ───────────── Plan choice (last step) ───────────── */
+
+/** Length first, then one card per plan with a single clear price. The chosen card opens to show what's included. */
+function PlanPicker({ plans, pick, onPick }: { plans: PlanDef[]; pick: PlanId; onPick: (key: PlanId) => void }) {
+  const cur = findOption(plans, pick);
+  // Shown plans, plus the one from a private link if the coach has hidden it.
+  const pickable = [...visiblePlans(plans), ...(cur && !cur.plan.visible ? [cur.plan] : [])];
+  const days = cur?.option.days ?? 30;
+  const lengths = [...new Set(pickable.flatMap((p) => p.options.map((o) => o.days)))].sort((a, b) => a - b);
+  const forLength = pickable.filter((p) => p.options.some((o) => o.days === days));
+  const badgeFor = (d: number) => pickable.flatMap((p) => p.options).find((o) => o.days === d && o.badge)?.badge;
+  const chooseLength = (d: number) => {
+    const same = cur && cur.plan.options.some((o) => o.days === d) ? cur.plan : pickable.find((p) => p.options.some((o) => o.days === d));
+    if (same) onPick(planKey(same.id, d));
+  };
+
+  return (
+    <>
+      <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">
+        Choose your <span className="font-serif italic text-brand">plan.</span>
+      </h1>
+      <p className="mt-2 text-stone">Your answers are saved. Pick how long, then what&apos;s included.</p>
+
+      {lengths.length > 1 && (
+        <div className="mt-7">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-ink/40">How long?</p>
+          <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(lengths.length, 3)}, minmax(0, 1fr))` }} role="radiogroup" aria-label="Programme length">
+            {lengths.map((d) => {
+              const on = d === days;
+              const badge = badgeFor(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => chooseLength(d)}
+                  className={`relative rounded-2xl px-3 py-3 text-center transition-all duration-300 ${on ? "bg-ink text-canvas shadow-[0_12px_24px_-14px_rgba(14,26,19,0.7)]" : "bg-white text-ink ring-1 ring-ink/10 hover:ring-ink/25"}`}
+                >
+                  <span className="block text-base font-semibold tracking-[-0.02em]">{lengthLabel(d)}</span>
+                  {badge ? (
+                    <span className={`mt-0.5 block text-[0.6875rem] font-bold ${on ? "text-sprout" : "text-brand-deep"}`}>{badge}</span>
+                  ) : (
+                    <span className={`mt-0.5 block text-[0.6875rem] ${on ? "text-canvas/50" : "text-stone"}`}>One-time</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <p className="mb-2 mt-7 text-xs font-bold uppercase tracking-[0.16em] text-ink/40">Which plan?</p>
+      <div className="space-y-3" role="radiogroup" aria-label="Plan">
+        {forLength.map((pl) => {
+          const o = pl.options.find((x) => x.days === days)!;
+          const on = cur?.plan.id === pl.id;
+          const shortest = [...pl.options].sort((a, b) => a.days - b.days)[0];
+          const was = shortest.days < days ? Math.round((shortest.price / shortest.days) * days) : 0;
+          return (
+            <motion.div
+              key={pl.id}
+              layout
+              transition={{ duration: 0.35, ease: EASE }}
+              className={`relative overflow-hidden rounded-[1.5rem] transition-colors duration-300 ${
+                on ? "bg-forest text-canvas shadow-[0_24px_48px_-28px_rgba(14,26,19,0.8)]" : "bg-white text-ink ring-1 ring-ink/10 hover:ring-ink/25"
+              }`}
+            >
+              {pl.featured && (
+                <span className={`absolute right-0 top-0 rounded-bl-2xl px-3 py-1 text-[0.625rem] font-bold uppercase tracking-[0.12em] ${on ? "bg-sprout text-forest" : "bg-mint text-brand-deep"}`}>
+                  Most popular
+                </span>
+              )}
+              <button type="button" role="radio" aria-checked={on} onClick={() => onPick(planKey(pl.id, days))} className="flex w-full items-center gap-4 p-5 text-left">
+                <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${on ? "border-sprout bg-sprout text-forest" : "border-ink/20"}`}>
+                  {on && <Check size={12} strokeWidth={3.5} />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-lg font-semibold leading-tight tracking-[-0.03em]">{pl.name}</span>
+                  {pl.tagline && <span className={`mt-0.5 block text-[0.8125rem] leading-snug ${on ? "text-canvas/60" : "text-stone"}`}>{pl.tagline}</span>}
+                </span>
+                <span className="shrink-0 text-right">
+                  {was > o.price && <span className={`block text-xs tabular-nums line-through ${on ? "text-canvas/35" : "text-ink/30"}`}>{inr(was)}</span>}
+                  <span className="block text-2xl font-semibold tabular-nums tracking-[-0.04em]">{inr(o.price)}</span>
+                  <span className={`block text-[0.6875rem] font-medium ${on ? "text-canvas/50" : "text-stone"}`}>{days > 31 ? `${inr(perMonth(o))}/month` : "one-time"}</span>
+                </span>
+              </button>
+              <AnimatePresence initial={false}>
+                {on && (pl.features.length > 0 || o.perks.length > 0) && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: EASE }} className="overflow-hidden">
+                    <ul className="grid grid-cols-1 gap-x-4 gap-y-2 border-t border-canvas/10 px-5 pb-5 pt-4 text-sm sm:grid-cols-2">
+                      {pl.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-canvas/80">
+                          <Check size={14} className="mt-0.5 shrink-0 text-sprout" /> {f}
+                        </li>
+                      ))}
+                      {o.perks.map((f) => (
+                        <li key={f} className="flex items-start gap-2 font-semibold text-sprout">
+                          <Sparkles size={14} className="mt-0.5 shrink-0" /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-stone">
+        <span>✓ Pay once, nothing renews</span>
+        <span>✓ Plan checked by {coach.name} within 24 hours</span>
+      </div>
+    </>
+  );
+}
+
 /* ───────────── Questionnaire ───────────── */
 
 export default function Onboarding() {
@@ -235,6 +353,7 @@ export default function Onboarding() {
   // Plan picked at the end (before paying). Starts on the one from the website link.
   const [chosen, setChosen] = useState<PlanId | null>(null);
   const pick = validKeyOr(plans, chosen ?? planId);
+  const chosenInfo = findOption(plans, pick);
 
   const [p, setP] = useState<Profile>({ ...defaultInputs, workoutPlace: "home", dislikes: "", life: { ...defaultLifestyle } });
   const [loaded, setLoaded] = useState(false);
@@ -520,7 +639,7 @@ export default function Onboarding() {
       {/* Top bar */}
       <header className="sticky top-0 z-20 border-b border-ink/[0.06] bg-canvas/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-4 sm:px-8">
-          <SealLogo />
+          <SealLogo alwaysWordmark />
           <span className="text-sm font-semibold tabular-nums text-ink/50">
             {step + 1} / {steps.length}
           </span>
@@ -780,74 +899,7 @@ export default function Onboarding() {
             </>
           )}
 
-          {id === "plan" && (
-            <>
-              <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">
-                Choose your <span className="font-serif italic text-brand">plan.</span>
-              </h1>
-              <p className="mt-2 text-stone">Pick a plan and a length. You pay once, and nothing renews.</p>
-              <div className="mt-8 space-y-3" role="radiogroup" aria-label="Plan">
-                {[...visiblePlans(plans), ...(findOption(plans, pick) && !findOption(plans, pick)!.plan.visible ? [findOption(plans, pick)!.plan] : [])].map((pl) => {
-                  const on = findOption(plans, pick)?.plan.id === pl.id;
-                  const sel = on ? findOption(plans, pick)!.option : null;
-                  return (
-                    <div
-                      key={pl.id}
-                      className={`rounded-[1.5rem] p-5 transition-colors duration-300 ${on ? "bg-forest text-canvas" : "bg-white text-ink ring-1 ring-ink/10"}`}
-                    >
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={on}
-                        onClick={() => !on && setChosen(planKey(pl.id, [...pl.options].sort((a, b) => b.days - a.days)[0].days))}
-                        className="flex w-full items-start justify-between gap-3 text-left"
-                      >
-                        <span className="min-w-0">
-                          <span className="flex flex-wrap items-center gap-2">
-                            <span className="text-xl font-semibold tracking-[-0.03em]">{pl.name}</span>
-                            {pl.featured && <span className="rounded-full bg-sprout px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-forest">Most popular</span>}
-                          </span>
-                          {pl.tagline && <span className={`mt-1 block text-sm ${on ? "text-canvas/60" : "text-stone"}`}>{pl.tagline}</span>}
-                        </span>
-                        <span className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-sprout bg-sprout text-forest" : "border-ink/20"}`}>
-                          {on && <Check size={12} strokeWidth={3.5} />}
-                        </span>
-                      </button>
-                      {pl.features.length > 0 && (
-                        <ul className={`mt-3 grid grid-cols-1 gap-1 text-sm sm:grid-cols-2 ${on ? "text-canvas/75" : "text-ink/65"}`}>
-                          {pl.features.slice(0, 4).map((f) => (
-                            <li key={f} className="flex items-center gap-2">
-                              <Check size={13} className={on ? "text-sprout" : "text-brand"} /> {f}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {pl.options.map((o) => {
-                          const picked = on && sel?.days === o.days;
-                          return (
-                            <button
-                              key={o.days}
-                              type="button"
-                              onClick={() => setChosen(planKey(pl.id, o.days))}
-                              className={`rounded-2xl px-4 py-2.5 text-left transition-colors ${
-                                picked ? "bg-sprout text-forest" : on ? "bg-canvas/[0.08] text-canvas ring-1 ring-canvas/15 hover:bg-canvas/15" : "bg-[#F4F5F1] text-ink hover:bg-mint"
-                              }`}
-                            >
-                              <span className="block text-xs font-semibold opacity-70">{lengthLabel(o.days)}</span>
-                              <span className="block text-lg font-semibold tabular-nums tracking-[-0.03em]">{inr(o.price)}</span>
-                              {(o.badge || o.days > 31) && <span className="block text-[0.6875rem] font-semibold opacity-75">{o.badge || `${inr(perMonth(o))}/month`}</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {on && sel && sel.perks.length > 0 && <p className="mt-3 text-xs font-semibold text-sprout">Includes: {sel.perks.join(" · ")}</p>}
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+          {id === "plan" && <PlanPicker plans={plans} pick={pick} onPick={setChosen} />}
 
           {id === "details" && (
             <>
@@ -987,22 +1039,36 @@ export default function Onboarding() {
       {/* Bottom actions */}
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-ink/[0.06] bg-canvas/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-4 sm:px-8">
-          <button
-            type="button"
-            onClick={() => go(step - 1)}
-            disabled={step === 0}
-            className="inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold text-ink transition-opacity disabled:opacity-0"
-          >
-            <ArrowLeft size={16} /> Back
-          </button>
+          {id === "plan" && chosenInfo ? (
+            <div className="flex min-w-0 items-center gap-2">
+              <button type="button" onClick={() => go(step - 1)} aria-label="Back" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink/[0.05] text-ink transition-colors hover:bg-ink/10">
+                <ArrowLeft size={17} />
+              </button>
+              <span className="min-w-0 leading-tight">
+                <span className="block truncate text-sm font-semibold text-ink">{chosenInfo.plan.name}</span>
+                <span className="block truncate text-xs text-stone">
+                  {lengthLabel(chosenInfo.option.days)} · {inr(chosenInfo.option.price)}
+                </span>
+              </span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => go(step - 1)}
+              disabled={step === 0}
+              className="inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold text-ink transition-opacity disabled:opacity-0"
+            >
+              <ArrowLeft size={16} /> Back
+            </button>
+          )}
           <button
             type="button"
             disabled={busy || (id === "details" && codeSent && code.length < 6)}
             onClick={() => (id === "details" ? (codeSent ? verify() : sendCode()) : step === last ? submit() : go(step + 1))}
-            className="group inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-14px_rgba(22,163,74,0.8)] transition-colors hover:bg-brand-deep disabled:opacity-60"
+            className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-14px_rgba(22,163,74,0.8)] transition-colors hover:bg-brand-deep disabled:opacity-60"
           >
             {busy && <Loader2 size={15} className="animate-spin" />}
-            {id === "details" ? (codeSent ? "Confirm & continue" : "Email me a code") : step === last ? (paid ? `Send to ${coach.name}` : "Build my plan") : "Continue"}
+            {id === "details" ? (codeSent ? "Confirm & continue" : "Email me a code") : step === last ? (paid ? `Send to ${coach.name}` : id === "plan" ? "Continue" : "Build my plan") : "Continue"}
             {!busy && <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />}
           </button>
         </div>
