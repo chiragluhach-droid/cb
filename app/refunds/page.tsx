@@ -14,7 +14,7 @@ export default function RefundsPage() {
       </Section>
       <Section title="Cancelling">
         <p>
-          There&apos;s nothing to cancel: each plan runs for its fixed 30 or 90 days and then simply ends. You won&apos;t be charged again unless you choose to buy another plan. You can
+          There&apos;s nothing to cancel: each plan runs for the fixed length you bought and then simply ends. You won&apos;t be charged again unless you choose to buy another plan. You can
           stop using your plan at any time, but the remaining days aren&apos;t refunded or carried over.
         </p>
       </Section>

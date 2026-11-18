@@ -9,6 +9,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { Settings, defaultSettings } from "@/lib/settings-core";
+import { planInfo } from "@/lib/plans";
 
 export * from "@/lib/settings-core";
 
@@ -99,4 +100,12 @@ export function resetSettings() {
   clearTimeout(timer);
   emit(defaultSettings);
   put(defaultSettings);
+}
+
+/** The plan list right now, outside React (labels in the coach panel). */
+export const currentPlans = () => cache.plans;
+
+/** Everything about a client's plan key, kept up to date with the coach's edits. */
+export function usePlanInfo(key: string | null | undefined) {
+  return planInfo(useSettings().plans, key);
 }

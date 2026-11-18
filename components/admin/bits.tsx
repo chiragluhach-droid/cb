@@ -3,7 +3,8 @@
 import { ReactNode } from "react";
 import type { ClientStatus } from "@/lib/admin";
 import type { Profile } from "@/lib/demo-store";
-import { parsePlan, plans } from "@/lib/plans";
+import { planInfo } from "@/lib/plans";
+import { currentPlans } from "@/lib/settings";
 import { initials } from "@/components/app/Shell";
 
 export const dietLabel = { veg: "Veg", jain: "Jain", egg: "Egg", nonveg: "Non-veg", vegan: "Vegan" } as const;
@@ -12,8 +13,8 @@ export const condLabel = { pcos: "PCOS", thyroid: "Thyroid", diabetes: "Diabetes
 export const activityLabel = { sedentary: "Sedentary", light: "Lightly active", moderate: "Moderately active", very: "Very active" } as const;
 
 export const planLabel = (id: string) => {
-  const p = parsePlan(id);
-  return `${plans[p.kind].name} · ${p.duration}d`;
+  const p = planInfo(currentPlans(), id);
+  return `${p.name} · ${p.days}d`;
 };
 
 export const statusMeta: Record<ClientStatus, { label: string; cls: string; dot: string }> = {

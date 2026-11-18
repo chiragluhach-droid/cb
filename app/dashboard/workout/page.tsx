@@ -7,7 +7,8 @@ import { ArrowUpRight, Check, Dumbbell, Footprints, Home, TrendingUp, Trophy } f
 import { Bar, Card, CardTitle } from "@/components/app/ui";
 import { dayKey, emptyDay, useSession } from "@/lib/demo-store";
 import { coach } from "@/lib/site";
-import { parsePlan } from "@/lib/plans";
+import { planInfo } from "@/lib/plans";
+import { currentPlans } from "@/lib/settings";
 import { dayNames, sessionFor, weekSince, workoutDays } from "@/lib/workouts";
 
 const mondayOf = (d: Date) => {
@@ -26,9 +27,9 @@ export default function WorkoutPage() {
 
   if (!user || !data?.profile) return null;
   const profile = data.profile;
-  const plan = parsePlan(user.plan);
+  const plan = planInfo(currentPlans(), user.plan);
 
-  if (plan.kind !== "meal-workout") {
+  if (!plan.workouts) {
     return (
       <div>
         <h1 className="text-[2.25rem] font-medium leading-[1] tracking-[-0.055em] text-ink sm:text-5xl">

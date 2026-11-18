@@ -26,6 +26,7 @@ export async function POST(req: Request) {
   const b = (await req.json().catch(() => ({}))) as Record<string, unknown>;
   if (!validPlan(b.plan)) return NextResponse.json({ error: "Pick a plan." }, { status: 400 });
   const q = quote(await getSettings(), b.plan, b.code);
+  if (!q) return NextResponse.json({ error: "That plan isn't available any more. Pick another one." }, { status: 400 });
   const codeError = typeof b.code === "string" && b.code.trim() && !q.code ? "That code isn't valid or has expired." : undefined;
   return NextResponse.json({ ...q, codeError, paymentsOn: paymentsOn(), testMode: testMode() });
 }

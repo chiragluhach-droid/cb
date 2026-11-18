@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import type { UpdateFilter } from "mongodb";
 import { accessOf, hasAccess } from "@/lib/server/billing";
 import { ClientDataDoc, cols } from "@/lib/server/mongo";
-import { coachMessage, freshData, loadClientView, newId, today, welcomeMessage } from "@/lib/server/repo";
+import { coachMessage, freshData, getSettings, loadClientView, newId, today, welcomeMessage } from "@/lib/server/repo";
+import { findOption } from "@/lib/plans";
 import { clientId } from "@/lib/server/session";
 import { isDayKey, readDayLog, readProfile, readText, readWeights, validName, validPlan } from "@/lib/server/validate";
 
@@ -58,7 +59,7 @@ export async function PATCH(req: Request) {
     const userSet: Record<string, unknown> = {};
     const u = b.user as Record<string, unknown> | undefined;
     if (u && validName(u.name)) userSet.name = (u.name as string).trim();
-    if (u && validPlan(u.plan) && (accessOf(user) === "open" || !user.subscription)) userSet.plan = u.plan;
+    if (u && validPlan(u.plan) && (accessOf(user) === "open" || !user.subscription) && findOption((await getSettings()).plans, u.plan)) userSet.plan = u.plan;
     if (Object.keys(userSet).length) await users.updateOne({ _id: id }, { $set: userSet });
 
     // Without a paid plan, clients can fill in the questionnaire (it comes before

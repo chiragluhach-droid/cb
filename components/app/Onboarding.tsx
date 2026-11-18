@@ -53,7 +53,8 @@ import {
   trainTimeOptions,
   workDays,
 } from "@/lib/lifestyle";
-import { PlanId, parsePlan } from "@/lib/plans";
+import { PlanId, defaultPlanKey, planInfo, validKeyOr } from "@/lib/plans";
+import { useSettings } from "@/lib/settings";
 import { coach } from "@/lib/site";
 
 /*
@@ -225,9 +226,10 @@ export default function Onboarding() {
   const router = useRouter();
   const { hydrated, user, data, update } = useSession();
   // The plan picked on the website (?plan=…); a signed-in client's own plan wins.
-  const [urlPlan, setUrlPlan] = useState<PlanId>("meal-workout-90");
+  const { plans } = useSettings();
+  const [urlPlan, setUrlPlan] = useState<PlanId>(() => defaultPlanKey(plans));
   const planId: PlanId = user?.plan ?? urlPlan;
-  const withWorkout = parsePlan(planId).kind === "meal-workout";
+  const withWorkout = planInfo(plans, planId).workouts;
   const anonymous = hydrated && !user;
 
   const [p, setP] = useState<Profile>({ ...defaultInputs, workoutPlace: "home", dislikes: "", life: { ...defaultLifestyle } });
@@ -257,8 +259,7 @@ export default function Onboarding() {
   useEffect(() => {
     if (!hydrated || loaded) return;
     const q = new URLSearchParams(window.location.search).get("plan");
-    const parsed = parsePlan(q);
-    const fromUrl = `${parsed.kind}-${parsed.duration}` as PlanId;
+    const fromUrl = validKeyOr(plans, q);
     const draft = loadDraft();
     if (data?.profile) {
       const life = { ...defaultLifestyle, ...(data.profile.life ?? {}) };
@@ -269,9 +270,9 @@ export default function Onboarding() {
       setHasTarget(draft.hasTarget);
       if (!user) setStep(Math.max(0, draft.step));
     }
-    setUrlPlan(q ? fromUrl : draft?.plan ?? fromUrl);
+    setUrlPlan(q ? fromUrl : validKeyOr(plans, draft?.plan));
     setLoaded(true);
-  }, [hydrated, user, data, loaded]);
+  }, [hydrated, user, data, loaded, plans]);
 
   // Keep a copy on this device while there's no account.
   useEffect(() => {

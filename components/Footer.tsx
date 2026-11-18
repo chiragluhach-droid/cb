@@ -8,6 +8,8 @@ import AnimatedHeading from "@/components/ui/AnimatedHeading";
 import { Wordmark } from "@/components/Logo";
 import { RingMark } from "@/components/brand/Marks";
 import { Seal } from "@/components/brand/Seal";
+import { planKey, visiblePlans } from "@/lib/plans";
+import { useSettings } from "@/lib/settings";
 
 const letterGreens = ["#16A34A", "#8AF0A0", "#0E7A37", "#4ADE80"];
 
@@ -44,6 +46,7 @@ function GiantWordmark() {
 }
 
 export default function Footer() {
+  const settings = useSettings();
   const year = new Date().getFullYear();
   const onHome = usePathname() === "/";
   const resolve = (href: string) => (href.startsWith("#") && !onHome ? `/${href}` : href);
@@ -108,9 +111,13 @@ export default function Footer() {
           <div>
             <p className={label}>Plans</p>
             <ul className="space-y-2.5">
-              <li><a href="/onboarding?plan=meal-30" className={linkCls}>Meal Plan</a></li>
-              <li><a href="/onboarding?plan=meal-workout-30" className={linkCls}>Meal + Workout</a></li>
-              <li><a href="/onboarding?plan=meal-workout-90" className={linkCls}>90-day programme</a></li>
+              {visiblePlans(settings.plans).map((p) => (
+                <li key={p.id}>
+                  <a href={`/onboarding?plan=${planKey(p.id, Math.max(...p.options.map((o) => o.days)))}`} className={linkCls}>
+                    {p.name}
+                  </a>
+                </li>
+              ))}
               <li><a href="/recipes" className={linkCls}>Free recipes</a></li>
             </ul>
           </div>

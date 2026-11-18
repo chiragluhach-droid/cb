@@ -8,8 +8,8 @@ import { Bar, Card, CardTitle } from "@/components/app/ui";
 import { initials, planDay } from "@/components/app/Shell";
 import { targets } from "@/lib/engine";
 import { formatPhone, logout, useSession } from "@/lib/demo-store";
-import { inr, parsePlan } from "@/lib/plans";
-import { priceFor, useSettings } from "@/lib/settings";
+import { inr, planInfo } from "@/lib/plans";
+import { useSettings } from "@/lib/settings";
 
 const dietLabel = { veg: "Vegetarian", jain: "Jain", egg: "Eggetarian", nonveg: "Non-vegetarian", vegan: "Vegan" } as const;
 const goalLabel = { lose: "Lose fat", tone: "Tone up", build: "Build muscle" } as const;
@@ -25,8 +25,10 @@ export default function ProfilePage() {
 
   if (!user || !data?.profile) return null;
   const p = data.profile;
-  const plan = parsePlan(user.plan);
-  const { day, total } = planDay(data.startDate, plan.duration);
+  const plan = planInfo(settings.plans, user.plan);
+  const { day, total } = planDay(data.startDate, plan.days);
+  // A longer length of the same plan, to suggest.
+  const longer = plan.plan?.options.filter((o) => o.days > plan.days).sort((a, b) => a.days - b.days)[0];
   const t = targets(p);
 
   const rows: [string, string][] = [
@@ -36,7 +38,7 @@ export default function ProfilePage() {
     ["Health", p.conditions.length ? p.conditions.join(", ").toUpperCase() : "None"],
     ["Allergies", p.allergies.length ? p.allergies.join(", ") : "None"],
     ["Dislikes", p.dislikes.trim() || "—"],
-    ...(plan.kind === "meal-workout" ? ([["Training", p.workoutPlace === "gym" ? "Gym" : "Home"]] as [string, string][]) : []),
+    ...(plan.workouts ? ([["Training", p.workoutPlace === "gym" ? "Gym" : "Home"]] as [string, string][]) : []),
   ];
 
   return (
@@ -118,10 +120,10 @@ export default function ProfilePage() {
         <div className="space-y-4 lg:col-span-5 lg:space-y-6">
           <Card className="bg-forest text-canvas ring-0">
             <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-canvas/50">Your plan</p>
-            <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{settings.plans[plan.kind].name}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{plan.name}</p>
             <p className="text-sm text-canvas/55">
-              {plan.duration}-day programme ·{" "}
-              {user.subscription ? `paid ${inr(user.subscription.amount)}` : `${inr(priceFor(settings, plan.kind, plan.duration))} one-time`}
+              {plan.days}-day programme
+              {user.subscription ? ` · paid ${inr(user.subscription.amount)}` : plan.price !== null ? ` · ${inr(plan.price)} one-time` : ""}
             </p>
             {user.subscription && (
               <p className="mt-1 text-sm text-canvas/55">
@@ -145,15 +147,13 @@ export default function ProfilePage() {
               </div>
             </div>
             {user.access === "active" ? (
-              <Link href={`/checkout?plan=${plan.kind === "meal" ? "meal-workout" : plan.kind}-${plan.kind === "meal" ? plan.duration : 90}`} className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
-                {plan.kind === "meal" ? "Add workouts" : plan.duration === 30 ? "Go 90 days — 3rd month free" : "Extend your plan"} <ArrowUpRight size={14} />
+              <Link href={`/checkout?plan=${plan.plan && longer ? `${plan.id}-${longer.days}` : plan.option ? plan.key : ""}`} className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
+                {longer ? `Extend by ${longer.days} days${longer.badge ? ` · ${longer.badge}` : ""}` : "Extend your plan"} <ArrowUpRight size={14} />
               </Link>
             ) : (
-              (plan.kind === "meal" || plan.duration === 30) && (
-                <Link href="/#pricing" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
-                  {plan.kind === "meal" ? "Add workouts" : "Go 90 days — 3rd month free"} <ArrowUpRight size={14} />
-                </Link>
-              )
+              <Link href="/#pricing" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-sprout">
+                See all plans <ArrowUpRight size={14} />
+              </Link>
             )}
           </Card>
 

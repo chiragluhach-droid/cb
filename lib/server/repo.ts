@@ -5,7 +5,7 @@
 
 import { randomBytes } from "crypto";
 import type { Message, User, UserData } from "@/lib/demo-store";
-import { Settings, defaultSettings } from "@/lib/settings-core";
+import { Settings, defaultSettings, readSettings } from "@/lib/settings-core";
 import { accessOf } from "@/lib/server/billing";
 import { Dish, baseDishIds } from "@/lib/engine";
 import { ClientDataDoc, RecipeDoc, UserDoc, cols } from "@/lib/server/mongo";
@@ -118,9 +118,8 @@ async function readSettingsDoc(): Promise<Settings> {
     const { settings } = await cols();
     const s = await settings.findOne({ _id: "subscriptions" });
     if (!s) return defaultSettings;
-    const { _id, ...rest } = s;
-    void _id;
-    return { ...defaultSettings, ...rest, plans: { ...defaultSettings.plans, ...rest.plans } };
+    // Also converts settings saved before plans were editable.
+    return readSettings(s) ?? defaultSettings;
   } catch {
     return defaultSettings; // site keeps working with default prices if the database is unreachable
   }

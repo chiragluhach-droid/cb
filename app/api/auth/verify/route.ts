@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { cols } from "@/lib/server/mongo";
 import { accessOf } from "@/lib/server/billing";
-import { freshData, newId, toUser, today, welcomeMessage } from "@/lib/server/repo";
+import { freshData, getSettings, newId, toUser, today, welcomeMessage } from "@/lib/server/repo";
+import { defaultPlanKey, findOption } from "@/lib/plans";
 import { CLIENT_COOKIE, hashCode, setSession } from "@/lib/server/session";
 import { normEmail, readProfile, validEmail } from "@/lib/server/validate";
 import { hashPassword, passwordProblem } from "@/lib/server/password";
@@ -57,7 +58,10 @@ export async function POST(req: Request) {
         name: otp.pending.name ?? "",
         email,
         phone: otp.pending.phone ?? "",
-        plan: otp.pending.plan ?? ("meal-workout-90" as const),
+        plan: await (async () => {
+          const plans = (await getSettings()).plans;
+          return otp.pending.plan && findOption(plans, otp.pending.plan) ? otp.pending.plan : defaultPlanKey(plans);
+        })(),
         createdAt: Date.now(),
         role: "client" as const,
         passwordHash: await hashPassword(b.password as string),

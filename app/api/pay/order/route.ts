@@ -36,6 +36,7 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
 
     const q = quote(await getSettings(), b.plan, b.code);
+    if (!q) return NextResponse.json({ error: "That plan isn't available any more. Pick another one." }, { status: 400 });
     const order = await createOrder(q.amount * 100, `evo_${uid}_${Date.now().toString(36)}`, { userId: uid, plan: q.plan, email: user.email });
     await orders.insertOne({
       _id: order.id,

@@ -28,8 +28,8 @@ const faqs = [
     a: "No. Pick home or gym on the Meal + Workout plans. Home plans need a mat and, optionally, a pair of dumbbells or a backpack.",
   },
   {
-    q: "What's the difference between 30 and 90 days?",
-    a: "90 days costs the same as two months, so the third month is free. The 90-day plans also include 1:1 video calls with your coach.",
+    q: "Which length should I pick?",
+    a: "Longer programmes cost less per month and give your body time to change, and some include 1:1 video calls with your coach. Each plan shows exactly what's included for every length.",
   },
   {
     q: "Can I join from outside India?",

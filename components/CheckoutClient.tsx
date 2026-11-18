@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Loader2, Lock, ShieldCheck, Tag } from "lucide-react";
 import { canUseApp, logout, reloadSession, useSession } from "@/lib/demo-store";
-import { Duration, PlanId, PlanKind, inr } from "@/lib/plans";
-import { priceFor, useSettings } from "@/lib/settings";
+import { PlanId, findOption, inr, lengthLabel, lengthsOf, parsePlanKey, planKey, validKeyOr, visiblePlans } from "@/lib/plans";
+import { useSettings } from "@/lib/settings";
 
 /*
  * Real checkout (Razorpay Standard Checkout).
@@ -15,7 +15,7 @@ import { priceFor, useSettings } from "@/lib/settings";
  * Razorpay's payment window and hands the result back to /api/pay/verify.
  */
 
-type Props = { initialKind: PlanKind; initialDuration: Duration };
+type Props = { initialPlan: string | null };
 
 type Quote = { key: string; plan: PlanId; listPrice: number; discount: number; amount: number; code: string | null; pct: number; codeError?: string; paymentsOn: boolean; testMode: boolean };
 
@@ -54,12 +54,13 @@ const field =
 
 type Phase = "idle" | "starting" | "open" | "verifying" | "pending" | "done";
 
-export default function CheckoutClient({ initialKind, initialDuration }: Props) {
+export default function CheckoutClient({ initialPlan }: Props) {
   const router = useRouter();
   const settings = useSettings();
   const { hydrated, user, data } = useSession();
-  const [kind, setKind] = useState<PlanKind>(initialKind);
-  const [duration, setDuration] = useState<Duration>(initialDuration);
+  const [start] = useState(() => parsePlanKey(validKeyOr(settings.plans, initialPlan))!);
+  const [kind, setKind] = useState<string>(start.id);
+  const [duration, setDuration] = useState<number>(start.days);
   const [codeInput, setCodeInput] = useState("");
   const [code, setCode] = useState<string | null>(null);
   const [codeError, setCodeError] = useState("");
@@ -67,8 +68,30 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState("");
   const [paid, setPaid] = useState<number | null>(null);
-  const plan = `${kind}-${duration}` as PlanId;
+  const plan: PlanId = planKey(kind, duration);
   const quoteFor = useRef("");
+  const chosen = findOption(settings.plans, plan);
+  const planDef = chosen?.plan ?? settings.plans.find((p) => p.id === kind) ?? settings.plans[0];
+  // Shown plans, plus the one in the link if the coach has hidden it (private offers).
+  const pickable = [...visiblePlans(settings.plans), ...(chosen && !chosen.plan.visible ? [chosen.plan] : [])];
+  const lengths = [...new Set([...lengthsOf(pickable), ...(chosen ? [duration] : [])])].sort((a, b) => a - b);
+  const forLength = pickable.filter((p) => p.options.some((o) => o.days === duration));
+  const optionOf = (id: string, d: number) => findOption(settings.plans, planKey(id, d))?.option ?? null;
+  const pickLength = (d: number) => {
+    setDuration(d);
+    if (!optionOf(kind, d)) {
+      const other = pickable.find((p) => p.options.some((o) => o.days === d));
+      if (other) setKind(other.id);
+    }
+  };
+  const pickPlan = (id: string) => {
+    setKind(id);
+    if (!optionOf(id, duration)) {
+      const opts = pickable.find((p) => p.id === id)?.options ?? [];
+      const near = [...opts].sort((a, b) => Math.abs(a.days - duration) - Math.abs(b.days - duration))[0];
+      if (near) setDuration(near.days);
+    }
+  };
 
   // Keep the chosen plan in the URL so it survives a refresh.
   useEffect(() => {
@@ -119,7 +142,7 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
   }, [phase, user]);
 
   const fresh = q && q.key === `${plan}|${code ?? ""}` ? q : null;
-  const listPrice = fresh?.listPrice ?? priceFor(settings, kind, duration);
+  const listPrice = fresh?.listPrice ?? chosen?.option.price ?? 0;
   const discount = fresh?.discount ?? 0;
   const total = fresh?.amount ?? listPrice;
 
@@ -167,7 +190,7 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
       currency: o.currency,
       order_id: o.orderId,
       name: "Evowell",
-      description: `${settings.plans[kind].name} · ${duration} days`,
+      description: `${planDef.name} · ${duration} days`,
       prefill: o.prefill,
       notes: { plan },
       theme: { color: "#16A34A" },
@@ -216,7 +239,7 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
             {ready ? (
               <>
                 {paid !== null && <>We received {inr(paid)}. </>}
-                Your {settings.plans[kind].name} runs until{" "}
+                Your {planDef.name} runs until{" "}
                 <b className="text-ink">{user.subscription ? new Date(user.subscription.expiresAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : "—"}</b>.
                 {!data?.profile && " Next, a 3-minute questionnaire so Simone can build your plan."}
               </>
@@ -275,25 +298,27 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
             </h2>
             <LayoutGroup id="co-dur">
               <div className="mt-5 inline-flex rounded-full bg-ink/[0.05] p-1" role="radiogroup" aria-label="Programme length">
-                {([30, 90] as Duration[]).map((d) => (
+                {lengths.map((d) => (
                   <button
                     type="button"
                     key={d}
                     role="radio"
                     aria-checked={duration === d}
                     disabled={busy}
-                    onClick={() => setDuration(d)}
+                    onClick={() => pickLength(d)}
                     className={`relative rounded-full px-5 py-2 text-sm font-semibold ${duration === d ? "text-canvas" : "text-ink/60"}`}
                   >
                     {duration === d && <motion.span layoutId="co-dur-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
-                    <span className="relative">{d} days</span>
+                    <span className="relative">{lengthLabel(d)}</span>
                   </button>
                 ))}
               </div>
             </LayoutGroup>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Plan">
-              {(Object.keys(settings.plans) as PlanKind[]).map((k) => {
+              {forLength.map((pd) => {
+                const k = pd.id;
                 const on = kind === k;
+                const opt = optionOf(k, duration);
                 return (
                   <button
                     type="button"
@@ -301,16 +326,18 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
                     role="radio"
                     aria-checked={on}
                     disabled={busy}
-                    onClick={() => setKind(k)}
+                    onClick={() => pickPlan(k)}
                     className={`relative rounded-[1.5rem] p-5 text-left transition-all duration-300 ${on ? "bg-forest text-canvas" : "bg-white text-ink ring-1 ring-ink/10 hover:ring-ink/25"}`}
                   >
                     <span className={`absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full border-2 ${on ? "border-sprout bg-sprout text-forest" : "border-ink/20"}`}>
                       {on && <Check size={12} strokeWidth={3.5} />}
                     </span>
-                    <span className="block text-lg font-semibold tracking-[-0.02em]">{settings.plans[k].name}</span>
-                    <span className={`mt-1 block pr-8 text-sm ${on ? "text-canvas/60" : "text-stone"}`}>{settings.plans[k].tagline}</span>
-                    <span className="mt-4 block text-2xl font-semibold tabular-nums tracking-[-0.04em]">{inr(priceFor(settings, k, duration))}</span>
-                    {duration === 90 && <span className={`text-xs font-semibold ${on ? "text-sprout" : "text-brand-deep"}`}>3rd month free · video calls included</span>}
+                    <span className="block pr-8 text-lg font-semibold tracking-[-0.02em]">{pd.name}</span>
+                    <span className={`mt-1 block pr-8 text-sm ${on ? "text-canvas/60" : "text-stone"}`}>{pd.tagline}</span>
+                    <span className="mt-4 block text-2xl font-semibold tabular-nums tracking-[-0.04em]">{opt ? inr(opt.price) : "—"}</span>
+                    {opt && (opt.badge || opt.calls) && (
+                      <span className={`text-xs font-semibold ${on ? "text-sprout" : "text-brand-deep"}`}>{[opt.badge, opt.calls ? "video calls included" : ""].filter(Boolean).join(" · ")}</span>
+                    )}
                   </button>
                 );
               })}
@@ -353,20 +380,19 @@ export default function CheckoutClient({ initialKind, initialDuration }: Props) 
             </div>
             <div className="mt-4 flex items-start justify-between gap-4 border-b border-ink/10 pb-5">
               <div>
-                <p className="text-lg font-semibold tracking-[-0.02em]">{settings.plans[kind].name}</p>
+                <p className="text-lg font-semibold tracking-[-0.02em]">{planDef.name}</p>
                 <p className="text-sm text-stone">{duration}-day programme · one-time</p>
               </div>
               <p className="text-lg font-semibold tabular-nums">{inr(listPrice)}</p>
             </div>
 
             <ul className="space-y-2 border-b border-ink/10 py-5 text-sm">
-              {settings.plans[kind].features.slice(0, 3).map((f) => (
+              {planDef.features.slice(0, 3).map((f) => (
                 <li key={f} className="flex items-center gap-2 text-ink/70">
                   <Check size={14} className="shrink-0 text-brand" /> {f}
                 </li>
               ))}
-              {duration === 90 &&
-                settings.ninetyDayExtras.map((f) => (
+              {(chosen?.option.perks ?? []).map((f) => (
                   <li key={f} className="flex items-center gap-2 font-semibold text-brand-deep">
                     <Check size={14} className="shrink-0" /> {f}
                   </li>

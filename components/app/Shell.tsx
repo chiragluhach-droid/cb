@@ -9,7 +9,8 @@ import { Wordmark } from "@/components/Logo";
 import { SealLogo } from "@/components/brand/SealLogo";
 import { Bar } from "@/components/app/ui";
 import { canUseApp, logout, useSession } from "@/lib/demo-store";
-import { parsePlan, plans } from "@/lib/plans";
+import { planInfo } from "@/lib/plans";
+import { currentPlans } from "@/lib/settings";
 
 export const appNav = [
   { href: "/dashboard", label: "Today", icon: Home },
@@ -56,8 +57,8 @@ export default function Shell({ children }: { children: ReactNode }) {
     );
   }
 
-  const plan = parsePlan(user.plan);
-  const { day, total } = planDay(data.startDate, plan.duration);
+  const plan = planInfo(currentPlans(), user.plan);
+  const { day, total } = planDay(data.startDate, plan.days);
   const isActive = (href: string) => (href === "/dashboard" ? pathname === href : pathname.startsWith(href));
   const coachLast = data.messages[data.messages.length - 1];
   const coachDot = coachLast?.from === "coach" && !pathname.startsWith("/dashboard/coach");
@@ -95,7 +96,7 @@ export default function Shell({ children }: { children: ReactNode }) {
 
         <div className="mt-auto space-y-4">
           <div className="rounded-[1.5rem] bg-mint p-4">
-            <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-brand-deep/70">{plans[plan.kind].name}</p>
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-brand-deep/70">{plan.name}</p>
             <p className="mt-1 text-sm font-semibold text-ink">
               Day {day} <span className="font-medium text-ink/45">of {total}</span>
             </p>

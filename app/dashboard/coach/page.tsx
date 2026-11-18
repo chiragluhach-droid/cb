@@ -6,7 +6,8 @@ import { CalendarCheck, Send, Video, X } from "lucide-react";
 import { CoachAvatar } from "@/components/app/CoachAvatar";
 import { coach } from "@/lib/site";
 import { newId, useSession } from "@/lib/demo-store";
-import { parsePlan } from "@/lib/plans";
+import { planInfo } from "@/lib/plans";
+import { currentPlans } from "@/lib/settings";
 
 const suggestions = ["Can I swap tonight's dinner?", "Wedding this weekend 😅", "Scale hasn't moved in 2 weeks", "Feeling hungry in the evenings"];
 
@@ -53,7 +54,8 @@ export default function CoachPage() {
   }, [count, typing]);
 
   if (!user || !data) return null;
-  const ninety = parsePlan(user.plan).duration === 90;
+  const plan = planInfo(currentPlans(), user.plan);
+  const ninety = plan.option ? plan.option.calls : plan.days >= 90;
 
   const send = (msg: string) => {
     const m = msg.trim();
@@ -89,7 +91,7 @@ export default function CoachPage() {
             <Video size={14} /> <span className="hidden sm:inline">Book a</span> video call
           </button>
         ) : (
-          <span className="hidden rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.6875rem] font-semibold text-ink/50 sm:inline">Video calls on 90-day plans</span>
+          <span className="hidden rounded-full bg-ink/[0.05] px-3 py-1.5 text-[0.6875rem] font-semibold text-ink/50 sm:inline">Video calls on longer plans</span>
         )}
       </div>
 
@@ -179,7 +181,7 @@ export default function CoachPage() {
                     <CalendarCheck size={22} />
                   </span>
                   <p className="mt-4 text-xl font-semibold tracking-[-0.03em]">Book a 1:1 video call</p>
-                  <p className="text-sm text-stone">20 minutes with {coach.name}, your coach. Included in your 90-day plan.</p>
+                  <p className="text-sm text-stone">20 minutes with {coach.name}, your coach. Included in your plan.</p>
                 </div>
                 <button onClick={() => setBooking(false)} aria-label="Close" className="flex h-10 w-10 items-center justify-center rounded-full bg-ink/[0.06]">
                   <X size={18} />

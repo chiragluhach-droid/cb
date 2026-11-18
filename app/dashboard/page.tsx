@@ -11,7 +11,8 @@ import { planDay } from "@/components/app/Shell";
 import { Dish, Slot } from "@/lib/engine";
 import { RecipeSheet } from "@/components/app/RecipeSheet";
 import { dayKey, emptyDay, newId, useSession, weekday } from "@/lib/demo-store";
-import { parsePlan } from "@/lib/plans";
+import { planInfo } from "@/lib/plans";
+import { currentPlans } from "@/lib/settings";
 import { sessionFor, weekSince } from "@/lib/workouts";
 import { coach } from "@/lib/site";
 import { CoachAvatar } from "@/components/app/CoachAvatar";
@@ -40,10 +41,10 @@ export default function TodayPage() {
   const eaten = meals.filter((m) => log.meals.includes(m.slot));
   const kcal = eaten.reduce((s, m) => s + m.kcal, 0);
   const protein = eaten.reduce((s, m) => s + m.protein, 0);
-  const plan = parsePlan(user.plan);
-  const { day, total } = planDay(data.startDate, plan.duration);
+  const plan = planInfo(currentPlans(), user.plan);
+  const { day, total } = planDay(data.startDate, plan.days);
   const steps = stepGoal(profile.activity);
-  const session = plan.kind === "meal-workout" ? sessionFor(profile.workoutPlace, weekday(now)) : null;
+  const session = plan.workouts ? sessionFor(profile.workoutPlace, weekday(now)) : null;
   const sessionSets = session ? session.exercises.reduce((s, e) => s + e.sets, 0) : 0;
   const sessionDone = session ? session.exercises.reduce((s, e) => s + Math.min(e.sets, log.sets[e.id] ?? 0), 0) : 0;
   const lastCoach = [...data.messages].reverse().find((m) => m.from === "coach");
@@ -191,7 +192,7 @@ export default function TodayPage() {
               <div className="flex-1">
                 <p className="text-xl font-semibold tracking-[-0.03em] text-ink">Your plan is on its way</p>
                 <p className="mt-1 text-sm leading-relaxed text-stone">
-                  {coach.name} is building your meals{plan.kind === "meal-workout" ? " and workouts" : ""} around your answers. You&apos;ll get a message here when it&apos;s ready. Meanwhile,
+                  {coach.name} is building your meals{plan.workouts ? " and workouts" : ""} around your answers. You&apos;ll get a message here when it&apos;s ready. Meanwhile,
                   log your water, steps and weight — it all helps.
                 </p>
               </div>
@@ -275,7 +276,7 @@ export default function TodayPage() {
             )}
           </Card>
 
-          {pub && plan.kind === "meal-workout" && (
+          {pub && plan.workouts && (
             <Link href="/dashboard/workout" className="group block">
               <Card className="transition-shadow group-hover:shadow-[0_20px_40px_-28px_rgba(14,26,19,0.5)]">
                 <CardTitle action={<Dumbbell size={16} className="text-brand" />}>Workout</CardTitle>

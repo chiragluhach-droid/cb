@@ -7,8 +7,8 @@ import { AlertTriangle, ArrowRight, ArrowUpRight, ClipboardCheck, MessageCircle,
 import { Card, CardTitle, Num } from "@/components/app/ui";
 import { ClientAvatar, Empty, ProfileTags, planLabel, timeAgo } from "@/components/admin/bits";
 import { useAdmin } from "@/lib/admin";
-import { inr, parsePlan, plans } from "@/lib/plans";
-import { priceFor, useSettings } from "@/lib/settings";
+import { inr, planInfo, planKey } from "@/lib/plans";
+import { useSettings } from "@/lib/settings";
 import { coach } from "@/lib/site";
 
 type PaymentsSummary = {
@@ -55,13 +55,14 @@ export default function AdminOverview() {
   const unread = clients.reduce((s, c) => s + c.unread, 0);
   const avgAdherence = onPlan.length ? onPlan.reduce((s, c) => s + c.adherence, 0) / onPlan.length : 0;
 
-  const booked = clients.reduce((s, c) => {
-    const p = parsePlan(c.user.plan);
-    return s + priceFor(settings, p.kind, p.duration);
-  }, 0);
-  const mix = (["meal", "meal-workout"] as const).flatMap((k) =>
-    ([30, 90] as const).map((d) => ({ label: `${plans[k].name} · ${d}d`, n: clients.filter((c) => c.user.plan === `${k}-${d}`).length }))
-  );
+  // What clients paid, or today's price for unpaid ones.
+  const booked = clients.reduce((s, c) => s + (c.user.subscription?.amount ?? planInfo(settings.plans, c.user.plan).price ?? 0), 0);
+  // Every plan and length on sale, plus any older plan a client is still on.
+  const keys = [...new Set([...settings.plans.flatMap((p) => p.options.map((o) => planKey(p.id, o.days))), ...clients.map((c) => planInfo(settings.plans, c.user.plan).key)])];
+  const mix = keys.map((k) => {
+    const info = planInfo(settings.plans, k);
+    return { label: `${info.name} · ${info.days}d`, n: clients.filter((c) => planInfo(settings.plans, c.user.plan).key === k).length };
+  });
   const maxMix = Math.max(1, ...mix.map((m) => m.n));
 
   const kpis = [

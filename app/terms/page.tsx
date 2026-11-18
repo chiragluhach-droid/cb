@@ -14,7 +14,7 @@ export default function TermsPage() {
       <Section title="The service">
         <p>
           Evowell sells online nutrition coaching: a personal meal plan built from Indian home food, an optional workout plan, a tracking dashboard and chat with your coach, for a fixed
-          period (30 or 90 days). Plans are made with the help of software and are reviewed and approved by your coach before you see them.
+          period shown when you buy it (for example 30 or 90 days). Plans are made with the help of software and are reviewed and approved by your coach before you see them.
         </p>
       </Section>
       <Section title="Not medical advice">

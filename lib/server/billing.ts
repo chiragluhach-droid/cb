@@ -5,8 +5,8 @@
  */
 
 import { randomBytes } from "crypto";
-import { parsePlan, PlanId } from "@/lib/plans";
-import { findCode, priceFor, Settings } from "@/lib/settings-core";
+import { findOption, parsePlanKey, PlanId } from "@/lib/plans";
+import { findCode, Settings } from "@/lib/settings-core";
 import { OrderDoc, UserDoc, cols } from "@/lib/server/mongo";
 import { paymentsOn, RzpPayment } from "@/lib/server/razorpay";
 
@@ -18,10 +18,11 @@ const today = () => {
 
 export type Quote = { plan: PlanId; listPrice: number; discount: number; amount: number; code: string | null; pct: number };
 
-/** Rupees. An unknown or inactive code is ignored (`code: null`). */
-export function quote(s: Settings, plan: PlanId, rawCode: unknown): Quote {
-  const { kind, duration } = parsePlan(plan);
-  const listPrice = priceFor(s, kind, duration);
+/** Rupees. An unknown or inactive code is ignored (`code: null`). Null = that plan or length isn't on sale. */
+export function quote(s: Settings, plan: PlanId, rawCode: unknown): Quote | null {
+  const found = findOption(s.plans, plan);
+  if (!found) return null;
+  const listPrice = found.option.price;
   const c = typeof rawCode === "string" && rawCode.trim() ? findCode(s, rawCode) : null;
   const discount = c ? Math.round((listPrice * c.pct) / 100) : 0;
   return { plan, listPrice, discount, amount: Math.max(1, listPrice - discount), code: c?.code ?? null, pct: c?.pct ?? 0 };
@@ -63,7 +64,7 @@ export async function fulfil(order: OrderDoc, payment: RzpPayment, via: "checkou
     const stillActive = !!u.subscription && u.subscription.expiresAt > now;
     // Renewing early adds the new days after the current end date.
     const from = stillActive ? u.subscription!.expiresAt : now;
-    const days = parsePlan(order.plan).duration;
+    const days = parsePlanKey(order.plan)?.days ?? 30;
     await users.updateOne(
       { _id: u._id },
       { $set: { plan: order.plan, subscription: { plan: order.plan, paidAt: now, expiresAt: from + days * 86400000, amount: order.amount, orderId: order._id } } },

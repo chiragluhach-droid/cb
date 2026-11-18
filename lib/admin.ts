@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Message, Profile, User, UserData, dayKey, newData, newId } from "@/lib/demo-store";
 import { Dish, Slot, clash, dietOk, dishes, dislikeWords, registerRecipes, slotSplit } from "@/lib/engine";
-import { PlanId, parsePlan } from "@/lib/plans";
+import { PlanId, parsePlanKey } from "@/lib/plans";
 import { editKey, planWeekday } from "@/components/app/meals";
 
 export { dislikeWords };
@@ -264,7 +264,7 @@ const daysAgoKey = (n: number) => dayKey(new Date(Date.now() - n * DAY));
 const daysBetween = (a: string, b: string) => Math.round((new Date(`${b}T00:00:00`).getTime() - new Date(`${a}T00:00:00`).getTime()) / DAY);
 
 function toRow(user: User, data: UserData): ClientRow {
-  const plan = parsePlan(user.plan);
+  const plan = { duration: parsePlanKey(user.plan)?.days ?? 30 };
   const startT = new Date(`${data.startDate}T00:00:00`).getTime();
   const day = Math.max(1, Math.min(plan.duration, Math.floor((Date.now() - startT) / DAY) + 1));
 
