@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <li>To build, review and adjust your plan, and for your coach to support you.</li>
           <li>To sign you in (your password is stored only as a secure hash; we email one-time codes to verify your email or reset your password) and to send receipts and important account messages.</li>
           <li>To take payment and correct any payment errors.</li>
-          <li>If you finish the questionnaire and enter your details but don&apos;t complete sign-up, we keep your answers and contact details so your coach can follow up. Email us to have them deleted.</li>
+          <li>If you enter your details but don&apos;t complete sign-up, we keep your contact details so your coach can follow up. Email us to have them deleted.</li>
         </ul>
       </Section>
       <Section title="Who else handles it">

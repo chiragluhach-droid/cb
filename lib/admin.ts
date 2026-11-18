@@ -17,7 +17,7 @@ export { dislikeWords };
 /* ───────────── Store ───────────── */
 
 type Client = { user: User; data: UserData };
-/** Finished the questionnaire and left their details, but never confirmed their email (no account yet). */
+/** Entered their details but never confirmed their email (no account yet). */
 export type Lead = { email: string; name: string; phone: string; plan?: PlanId; profile?: Profile; createdAt: number; updatedAt: number };
 type AdminState = { status: "idle" | "loading" | "ready" | "signedOut" | "error"; clients: Client[]; leads?: Lead[] };
 const SERVER: AdminState = { status: "idle", clients: [] };

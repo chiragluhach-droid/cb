@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -53,7 +53,7 @@ import {
   trainTimeOptions,
   workDays,
 } from "@/lib/lifestyle";
-import { PlanId, defaultPlanKey, planInfo, validKeyOr } from "@/lib/plans";
+import { PlanId, defaultPlanKey, findOption, inr, lengthLabel, perMonth, planInfo, planKey, validKeyOr, visiblePlans } from "@/lib/plans";
 import { useSettings } from "@/lib/settings";
 import { coach } from "@/lib/site";
 
@@ -97,7 +97,7 @@ const allergens: { v: Allergen; l: string }[] = [
 const workIcons = { desk: Briefcase, feet: Footprints, shift: Moon, home: Home } as const;
 const cookIcons = { self: ChefHat, family: UsersRound, out: Truck } as const;
 
-type StepId = "you" | "goal" | "day" | "food" | "habits" | "training" | "review" | "details";
+type StepId = "details" | "you" | "goal" | "day" | "food" | "habits" | "training" | "review" | "plan";
 const stepLabel: Record<StepId, string> = {
   you: "About you",
   goal: "Your goal",
@@ -107,11 +107,12 @@ const stepLabel: Record<StepId, string> = {
   training: "Training",
   review: "Review",
   details: "Your details",
+  plan: "Your plan",
 };
 
-/* Answers are kept on this device until the account exists, so a refresh doesn't lose them. */
+/* Half-finished answers are kept on this device (per account), so leaving midway doesn't lose them. */
 const DRAFT_KEY = "evo_questionnaire";
-type Draft = { p: Profile; hasTarget: boolean; step: number; plan: PlanId };
+type Draft = { p: Profile; hasTarget: boolean; step: number; plan: PlanId; uid?: string };
 const loadDraft = (): Draft | null => {
   try {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -224,13 +225,16 @@ function WaterPicker({ value, onChange }: { value: number; onChange: (n: number)
 
 export default function Onboarding() {
   const router = useRouter();
-  const { hydrated, user, data, update } = useSession();
+  const { hydrated, user, data, update, updateUser } = useSession();
   // The plan picked on the website (?plan=…); a signed-in client's own plan wins.
   const { plans } = useSettings();
   const [urlPlan, setUrlPlan] = useState<PlanId>(() => defaultPlanKey(plans));
   const planId: PlanId = user?.plan ?? urlPlan;
   const withWorkout = planInfo(plans, planId).workouts;
   const anonymous = hydrated && !user;
+  // Plan picked at the end (before paying). Starts on the one from the website link.
+  const [chosen, setChosen] = useState<PlanId | null>(null);
+  const pick = validKeyOr(plans, chosen ?? planId);
 
   const [p, setP] = useState<Profile>({ ...defaultInputs, workoutPlace: "home", dislikes: "", life: { ...defaultLifestyle } });
   const [loaded, setLoaded] = useState(false);
@@ -253,7 +257,6 @@ export default function Onboarding() {
   const [busy, setBusy] = useState(false);
   const [fieldErr, setFieldErr] = useState<{ name?: string; email?: string; phone?: string; password?: string; code?: string }>({});
   const [formErr, setFormErr] = useState<{ text: string; login?: boolean } | null>(null);
-  const savedOnServer = useRef(false);
 
   // Prefill: an earlier questionnaire on the account, or answers saved on this device.
   useEffect(() => {
@@ -265,19 +268,19 @@ export default function Onboarding() {
       const life = { ...defaultLifestyle, ...(data.profile.life ?? {}) };
       setP({ ...data.profile, life });
       setHasTarget(life.targetWeight > 0);
-    } else if (draft) {
+    } else if (draft && user && draft.uid === user.id) {
       setP({ ...draft.p, life: { ...defaultLifestyle, ...(draft.p.life ?? {}) } });
       setHasTarget(draft.hasTarget);
-      if (!user) setStep(Math.max(0, draft.step));
+      setStep(Math.max(0, draft.step));
     }
     setUrlPlan(q ? fromUrl : validKeyOr(plans, draft?.plan));
     setLoaded(true);
   }, [hydrated, user, data, loaded, plans]);
 
-  // Keep a copy on this device while there's no account.
+  // Keep a copy on this device until the answers are saved to the account.
   useEffect(() => {
-    if (loaded && !user && phase === "form") saveDraft({ p, hasTarget, step, plan: urlPlan });
-  }, [loaded, user, p, hasTarget, step, urlPlan, phase]);
+    if (loaded && user && !data?.profile && phase === "form") saveDraft({ p, hasTarget, step, plan: pick, uid: user.id });
+  }, [loaded, user, data?.profile, p, hasTarget, step, pick, phase]);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -286,9 +289,22 @@ export default function Onboarding() {
   }, [resendIn]);
 
   const paid = user ? canUseApp(user) : false;
+  // The plan is chosen after the questions, so training is asked unless a paid plan has no workouts.
+  const askTraining = withWorkout || !paid;
   const steps = useMemo<StepId[]>(
-    () => ["you", "goal", "day", "food", "habits", ...(withWorkout ? (["training"] as StepId[]) : []), "review", ...(anonymous || savedOnServer.current ? (["details"] as StepId[]) : [])],
-    [withWorkout, anonymous],
+    () => [
+      // Name, email, phone and the email code come first: the account exists from here on.
+      ...(anonymous ? (["details"] as StepId[]) : []),
+      "you",
+      "goal",
+      "day",
+      "food",
+      "habits",
+      ...(askTraining ? (["training"] as StepId[]) : []),
+      "review",
+      ...(!paid ? (["plan"] as StepId[]) : []),
+    ],
+    [askTraining, anonymous, paid],
   );
   const last = steps.length - 1;
   const life = p.life ?? defaultLifestyle;
@@ -332,7 +348,7 @@ export default function Onboarding() {
     setFormErr(null);
     if (Object.keys(er).length) return;
     setBusy(true);
-    const res = await startAuth({ mode: "signup", name: name.trim(), email: email.trim(), phone: `${dial}${num}`, plan: planId, profile: finalProfile() });
+    const res = await startAuth({ mode: "signup", name: name.trim(), email: email.trim(), phone: `${dial}${num}`, plan: planId });
     setBusy(false);
     if (!res.ok) {
       if (res.field) setFieldErr({ [res.field]: res.error });
@@ -351,15 +367,17 @@ export default function Onboarding() {
     if (pw.length < 8) return setFieldErr({ password: "Use at least 8 characters." });
     setBusy(true);
     setFieldErr({});
-    const res = await verifyAuth(email.trim(), c, { password: pw, profile: finalProfile() });
+    const res = await verifyAuth(email.trim(), c, { password: pw });
     if (!res.ok) {
       setBusy(false);
       setFieldErr(res.field === "password" ? { password: res.error } : { code: res.error });
       return;
     }
-    savedOnServer.current = true;
+    // Signed in: on to the questions (the details step drops out of the list).
     setBusy(false);
-    submit();
+    setDir(1);
+    setStep(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Drafting animation, then save.
@@ -370,11 +388,7 @@ export default function Onboarding() {
       return () => clearTimeout(id);
     }
     clearDraft();
-    if (savedOnServer.current) {
-      // The answers were saved together with the new account.
-      const id = setTimeout(() => setPhase("sent"), 400);
-      return () => clearTimeout(id);
-    }
+    if (user && !paid && pick !== user.plan) updateUser({ plan: pick });
     const profile = finalProfile();
     update((d) => ({
       ...d,
@@ -479,10 +493,10 @@ export default function Onboarding() {
                 <p className="mt-6 text-sm leading-relaxed text-canvas/60">
                   {paid
                     ? `${coach.name} reviews every plan by hand, usually within 24 hours. It appears in your dashboard as soon as it's approved.`
-                    : `One last step: choose your plan. ${coach.name} then builds and checks your first week by hand, usually within 24 hours.`}
+                    : `One last step: payment. ${coach.name} then builds and checks your first week by hand, usually within 24 hours.`}
                 </p>
                 <button
-                  onClick={() => router.push(paid ? "/dashboard" : `/checkout?plan=${planId}`)}
+                  onClick={() => router.push(paid ? "/dashboard" : `/checkout?plan=${pick}`)}
                   className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-sprout py-4 text-sm font-bold text-forest transition-colors hover:bg-canvas"
                 >
                   {paid ? "Open my dashboard" : "Continue to payment"} <ArrowRight size={16} />
@@ -738,7 +752,7 @@ export default function Onboarding() {
                     ["Health", p.conditions.length ? p.conditions.map((c) => conditions.find((x) => x.v === c)!.l).join(", ") : "None", "food"],
                     ["Allergies", p.allergies.length ? p.allergies.map((a) => allergens.find((x) => x.v === a)!.l).join(", ") : "None", "food"],
                     ["Kitchen", `${cookingOptions.find((c) => c.v === life.cooking)!.l} · out ${life.eatingOut}× a week · ${life.water} glasses water`, "habits"],
-                    ...(withWorkout ? ([["Training", `${p.workoutPlace === "gym" ? "Gym" : "Home"} · ${experienceOptions.find((e) => e.v === life.experience)!.l.toLowerCase()} · ${life.trainTime}`, "training"]] as const) : []),
+                    ...(askTraining ? ([["Training", `${p.workoutPlace === "gym" ? "Gym" : "Home"} · ${experienceOptions.find((e) => e.v === life.experience)!.l.toLowerCase()} · ${life.trainTime}`, "training"]] as const) : []),
                   ] as const
                 ).map(([k, v, s]) => (
                   <div key={k} className="flex items-start justify-between gap-4 py-3.5">
@@ -766,12 +780,81 @@ export default function Onboarding() {
             </>
           )}
 
+          {id === "plan" && (
+            <>
+              <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">
+                Choose your <span className="font-serif italic text-brand">plan.</span>
+              </h1>
+              <p className="mt-2 text-stone">Pick a plan and a length. You pay once, and nothing renews.</p>
+              <div className="mt-8 space-y-3" role="radiogroup" aria-label="Plan">
+                {[...visiblePlans(plans), ...(findOption(plans, pick) && !findOption(plans, pick)!.plan.visible ? [findOption(plans, pick)!.plan] : [])].map((pl) => {
+                  const on = findOption(plans, pick)?.plan.id === pl.id;
+                  const sel = on ? findOption(plans, pick)!.option : null;
+                  return (
+                    <div
+                      key={pl.id}
+                      className={`rounded-[1.5rem] p-5 transition-colors duration-300 ${on ? "bg-forest text-canvas" : "bg-white text-ink ring-1 ring-ink/10"}`}
+                    >
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={on}
+                        onClick={() => !on && setChosen(planKey(pl.id, [...pl.options].sort((a, b) => b.days - a.days)[0].days))}
+                        className="flex w-full items-start justify-between gap-3 text-left"
+                      >
+                        <span className="min-w-0">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="text-xl font-semibold tracking-[-0.03em]">{pl.name}</span>
+                            {pl.featured && <span className="rounded-full bg-sprout px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-forest">Most popular</span>}
+                          </span>
+                          {pl.tagline && <span className={`mt-1 block text-sm ${on ? "text-canvas/60" : "text-stone"}`}>{pl.tagline}</span>}
+                        </span>
+                        <span className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-sprout bg-sprout text-forest" : "border-ink/20"}`}>
+                          {on && <Check size={12} strokeWidth={3.5} />}
+                        </span>
+                      </button>
+                      {pl.features.length > 0 && (
+                        <ul className={`mt-3 grid grid-cols-1 gap-1 text-sm sm:grid-cols-2 ${on ? "text-canvas/75" : "text-ink/65"}`}>
+                          {pl.features.slice(0, 4).map((f) => (
+                            <li key={f} className="flex items-center gap-2">
+                              <Check size={13} className={on ? "text-sprout" : "text-brand"} /> {f}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {pl.options.map((o) => {
+                          const picked = on && sel?.days === o.days;
+                          return (
+                            <button
+                              key={o.days}
+                              type="button"
+                              onClick={() => setChosen(planKey(pl.id, o.days))}
+                              className={`rounded-2xl px-4 py-2.5 text-left transition-colors ${
+                                picked ? "bg-sprout text-forest" : on ? "bg-canvas/[0.08] text-canvas ring-1 ring-canvas/15 hover:bg-canvas/15" : "bg-[#F4F5F1] text-ink hover:bg-mint"
+                              }`}
+                            >
+                              <span className="block text-xs font-semibold opacity-70">{lengthLabel(o.days)}</span>
+                              <span className="block text-lg font-semibold tabular-nums tracking-[-0.03em]">{inr(o.price)}</span>
+                              {(o.badge || o.days > 31) && <span className="block text-[0.6875rem] font-semibold opacity-75">{o.badge || `${inr(perMonth(o))}/month`}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {on && sel && sel.perks.length > 0 && <p className="mt-3 text-xs font-semibold text-sprout">Includes: {sel.perks.join(" · ")}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
           {id === "details" && (
             <>
               <h1 className="mt-2 text-4xl font-medium tracking-[-0.055em] text-ink sm:text-5xl">
-                Last step: <span className="font-serif italic text-brand">your details.</span>
+                First, <span className="font-serif italic text-brand">your details.</span>
               </h1>
-              <p className="mt-2 text-stone">So we can save your plan and {coach.name} can reach you. We&apos;ll email you a code to confirm it&apos;s you.</p>
+              <p className="mt-2 text-stone">So {coach.name} can reach you and your answers are saved as you go. We&apos;ll email you a code to confirm it&apos;s you.</p>
               <div className="mt-8 space-y-3">
                 <label className="block rounded-[1.5rem] bg-white p-4 ring-1 ring-ink/10 sm:p-5">
                   <span className="text-sm font-semibold text-ink">Full name</span>
@@ -837,7 +920,7 @@ export default function Onboarding() {
                     {formErr.text}{" "}
                     {formErr.login && (
                       <Link href="/login?next=/onboarding" className="font-semibold underline underline-offset-2">
-                        Log in — your answers are kept
+                        Log in instead
                       </Link>
                     )}
                   </p>
@@ -919,7 +1002,7 @@ export default function Onboarding() {
             className="group inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-[0_14px_30px_-14px_rgba(22,163,74,0.8)] transition-colors hover:bg-brand-deep disabled:opacity-60"
           >
             {busy && <Loader2 size={15} className="animate-spin" />}
-            {id === "details" ? (codeSent ? "Confirm & build my plan" : "Email me a code") : step === last ? (paid ? `Send to ${coach.name}` : "Build my plan") : "Continue"}
+            {id === "details" ? (codeSent ? "Confirm & continue" : "Email me a code") : step === last ? (paid ? `Send to ${coach.name}` : "Build my plan") : "Continue"}
             {!busy && <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />}
           </button>
         </div>

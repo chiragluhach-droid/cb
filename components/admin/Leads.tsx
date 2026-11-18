@@ -8,10 +8,7 @@ import { ClientAvatar, planLabel, timeAgo } from "@/components/admin/bits";
 import { Lead, deleteLead } from "@/lib/admin";
 import { formatPhone } from "@/lib/demo-store";
 
-/**
- * People who answered the questionnaire and left their name, email and phone,
- * but never entered the email code, so no account was made.
- */
+/** People who entered their name, email and phone but never confirmed the email code, so no account was made. */
 export function LeadsList({ leads }: { leads: Lead[] }) {
   const [open, setOpen] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<string | null>(null);
@@ -33,7 +30,7 @@ export function LeadsList({ leads }: { leads: Lead[] }) {
         Didn&apos;t finish sign-up <span className="text-ink/35">{leads.length}</span>
       </h2>
       <p className="mt-1 max-w-2xl text-sm text-stone">
-        They answered the questionnaire and left their details but never entered the email code, so they have no account and haven&apos;t paid. You can contact them directly.
+        They entered their name, email and phone but never confirmed the email code, so no account was made and they haven&apos;t paid. You can contact them directly.
       </p>
       <ul className="mt-4 divide-y divide-ink/[0.06] overflow-hidden rounded-[1.75rem] bg-white ring-1 ring-ink/[0.06]">
         {leads.map((l) => {
